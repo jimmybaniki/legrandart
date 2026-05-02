@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin LeGrandArt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #050505; color: #f8fafc; }
+        .glass { background: rgba(10, 10, 11, 0.80); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); }
+        .glass-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); }
+        .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.10); color: white; }
+        .input-field:focus { outline: none; border-color: #eab308; box-shadow: 0 0 0 4px rgba(234,179,8,0.12); }
+        .hidden { display: none; }
+        .toast { position: fixed; bottom: 24px; right: 24px; z-index: 50; padding: 16px 22px; border-radius: 16px; font-weight: 700; opacity: 0; transform: translateY(20px); transition: 0.25s ease; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .table-scroll { max-height: 520px; overflow: auto; }
+    </style>
+</head>
+<body class="min-h-screen pb-16">
+    <header class="bg-black/90 sticky top-0 z-40 border-b border-white/10">
+        <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-5">
+            <div>
+                <a href="index.html" class="text-2xl font-black uppercase tracking-tight text-white">LeGrand<span class="text-yellow-400">Art</span> Admin</a>
+                <p class="text-[10px] uppercase tracking-[0.35em] text-gray-500 mt-1">Gestion Users • Boutiques • Arts</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="logout()" class="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-xs uppercase tracking-[0.35em] font-black text-white hover:border-yellow-400 hover:bg-yellow-400 hover:text-black transition">Déconnexion</button>
+                <button onclick="refreshAll()" class="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-xs uppercase tracking-[0.35em] font-black text-white hover:border-emerald-400 hover:bg-emerald-400 hover:text-black transition"><i class="fas fa-sync-alt"></i> Rafraîchir</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1400px] mx-auto px-6 py-10 space-y-10">
+        <section id="login-screen" class="glass-card p-10 rounded-[2.5rem] max-w-2xl mx-auto">
+            <h1 class="text-3xl font-black uppercase tracking-tight text-white mb-4">Administration sécurisée</h1>
+            <p class="text-gray-400 mb-8">Identifiants: <strong>LGT2026</strong> / <strong>admin2026</strong></p>
+            <form id="admin-login-form" class="grid gap-6">
+                <div>
+                    <label class="block text-xs uppercase tracking-[0.35em] text-gray-400 mb-2">Nom d'utilisateur</label>
+                    <input id="admin-username" type="text" placeholder="LGT2026" class="input-field w-full rounded-3xl px-5 py-4" required />
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-[0.35em] text-gray-400 mb-2">Code d'accès</label>
+                    <input id="admin-password" type="password" placeholder="admin2026" class="input-field w-full rounded-3xl px-5 py-4" required />
+                </div>
+                <button type="submit" class="w-full rounded-3xl bg-yellow-500 px-6 py-4 text-sm uppercase tracking-[0.35em] font-black text-black hover:bg-yellow-400 transition">Se connecter</button>
+            </form>
+        </section>
+
+        <section id="admin-dashboard" class="hidden space-y-10">
+            <div class="grid gap-6 lg:grid-cols-3">
+                <div class="glass rounded-[2.5rem] p-8">
+                    <p class="text-xs uppercase tracking-[0.35em] text-gray-500">Statistiques</p>
+                    <h2 class="text-4xl font-black text-white mt-4" id="stats-users">0</h2>
+                    <p class="text-gray-400 mt-2 text-sm">Utilisateurs</p>
+                </div>
+                <div class="glass rounded-[2.5rem] p-8">
+                    <p class="text-xs uppercase tracking-[0.35em] text-gray-500">Statistiques</p>
+                    <h2 class="text-4xl font-black text-white mt-4" id="stats-shops">0</h2>
+                    <p class="text-gray-400 mt-2 text-sm">Boutiques</p>
+                </div>
+                <div class="glass rounded-[2.5rem] p-8">
+                    <p class="text-xs uppercase tracking-[0.35em] text-gray-500">Statistiques</p>
+                    <h2 class="text-4xl font-black text-white mt-4" id="stats-arts">0</h2>
+                    <p class="text-gray-400 mt-2 text-sm">Œuvres</p>
+                </div>
+            </div>
+
+            <div class="glass rounded-[2.5rem] p-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+                    <div>
+                        <h2 class="text-2xl font-black uppercase text-white">Gestion des données</h2>
+                        <p class="text-gray-400 mt-2">Consulte, modifie ou supprime les utilisateurs, boutiques et œuvres synchronisées avec Google Sheets.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="showTab('users')" class="tab-button rounded-full bg-yellow-500 px-5 py-3 text-xs uppercase tracking-[0.35em] font-black text-black">Utilisateurs</button>
+                        <button onclick="showTab('shops')" class="tab-button rounded-full bg-white/5 px-5 py-3 text-xs uppercase tracking-[0.35em] font-black text-white">Boutiques</button>
+                        <button onclick="showTab('arts')" class="tab-button rounded-full bg-white/5 px-5 py-3 text-xs uppercase tracking-[0.35em] font-black text-white">Arts</button>
+                    </div>
+                </div>
+
+                <div id="admin-content" class="space-y-10">
+                    <div id="users-tab" class="tab-panel">
+                        <div class="table-scroll glass rounded-[2rem] border border-white/10 p-6">
+                            <table class="min-w-full text-left text-sm text-gray-200">
+                                <thead class="border-b border-white/10 text-xs uppercase tracking-[0.35em] text-gray-400">
+                                    <tr>
+                                        <th class="py-4 px-3">Nom</th>
+                                        <th class="py-4 px-3">Email</th>
+                                        <th class="py-4 px-3">Rôle</th>
+                                        <th class="py-4 px-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="shops-tab" class="tab-panel hidden">
+                        <div class="table-scroll glass rounded-[2rem] border border-white/10 p-6">
+                            <table class="min-w-full text-left text-sm text-gray-200">
+                                <thead class="border-b border-white/10 text-xs uppercase tracking-[0.35em] text-gray-400">
+                                    <tr>
+                                        <th class="py-4 px-3">Boutique</th>
+                                        <th class="py-4 px-3">Propriétaire</th>
+                                        <th class="py-4 px-3">Ville / Pays</th>
+                                        <th class="py-4 px-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shops-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="arts-tab" class="tab-panel hidden">
+                        <div class="table-scroll glass rounded-[2rem] border border-white/10 p-6">
+                            <table class="min-w-full text-left text-sm text-gray-200">
+                                <thead class="border-b border-white/10 text-xs uppercase tracking-[0.35em] text-gray-400">
+                                    <tr>
+                                        <th class="py-4 px-3">Titre</th>
+                                        <th class="py-4 px-3">Artiste</th>
+                                        <th class="py-4 px-3">Catégorie</th>
+                                        <th class="py-4 px-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="arts-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="custom-toast" class="toast bg-emerald-400 text-black"></div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7xZ_zf2IPfM96HsoiP3JVGtFyBEWw1iGgDOavlacJ92MUUgZOWdBCFNSRwOExbeoX/exec";
+        const ADMIN_USERNAME = 'LGT2026';
+        const ADMIN_PASSWORD = 'admin2026';
+        const sessionKey = 'lg_admin_logged_in';
+
+        const loginScreen = document.getElementById('login-screen');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const usersBody = document.getElementById('users-body');
+        const shopsBody = document.getElementById('shops-body');
+        const artsBody = document.getElementById('arts-body');
+        const statsUsers = document.getElementById('stats-users');
+        const statsShops = document.getElementById('stats-shops');
+        const statsArts = document.getElementById('stats-arts');
+        const toast = document.getElementById('custom-toast');
+
+        document.getElementById('admin-login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const user = document.getElementById('admin-username').value.trim();
+            const pass = document.getElementById('admin-password').value.trim();
+            if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
+                sessionStorage.setItem(sessionKey, 'true');
+                showAdmin();
+                loadAllData();
+            } else {
+                showToast('Identifiants incorrects', true);
+            }
+        });
+
+        function showAdmin() {
+            loginScreen.classList.add('hidden');
+            adminDashboard.classList.remove('hidden');
+            showTab('users');
+        }
+
+        function logout() {
+            sessionStorage.removeItem(sessionKey);
+            window.location.href = 'admin.html';
+        }
+
+        function showToast(message, error = false) {
+            toast.innerText = message;
+            toast.style.background = error ? '#ef4444' : '#34d399';
+            toast.style.color = '#000';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.className = 'tab-button rounded-full bg-white/5 px-5 py-3 text-xs uppercase tracking-[0.35em] font-black text-white');
+            document.getElementById(`${tab}-tab`).classList.remove('hidden');
+            document.querySelector(`button[onclick="showTab('${tab}')"]`).className = 'tab-button rounded-full bg-yellow-500 px-5 py-3 text-xs uppercase tracking-[0.35em] font-black text-black';
+        }
+
+        async function fetchData(action) {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=${action}`);
+                return await response.json();
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur de connexion Google Sheets', true);
+                return [];
+            }
+        }
+
+        async function sendAction(payload) {
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                return true;
+            } catch (error) {
+                console.error(error);
+                showToast('Action impossible', true);
+                return false;
+            }
+        }
+
+        async function loadAllData() {
+            const [users, shops, arts] = await Promise.all([fetchData('get_users'), fetchData('get_shops'), fetchData('get_artworks')]);
+            renderUsers(users || []);
+            renderShops(shops || []);
+            renderArts(arts || []);
+            statsUsers.innerText = users?.length || 0;
+            statsShops.innerText = shops?.length || 0;
+            statsArts.innerText = arts?.length || 0;
+        }
+
+        function renderUsers(users) {
+            usersBody.innerHTML = users.map(user => `
+                <tr class="border-b border-white/10 hover:bg-white/5 transition">
+                    <td class="py-4 px-3">${user.name || user.nom || '–'}</td>
+                    <td class="py-4 px-3">${user.email || user.mail || '–'}</td>
+                    <td class="py-4 px-3">${user.role || user.role_utilisateur || '–'}</td>
+                    <td class="py-4 px-3 space-x-2">
+                        <button onclick="deleteUser('${encodeURIComponent(user.id || user.ID || user.email || user.mail)}')" class="rounded-full bg-red-500/10 px-4 py-2 text-xs uppercase tracking-[0.25em] text-red-400 hover:bg-red-500 hover:text-black transition">Supprimer</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderShops(shops) {
+            shopsBody.innerHTML = shops.map(shop => `
+                <tr class="border-b border-white/10 hover:bg-white/5 transition">
+                    <td class="py-4 px-3">${shop.shopName || shop.nom_boutique || shop.shopName || '–'}</td>
+                    <td class="py-4 px-3">${shop.owner || shop.proprietaire || '–'}</td>
+                    <td class="py-4 px-3">${[shop.city, shop.country].filter(Boolean).join(' / ') || '–'}</td>
+                    <td class="py-4 px-3 space-x-2">
+                        <button onclick="deleteShop('${encodeURIComponent(shop.id || shop.ID || shop.shopName || shop.nom_boutique)}')" class="rounded-full bg-red-500/10 px-4 py-2 text-xs uppercase tracking-[0.25em] text-red-400 hover:bg-red-500 hover:text-black transition">Supprimer</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderArts(arts) {
+            artsBody.innerHTML = arts.map(art => `
+                <tr class="border-b border-white/10 hover:bg-white/5 transition">
+                    <td class="py-4 px-3">${art.title || art.titre || '–'}</td>
+                    <td class="py-4 px-3">${art.artist || art.artiste || '–'}</td>
+                    <td class="py-4 px-3">${art.category || art.categorie || '–'}</td>
+                    <td class="py-4 px-3 space-x-2">
+                        <button onclick="deleteArt('${encodeURIComponent(art.id || art.ID || art.title)}')" class="rounded-full bg-red-500/10 px-4 py-2 text-xs uppercase tracking-[0.25em] text-red-400 hover:bg-red-500 hover:text-black transition">Supprimer</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Supprimer cet utilisateur ?')) return;
+            await sendAction({ action: 'delete_user', id: decodeURIComponent(id) });
+            showToast('Utilisateur supprimé');
+            loadAllData();
+        }
+
+        async function deleteShop(id) {
+            if (!confirm('Supprimer cette boutique ?')) return;
+            await sendAction({ action: 'delete_shop', id: decodeURIComponent(id) });
+            showToast('Boutique supprimée');
+            loadAllData();
+        }
+
+        async function deleteArt(id) {
+            if (!confirm('Supprimer cette œuvre ?')) return;
+            await sendAction({ action: 'delete_artwork', id: decodeURIComponent(id) });
+            showToast('Œuvre supprimée');
+            loadAllData();
+        }
+
+        function refreshAll() {
+            if (sessionStorage.getItem(sessionKey)) {
+                loadAllData();
+            } else {
+                window.location.href = 'admin.html';
+            }
+        }
+
+        // Auto-login si déjà connecté
+        if (sessionStorage.getItem(sessionKey)) {
+            showAdmin();
+            loadAllData();
+        }
+    </script>
+</body>
+</html>

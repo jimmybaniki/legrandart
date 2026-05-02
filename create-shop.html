@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Créer une Boutique - LeGrandArt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #040404; color: #f8fafc; }
+        .glass-card { background: rgba(10, 10, 11, 0.75); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px); }
+        .highlight { border-color: #facc15 !important; box-shadow: 0 0 40px rgba(250, 204, 21, 0.15); }
+        .radio-card { transition: transform 0.25s ease, border-color 0.25s ease; }
+        .radio-card:hover { transform: translateY(-4px); }
+        .field-group label { font-size: 0.72rem; letter-spacing: 0.18em; }
+        .hidden-section { display: none; }
+        input, select, textarea { font-size: 0.95rem; }
+    </style>
+</head>
+<body class="min-h-screen bg-[#050505]">
+    <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-[1400px] mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-6 py-5">
+            <a href="index.html" class="flex flex-col leading-none no-underline">
+                <span class="text-3xl font-black text-white">LeGrand<span class="text-yellow-400">Art</span></span>
+                <span class="text-[10px] uppercase tracking-[0.4em] text-emerald-400 font-black mt-1">Créer une Boutique</span>
+            </a>
+            <nav class="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.25em] font-black text-gray-300">
+                <a href="index.html" class="hover:text-yellow-400 transition">Accueil</a>
+                <a href="business.html" class="hover:text-yellow-400 transition">Business</a>
+                <a href="index.html" class="text-yellow-400 hover:text-white transition">Accès</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
+        <section class="space-y-10">
+            <div>
+                <span class="text-sm uppercase tracking-[0.35em] text-yellow-400 font-black">Formulaire d'adhésion</span>
+                <h2 class="text-3xl md:text-4xl font-black text-white mt-3">Créez votre boutique en ligne sur LeGrandArt</h2>
+                <p class="max-w-3xl text-gray-400 mt-4">Remplissez le formulaire dynamique pour déposer une fiche professionnelle claire, exploitable et adaptée à votre profil Business, Artiste, Artisan ou Professionnel.</p>
+            </div>
+            <form id="business-form" class="grid gap-8">
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="field-group space-y-2">
+                        <label for="name" class="uppercase text-gray-400 font-black tracking-[0.25em]">Nom / Nom commercial *</label>
+                        <input id="name" name="name" required class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                    </div>
+                    <div class="field-group space-y-2">
+                        <label for="firstname" class="uppercase text-gray-400 font-black tracking-[0.25em]">Prénom</label>
+                        <input id="firstname" name="firstname" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                    </div>
+                    <div class="field-group space-y-2">
+                        <label for="country" class="uppercase text-gray-400 font-black tracking-[0.25em]">Pays *</label>
+                        <input id="country" name="country" required class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                    </div>
+                    <div class="field-group space-y-2">
+                        <label for="city" class="uppercase text-gray-400 font-black tracking-[0.25em]">Ville *</label>
+                        <input id="city" name="city" required class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                    </div>
+                    <div class="field-group space-y-2 md:col-span-2">
+                        <label for="phone" class="uppercase text-gray-400 font-black tracking-[0.25em]">Téléphone / WhatsApp *</label>
+                        <input id="phone" name="phone" type="tel" required class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                    </div>
+                    <div class="field-group space-y-2 md:col-span-2">
+                        <label for="email" class="uppercase text-gray-400 font-black tracking-[0.25em]">Adresse e-mail *</label>
+                        <input id="email" name="email" type="email" required class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                    </div>
+                    <div class="field-group space-y-2 md:col-span-2">
+                        <label for="password" class="uppercase text-gray-400 font-black tracking-[0.25em]">Mot de passe *</label>
+                        <input id="password" name="password" type="password" required class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                    </div>
+                    <div class="field-group space-y-2">
+                        <label for="language" class="uppercase text-gray-400 font-black tracking-[0.25em]">Langue préférée *</label>
+                        <select id="language" name="language" required class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10">
+                            <option value="" disabled selected>Choisir une langue</option>
+                            <option>Français</option>
+                            <option>Anglais</option>
+                            <option>Portugais</option>
+                            <option>Arabe</option>
+                        </select>
+                    </div>
+                    <div class="field-group space-y-2">
+                        <label for="profile-photo" class="uppercase text-gray-400 font-black tracking-[0.25em]">Photo de profil</label>
+                        <input id="profile-photo" name="profile-photo" type="file" accept="image/*" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-3 text-white outline-none file:bg-yellow-400 file:text-black file:px-4 file:py-2 file:rounded-full" />
+                    </div>
+                    <div class="field-group space-y-2 md:col-span-2">
+                        <label for="bio" class="uppercase text-gray-400 font-black tracking-[0.25em]">Courte biographie / présentation *</label>
+                        <textarea id="bio" name="bio" rows="4" maxlength="500" required class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Parlez-nous de votre projet en moins de 500 caractères..."></textarea>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-[2rem] border border-white/10 p-6">
+                    <h3 class="text-yellow-400 font-black uppercase tracking-[0.3em] text-sm mb-6">Choix du domaine principal</h3>
+                    <div class="grid gap-4 md:grid-cols-4">
+                        <button type="button" onclick="selectDomain('business')" id="radio-business" class="radio-card rounded-[1.75rem] border border-white/10 p-6 text-left bg-white/5">Business</button>
+                        <button type="button" onclick="selectDomain('artiste')" id="radio-artiste" class="radio-card rounded-[1.75rem] border border-white/10 p-6 text-left bg-white/5">Artiste</button>
+                        <button type="button" onclick="selectDomain('artisan')" id="radio-artisan" class="radio-card rounded-[1.75rem] border border-white/10 p-6 text-left bg-white/5">Artisan</button>
+                        <button type="button" onclick="selectDomain('professionnel')" id="radio-professionnel" class="radio-card rounded-[1.75rem] border border-white/10 p-6 text-left bg-white/5">Professionnel</button>
+                    </div>
+                    <p class="mt-4 text-gray-400 text-sm">Le choix conditionne l’affichage des champs suivants. Choisissez votre profil principal pour recevoir une fiche adaptée.</p>
+                </div>
+
+                <div id="domain-sections" class="space-y-6">
+                    <div id="section-business" class="glass-card rounded-[2rem] border border-white/10 p-8 hidden-section">
+                        <h3 class="text-xl font-black text-white mb-4">A. BUSINESS</h3>
+                        <div class="grid gap-6 md:grid-cols-2">
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Type d'activité</label>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-3">
+                                        <input type="checkbox" name="business-type" value="Vente de produits" class="accent-yellow-400">
+                                        <span>Vente de produits</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-3">
+                                        <input type="checkbox" name="business-type" value="Prestations de services" class="accent-yellow-400">
+                                        <span>Prestations de services</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-3">
+                                        <input type="checkbox" name="business-type" value="Formation" class="accent-yellow-400">
+                                        <span>Formation</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-3">
+                                        <input type="checkbox" name="business-type" value="Autre" class="accent-yellow-400">
+                                        <span>Autre</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Domaine précis</label>
+                                <input id="business-domain" name="business-domain" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Ex. Vente de produits artisanaux" />
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Description détaillée de l'activité</label>
+                                <textarea id="business-description" name="business-description" rows="4" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Que proposez-vous ? À quel public ? Quelle est votre valeur ajoutée ?"></textarea>
+                            </div>
+                            <div class="field-group space-y-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Nom de l'entreprise</label>
+                                <input id="business-company" name="business-company" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                            </div>
+                            <div class="field-group space-y-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Statut juridique</label>
+                                <input id="business-legal" name="business-legal" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="SARL, SAS, Autoentrepreneur..." />
+                            </div>
+                            <div class="field-group space-y-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Année de création</label>
+                                <input id="business-year" name="business-year" type="number" min="1900" max="2099" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                            </div>
+                            <div class="field-group space-y-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Zone d'intervention</label>
+                                <select id="business-zone" name="business-zone" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10">
+                                    <option value="">Choisissez</option>
+                                    <option>Local</option>
+                                    <option>National</option>
+                                    <option>International</option>
+                                </select>
+                            </div>
+                            <div class="field-group space-y-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Site web</label>
+                                <input id="business-website" name="business-website" type="url" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" />
+                            </div>
+                            <div class="field-group space-y-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Page Facebook / Instagram</label>
+                                <input id="business-social" name="business-social" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="URL ou @compte" />
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">WhatsApp Business</label>
+                                <input id="business-whatsapp" name="business-whatsapp" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="+243..." />
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Autres liens</label>
+                                <textarea id="business-links" name="business-links" rows="3" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Site, portfolio, réseaux..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="section-artiste" class="glass-card rounded-[2rem] border border-white/10 p-8 hidden-section">
+                        <h3 class="text-xl font-black text-white mb-4">B. ARTISTE</h3>
+                        <div class="grid gap-6 md:grid-cols-2">
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Discipline artistique</label>
+                                <select id="artiste-discipline" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10">
+                                    <option value="">Choisir</option>
+                                    <option>Musique</option>
+                                    <option>Peinture / Dessin</option>
+                                    <option>Sculpture</option>
+                                    <option>Danse</option>
+                                    <option>Théâtre</option>
+                                    <option>Cinéma / Audiovisuel</option>
+                                    <option>Photographie</option>
+                                    <option>Écriture / Poésie</option>
+                                    <option>Art numérique</option>
+                                    <option>Autre</option>
+                                </select>
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Style / Univers artistique</label>
+                                <input id="artiste-style" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Ex. Afro-contemporain, traditionnel..." />
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <span class="uppercase text-gray-400 font-black tracking-[0.25em]">Niveau</span>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <label class="flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3"><input type="radio" name="artiste-niveau" value="Amateur" class="accent-yellow-400"> Amateur</label>
+                                    <label class="flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3"><input type="radio" name="artiste-niveau" value="Semi-professionnel" class="accent-yellow-400"> Semi-pro</label>
+                                    <label class="flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3"><input type="radio" name="artiste-niveau" value="Professionnel" class="accent-yellow-400"> Professionnel</label>
+                                </div>
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Œuvres & réalisations</label>
+                                <textarea id="artiste-oeuvres" rows="3" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Années d'expérience, projets notables, distinctions..."></textarea>
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Liens médias</label>
+                                <textarea id="artiste-media" rows="3" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="YouTube, Instagram, Spotify, galeries..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="section-artisan" class="glass-card rounded-[2rem] border border-white/10 p-8 hidden-section">
+                        <h3 class="text-xl font-black text-white mb-4">C. ARTISAN</h3>
+                        <div class="grid gap-6 md:grid-cols-2">
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Métier artisanal</label>
+                                <select id="artisan-metier" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10">
+                                    <option value="">Choisir</option>
+                                    <option>Menuiserie</option>
+                                    <option>Couture / mode</option>
+                                    <option>Bijouterie</option>
+                                    <option>Sculpture</option>
+                                    <option>Vannerie</option>
+                                    <option>Céramique</option>
+                                    <option>Maroquinerie</option>
+                                    <option>Autre</option>
+                                </select>
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Spécialité</label>
+                                <input id="artisan-specialty" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Ex. meubles sur mesure, bijoux faits main..." />
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <span class="uppercase text-gray-400 font-black tracking-[0.25em]">Mode de travail</span>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <label class="flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3"><input type="radio" name="artisan-mode" value="Sur commande" class="accent-yellow-400"> Sur commande</label>
+                                    <label class="flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3"><input type="radio" name="artisan-mode" value="Production continue" class="accent-yellow-400"> Production continue</label>
+                                    <label class="flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3"><input type="radio" name="artisan-mode" value="Les deux" class="accent-yellow-400"> Les deux</label>
+                                </div>
+                            </div>
+                            <div class="field-group space-y-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Zone de livraison / service</label>
+                                <select id="artisan-zone" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10">
+                                    <option value="">Choisir</option>
+                                    <option>Locale</option>
+                                    <option>Nationale</option>
+                                    <option>Internationale</option>
+                                </select>
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Portfolio</label>
+                                <textarea id="artisan-portfolio" rows="3" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Photos, vidéos, réalisations..." ></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="section-professionnel" class="glass-card rounded-[2rem] border border-white/10 p-8 hidden-section">
+                        <h3 class="text-xl font-black text-white mb-4">D. PROFESSIONNEL</h3>
+                        <div class="grid gap-6 md:grid-cols-2">
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Domaine professionnel</label>
+                                <select id="pro-domain" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10">
+                                    <option value="">Choisir</option>
+                                    <option>Communication</option>
+                                    <option>Marketing</option>
+                                    <option>Design</option>
+                                    <option>Architecture</option>
+                                    <option>Ingénierie</option>
+                                    <option>Juridique</option>
+                                    <option>Formation</option>
+                                    <option>Autre</option>
+                                </select>
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Fonction / Titre</label>
+                                <input id="pro-title" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Ex. Consultant, Architecte..." />
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Compétences principales</label>
+                                <input id="pro-skills" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Tags ou mots-clés" />
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <label class="uppercase text-gray-400 font-black tracking-[0.25em]">Expérience</label>
+                                <textarea id="pro-experience" rows="3" class="w-full rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none focus:border-yellow-400 focus:bg-white/10" placeholder="Années d'expérience, références..." ></textarea>
+                            </div>
+                            <div class="field-group space-y-2 md:col-span-2">
+                                <span class="uppercase text-gray-400 font-black tracking-[0.25em]">Disponibilité</span>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <label class="flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3"><input type="checkbox" name="pro-availability" value="Missions" class="accent-yellow-400"> Missions</label>
+                                    <label class="flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3"><input type="checkbox" name="pro-availability" value="Emploi" class="accent-yellow-400"> Emploi</label>
+                                    <label class="flex items-center gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3"><input type="checkbox" name="pro-availability" value="Collaboration" class="accent-yellow-400"> Collaboration</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-[2rem] border border-white/10 p-8">
+                    <h3 class="text-xl font-black text-white mb-4">Objectifs sur LEGRANDART</h3>
+                    <div class="grid gap-3 md:grid-cols-2">
+                        <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-4"><input type="checkbox" name="objectives" value="Visibilité & promotion" class="accent-yellow-400"> Visibilité & promotion</label>
+                        <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-4"><input type="checkbox" name="objectives" value="Trouver des clients" class="accent-yellow-400"> Trouver des clients</label>
+                        <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-4"><input type="checkbox" name="objectives" value="Vendre mes produits" class="accent-yellow-400"> Vendre mes produits</label>
+                        <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-4"><input type="checkbox" name="objectives" value="Créer des collaborations" class="accent-yellow-400"> Créer des collaborations</label>
+                        <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-4"><input type="checkbox" name="objectives" value="Partager mon art / savoir-faire" class="accent-yellow-400"> Partager mon art / savoir-faire</label>
+                        <label class="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/5 px-4 py-4"><input type="checkbox" name="objectives" value="Former / transmettre" class="accent-yellow-400"> Former / transmettre</label>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-[2rem] border border-white/10 p-8">
+                    <div class="space-y-4">
+                        <label class="flex items-center gap-3"><input id="agree-terms" type="checkbox" class="accent-yellow-400"> <span class="text-gray-300">J'accepte les conditions générales d'utilisation</span></label>
+                        <label class="flex items-center gap-3"><input id="allow-promo" type="checkbox" class="accent-yellow-400"> <span class="text-gray-300">J'autorise la mise en avant de mon profil sur LEGRANDART</span></label>
+                    </div>
+                    <button type="button" onclick="submitBusinessForm()" class="mt-6 w-full rounded-full bg-yellow-400 text-black font-black uppercase tracking-[0.2em] py-5 shadow-[0_20px_60px_-30px_rgba(250,204,21,0.9)] hover:bg-yellow-300 transition">Créer mon profil</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/10 py-10 text-center text-gray-400 text-sm">
+        <p class="max-w-3xl mx-auto">LeGrandArt - Plateforme de valorisation des arts et métiers. Un espace dédié à l'organisation de boutiques, profils et partenariats business.</p>
+    </footer>
+
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('lg_user_name')) {
+            window.location.href = 'index.html';
+        }
+
+        const WHATSAPP_PHONE = '243815022325';
+        let activeDomain = '';
+
+        function selectDomain(domain) {
+            activeDomain = domain;
+            document.querySelectorAll('[id^="radio-"]').forEach(btn => btn.classList.remove('highlight'));
+            document.querySelectorAll('[id^="section-"]').forEach(section => section.classList.add('hidden-section'));
+            const radio = document.getElementById('radio-' + domain);
+            const section = document.getElementById('section-' + domain);
+            if (radio) radio.classList.add('highlight');
+            if (section) section.classList.remove('hidden-section');
+        }
+
+        function submitBusinessForm() {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const bio = document.getElementById('bio').value.trim();
+            const agree = document.getElementById('agree-terms').checked;
+            if (!name || !phone || !email || !bio || !agree) {
+                alert('Veuillez remplir les champs obligatoires et accepter les conditions.');
+                return;
+            }
+            const domainLabel = activeDomain ? activeDomain.toUpperCase() : 'NON SÉLECTIONNÉ';
+            let domainDetails = '';
+            if (activeDomain === 'business') {
+                const types = [...document.querySelectorAll('input[name="business-type"]:checked')].map(i => i.value).join(', ') || 'Non renseigné';
+                domainDetails = `Type d'activité: ${types}\nDomaine précis: ${document.getElementById('business-domain').value || 'Non renseigné'}\nDescription: ${document.getElementById('business-description').value || 'Non renseigné'}\nEntreprise: ${document.getElementById('business-company').value || 'Non renseigné'}\nStatut: ${document.getElementById('business-legal').value || 'Non renseigné'}\nAnnée: ${document.getElementById('business-year').value || 'Non renseigné'}\nZone: ${document.getElementById('business-zone').value || 'Non renseigné'}\nSite: ${document.getElementById('business-website').value || 'Non renseigné'}\nSocial: ${document.getElementById('business-social').value || 'Non renseigné'}\nWhatsApp Business: ${document.getElementById('business-whatsapp').value || 'Non renseigné'}\nAutres liens: ${document.getElementById('business-links').value || 'Non renseigné'}\n`;
+            } else if (activeDomain === 'artiste') {
+                domainDetails = `Discipline: ${document.getElementById('artiste-discipline').value || 'Non renseigné'}\nStyle: ${document.getElementById('artiste-style').value || 'Non renseigné'}\nNiveau: ${[...document.querySelectorAll('input[name="artiste-niveau"]:checked')].map(i => i.value).join(', ') || 'Non renseigné'}\nŒuvres: ${document.getElementById('artiste-oeuvres').value || 'Non renseigné'}\nLiens médias: ${document.getElementById('artiste-media').value || 'Non renseigné'}\n`;
+            } else if (activeDomain === 'artisan') {
+                domainDetails = `Métier: ${document.getElementById('artisan-metier').value || 'Non renseigné'}\nSpécialité: ${document.getElementById('artisan-specialty').value || 'Non renseigné'}\nMode de travail: ${[...document.querySelectorAll('input[name="artisan-mode"]:checked')].map(i => i.value).join(', ') || 'Non renseigné'}\nZone: ${document.getElementById('artisan-zone').value || 'Non renseigné'}\nPortfolio: ${document.getElementById('artisan-portfolio').value || 'Non renseigné'}\n`;
+            } else if (activeDomain === 'professionnel') {
+                domainDetails = `Domaine: ${document.getElementById('pro-domain').value || 'Non renseigné'}\nFonction: ${document.getElementById('pro-title').value || 'Non renseigné'}\nCompétences: ${document.getElementById('pro-skills').value || 'Non renseigné'}\nExpérience: ${document.getElementById('pro-experience').value || 'Non renseigné'}\nDisponibilité: ${[...document.querySelectorAll('input[name="pro-availability"]:checked')].map(i => i.value).join(', ') || 'Non renseigné'}\n`;
+            }
+            const objectives = [...document.querySelectorAll('input[name="objectives"]:checked')].map(i => i.value).join(', ') || 'Non renseigné';
+            const message = `*FICHE D'ADHÉSION – LEGRANDART*\n\n*Profil:* ${domainLabel}\n*Nom:* ${name}\n*Email:* ${email}\n*Téléphone:* ${phone}\n*Bio:* ${bio}\n\n*Objectifs:* ${objectives}\n\n*Détails du domaine:*\n${domainDetails}`;
+            window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            selectDomain('business');
+        });
+    </script>
+</body>
+</html>

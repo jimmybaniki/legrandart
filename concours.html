@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concours 2026 - LeGrandArt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Sécurité : Redirection immédiate si non connecté
+        if (!localStorage.getItem('lg_user_name')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#0a0a0b] text-white min-h-screen">
+    <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-[1400px] mx-auto px-4 md:px-6 flex justify-between items-center h-20">
+            <a href="index.html" class="flex flex-col leading-none">
+                <span class="text-2xl font-black">LeGrand<span class="text-yellow-500">Art</span></span>
+                <span class="text-[9px] uppercase tracking-[0.4em] text-emerald-500 font-black mt-1">Concours Officiel</span>
+            </a>
+            <nav class="flex gap-6 text-[10px] uppercase tracking-widest font-black">
+                <a href="index.html" class="hover:text-yellow-400 transition">Accueil</a>
+                <a href="boutiques.html" class="hover:text-yellow-500 transition">Boutiques</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="pb-24">
+        <section class="relative h-[60vh] flex items-end p-8 md:p-24 overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1523895665936-7bfe172b757d?auto=format&fit=crop&q=80&w=1920" class="absolute inset-0 w-full h-full object-cover opacity-50" alt="Hero Contest">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0b] to-transparent"></div>
+            <div class="relative z-10 max-w-5xl">
+                <h1 class="text-5xl md:text-8xl font-black text-white leading-none tracking-tighter mb-6 uppercase">
+                    Art, Foi & <span class="text-yellow-500 italic">Racines</span>
+                </h1>
+                <p class="text-xl md:text-3xl text-emerald-400 font-black uppercase tracking-widest">Honorer nos racines, inspirer nos lendemains.</p>
+            </div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 mt-12 grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div class="md:col-span-2 space-y-12">
+                <div>
+                    <h2 class="text-3xl font-black text-white mb-6 uppercase border-b border-white/10 pb-4">Concept & Vision</h2>
+                    <p class="text-gray-300 text-lg leading-relaxed">
+                        Le concours « Art, Foi & Racines » vise à offrir un espace artistique permettant aux participants d’exprimer leur gratitude envers les ancêtres, de reconnaître leur héritage et de transmettre des valeurs profondes aux générations futures. L’événement est organisé et diffusé via la plateforme LE GRAND ART, renforçant son rôle comme carrefour culturel panafricain.
+                    </p>
+                </div>
+
+                <div>
+                    <h2 class="text-3xl font-black text-white mb-6 uppercase border-b border-white/10 pb-4">Communiqué Officiel de Lancement</h2>
+                    <p class="text-gray-300 text-lg leading-relaxed">
+                        LE GRAND ART annonce le lancement du concours panafricain « Art, Foi & Racines », une célébration artistique dédiée à l’héritage, la mémoire et la gratitude envers les ancêtres. Le concours sera diffusé durant le mois d’août, avec un point culminant le 1er août, Journée des Parents en RDC.
+                    </p>
+                </div>
+
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-black text-white uppercase tracking-widest">Identité Visuelle & Slogans</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-4">
+                            <i class="fas fa-quote-left text-yellow-500 opacity-50"></i>
+                            <p class="text-yellow-500 font-bold italic text-sm">"Honorer nos racines, inspirer nos lendemains."</p>
+                        </div>
+                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-4">
+                            <i class="fas fa-quote-left text-yellow-500 opacity-50"></i>
+                            <p class="text-yellow-500 font-bold italic text-sm">"L’art comme mémoire vivante."</p>
+                        </div>
+                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-4">
+                            <i class="fas fa-quote-left text-yellow-500 opacity-50"></i>
+                            <p class="text-yellow-500 font-bold italic text-sm">"Nos ancêtres, nos forces, nos inspirations."</p>
+                        </div>
+                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-4">
+                            <i class="fas fa-quote-left text-yellow-500 opacity-50"></i>
+                            <p class="text-yellow-500 font-bold italic text-sm">"Art, Foi & Racines : un pont entre les générations."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/5 p-8 rounded-[2rem] border border-white/10">
+                    <h2 class="text-2xl font-black text-yellow-500 mb-6 uppercase">Règlement Intérieur</h2>
+                    <ul class="space-y-6 text-gray-300 text-sm md:text-base">
+                        <li class="flex gap-4"><span class="text-yellow-500 font-black">01.</span> Le concours est ouvert à tout artiste sans distinction d’âge ou de nationalité.</li>
+                        <li class="flex gap-4"><span class="text-yellow-500 font-black">02.</span> Chaque participant peut soumettre une seule œuvre originale.</li>
+                        <li class="flex gap-4"><span class="text-yellow-500 font-black">03.</span> Les catégories acceptées : peinture, photo, vidéo, poésie audio, musique, danse filmée, art digital.</li>
+                        <li class="flex gap-4"><span class="text-yellow-500 font-black">04.</span> Les œuvres doivent obligatoirement traiter des thèmes : ancêtres, héritage, gratitude, foi, transmission.</li>
+                        <li class="flex gap-4"><span class="text-yellow-500 font-black">05.</span> Les œuvres doivent être téléchargées via LE GRAND ART entre le 1er mai et le 15 juin.</li>
+                        <li class="flex gap-4"><span class="text-yellow-500 font-black">06.</span> Les participants garantissent être détenteurs des droits de leurs œuvres.</li>
+                        <li class="flex gap-4"><span class="text-yellow-500 font-black">07.</span> Les décisions du jury sont finales et sans appel.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+                <div class="bg-yellow-500 p-8 rounded-[2rem] text-black text-center">
+                    <h3 class="font-black text-xl mb-4 uppercase">Inscriptions</h3>
+                    <p class="font-bold text-sm mb-6">Du 1er mai au 15 juin 2026</p>
+                    <button onclick="toggleModal('submit-modal')" class="w-full bg-black text-white font-black py-4 rounded-xl uppercase text-xs tracking-widest hover:scale-105 transition">Participer maintenant</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER COMPLET -->
+    <footer class="bg-[#050505] border-t border-white/5 pt-24 pb-12 px-6 mt-24">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
+                <!-- Colonne 1: À Propos -->
+                <div class="space-y-8">
+                    <a href="index.html" class="flex flex-col leading-none">
+                        <span class="text-3xl font-black text-white">
+                            LeGrand<span class="text-yellow-500">Art</span>
+                        </span>
+                        <span class="text-[8px] md:text-[9px] uppercase tracking-[0.4em] text-emerald-500 font-black mt-1">Concours Officiel</span>
+                    </a>
+                    <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
+                        La première plateforme éthique dédiée à l'excellence artistique panafricaine. Nous protégeons et promouvons l'art qui élève l'esprit et honore nos racines.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Colonne 2: Navigation -->
+                <div>
+                    <h4 class="text-white font-black uppercase text-xs tracking-[0.2em] mb-8">Navigation</h4>
+                    <ul class="space-y-4 text-sm font-bold">
+                        <li><a href="index.html" class="text-gray-500 hover:text-yellow-500 transition-colors uppercase tracking-widest text-[10px]">Accueil</a></li>
+                        <li><a href="boutiques.html" class="text-gray-500 hover:text-yellow-500 transition-colors uppercase tracking-widest text-[10px]">Espace Boutiques</a></li>
+                        <li><a href="business.html" class="text-gray-500 hover:text-yellow-500 transition-colors uppercase tracking-widest text-[10px]">Espace Business</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Colonne 3: Catégories -->
+                <div>
+                    <h4 class="text-white font-black uppercase text-xs tracking-[0.2em] mb-8">Catégories Concours</h4>
+                    <ul class="grid grid-cols-1 gap-4 text-sm font-bold">
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors uppercase tracking-widest text-[10px]">Peinture & Dessin</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors uppercase tracking-widest text-[10px]">Musique & Poésie</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors uppercase tracking-widest text-[10px]">Art Digital & Vidéo</a></li>
+                    </ul>
+                </div>
+
+                <!-- Colonne 4: Contact -->
+                <div class="space-y-8">
+                    <h4 class="text-white font-black uppercase text-xs tracking-[0.2em] mb-8">Contact Support</h4>
+                    <div class="space-y-6">
+                        <a href="https://wa.me/243815022325" class="flex items-center space-x-4 group">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-black transition-all">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <span class="text-gray-400 group-hover:text-white text-xs font-black tracking-widest">+243 815 022 325</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright et Mentions -->
+            <div class="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0 text-center md:text-left">
+                <p class="text-[9px] text-gray-600 uppercase tracking-[0.3em] leading-relaxed">
+                    &copy; 2026 LEGRANDART - TOUS DROITS RÉSERVÉS<br>HONORER LE PASSÉ, BÂTIR L'AVENIR.
+                </p>
+                <p class="text-[9px] text-emerald-500/50 font-black uppercase tracking-[0.3em]">
+                    GOMBE, KINSHASA, RDC
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL D'INSCRIPTION -->
+    <div id="submit-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
+        <div class="bg-[#0a0a0b] border border-white/10 w-full max-w-4xl rounded-[3rem] p-8 md:p-12 overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-start mb-8">
+                <h3 class="text-3xl font-black uppercase">Inscription <span class="text-emerald-500 italic">Concours</span></h3>
+                <button onclick="toggleModal('submit-modal')" class="text-white hover:text-red-500 text-2xl">&times;</button>
+            </div>
+            <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input type="text" id="contest-fullname" placeholder="Nom Complet" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-emerald-500">
+                <input type="email" id="contest-email" placeholder="Email" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-emerald-500">
+                <input type="tel" id="contest-phone" placeholder="Téléphone / WhatsApp" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-emerald-500">
+                <select id="contest-category" class="bg-zinc-900 border border-white/10 rounded-2xl p-4 outline-none focus:border-emerald-500">
+                    <option value="" disabled selected>Choisir une catégorie</option>
+                    <option value="Peinture">Peinture</option>
+                    <option value="Photo">Photo</option>
+                    <option value="Vidéo">Vidéo</option>
+                </select>
+                <input type="text" id="contest-title" placeholder="Titre de l'Œuvre" class="col-span-full bg-white/5 border border-white/10 rounded-2xl p-4">
+                <textarea id="contest-desc" rows="4" placeholder="Description / Concept" class="col-span-full bg-white/5 border border-white/10 rounded-2xl p-4"></textarea>
+                <button type="button" onclick="sendContestToWhatsApp()" class="col-span-full bg-emerald-500 text-black font-black py-4 rounded-2xl uppercase tracking-widest">Envoyer mon Inscription</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal(id) { 
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden'); 
+        }
+
+        function sendContestToWhatsApp() {
+            const fullname = document.getElementById('contest-fullname').value;
+            const category = document.getElementById('contest-category').value;
+            const title = document.getElementById('contest-title').value;
+            
+            if(!fullname || !category || !title) { alert('Veuillez remplir les champs.'); return; }
+            
+            const message = `*INSCRIPTION CONCOURS*\n*Nom:* ${fullname}\n*Catégorie:* ${category}\n*Titre:* ${title}`;
+            window.open(`https://wa.me/243815022325?text=${encodeURIComponent(message)}`, '_blank');
+        }
+    </script>
+</body>
+</html>
