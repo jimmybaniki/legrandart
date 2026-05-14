@@ -149,11 +149,6 @@
         let allProducts = [];
         let cart = [];
 
-        // Protection de session
-        const currentUser = localStorage.getItem('lg_user_name');
-        if (!currentUser) {
-            window.location.href = 'connexion.html';
-        }
 
         // Fonction de récupération de valeur améliorée (synchronisée avec aza-kai-admin.html)
         function getSpecValue(obj, synonyms, priorityIndex = -1) {
