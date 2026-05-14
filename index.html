@@ -261,6 +261,11 @@
                     <h3 class="text-xl font-black uppercase mb-4">Voir les Boutiques</h3>
                     <p class="text-gray-300 text-sm leading-relaxed">Accédez aux boutiques déjà présentes et découvrez les créateurs partenaires.</p>
                 </a>
+                <a href="business.html" class="glass-card rounded-[2rem] border border-white/10 p-8 text-center hover:border-purple-400/50 transition-all">
+                    <div class="text-purple-400 text-3xl mb-5"><i class="fas fa-handshake"></i></div>
+                    <h3 class="text-xl font-black uppercase mb-4">Je suis Agent Commercial</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">Aidez les artistes et entreprises à prospérer sur la plateforme.</p>
+                </a>
             </div>
         </section>
 
@@ -380,6 +385,14 @@
         </div>
     </div>
 
+    <!-- Bouton Admin déplacé tout en bas pour plus de discrétion -->
+    <section class="max-w-[1400px] mx-auto px-4 md:px-6 py-12 text-center">
+        <button onclick="accessPlatformAdmin()" class="premium-icon-btn flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest text-yellow-500 border-2 border-yellow-500/40 hover:border-yellow-500 hover:bg-yellow-500/10 transition-all shadow-[0_0_20px_rgba(234,179,8,0.15)] mx-auto">
+            <i data-feather="shield" class="w-5 h-5"></i>
+            <span>Accès Administration</span>
+        </button>
+    </section>
+
     <!-- FOOTER COMPLET -->
     <footer class="bg-[#050505] border-t border-white/5 pt-24 pb-12 px-6 mt-24">
         <div class="max-w-[1600px] mx-auto">
@@ -469,6 +482,7 @@
                 </p>
             </div>
         </div>
+        
     </footer>
     </div>
 
@@ -899,6 +913,17 @@
             localStorage.removeItem('lg_user_name');
             location.reload();
         }
+
+        function accessPlatformAdmin() {
+            const code = prompt("Entrez le code d'accès administrateur :");
+            if (code === "admin2026") {
+                window.location.href = "admin.html";
+            } else if (code !== null) {
+                alert("Code d'accès incorrect.");
+            }
+        }
     </script>
+
+
 </body>
 </html>

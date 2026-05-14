@@ -1,7 +1,58 @@
 // Gestion des données en stockage local
 // Les profils, boutiques et œuvres sont sauvegardés dans le navigateur
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7xZ_zf2IPfM96HsoiP3JVGtFyBEWw1iGgDOavlacJ92MUUgZOWdBCFNSRwOExbeoX/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypuG5CjVBMTTo1uWHX8a8vPKjkaOiVEGIauGlFykncCMJMxxDoDG6IbgAyVTctTmeX/exec";
+
+// FONCTIONS DE SYNCHRONISATION BDD
+async function readData(sheetName) {
+    try {
+        const response = await fetch(`${SCRIPT_URL}?sheetName=${sheetName}`);
+        return await response.json();
+    } catch (e) {
+        console.error("Erreur lecture BDD:", e);
+        return [];
+    }
+}
+
+async function addEntry(sheetName, rowValues) {
+    const payload = {
+        action: "write",
+        sheetName: sheetName,
+        values: rowValues
+    };
+
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(payload)
+        });
+        return true;
+    } catch (e) {
+        console.error("Erreur écriture BDD:", e);
+        return false;
+    }
+}
+
+async function deleteEntry(sheetName, rowIndex) {
+    const payload = {
+        action: "delete",
+        sheetName: sheetName,
+        rowIndex: rowIndex // L'index de la ligne à supprimer (base 1, incluant l'en-tête)
+    };
+
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(payload)
+        });
+        return true;
+    } catch (e) {
+        console.error("Erreur suppression BDD:", e);
+        return false;
+    }
+}
 
 function getLocalShops() {
     return JSON.parse(localStorage.getItem('lg_shops') || '[]');
@@ -44,15 +95,21 @@ function saveProfileWithMode(profile) {
 async function saveToDataStore(payload) {
     // Enregistrement silencieux vers Google Sheets
     try {
-        const response = await fetch(SCRIPT_URL, {
+        await fetch(SCRIPT_URL, {
             method: 'POST',
-            mode: 'cors',
+            mode: 'no-cors',
             body: JSON.stringify(payload)
         });
-        return await response.json();
     } catch (e) {
         console.error("Erreur de sauvegarde distante:", e);
     }
+}
+
+function loginAsManager(shopName) {
+    // Simule une connexion en tant que gérant d'une boutique spécifique
+    localStorage.setItem('lg_active_managed_shop', shopName);
+    // Redirection vers le template de boutique (ex: aza-kai.html si c'est Aza & Kai)
+    window.location.href = shopName.toLowerCase().includes('aza') ? 'aza-kai-admin.html' : 'dashboard.html';
 }
 
 function registerProfile(profile) {
@@ -89,7 +146,14 @@ function addShop(shop) {
     shops.unshift(shop);
     localStorage.setItem('lg_shops', JSON.stringify(shops));
     // Envoi vers Google Sheets pour persistance éternelle
-    saveToDataStore({ action: 'add_shop', data: shop });
+    addEntry("shops", [
+        shop.shopName, 
+        shop.owner, 
+        shop.email, 
+        shop.country, 
+        shop.city, 
+        shop.tags
+    ]);
 }
 
 function addArtwork(artwork) {
@@ -171,15 +235,9 @@ async function loadShops() {
     ];
 
     // Tentative de récupération depuis Google Sheets pour mise à jour
-    try {
-        const res = await fetch(`${SCRIPT_URL}?action=get_shops`);
-        const remoteShops = await res.json();
-        if (remoteShops && remoteShops.length > 0) {
-            shops = remoteShops;
-            localStorage.setItem('lg_shops', JSON.stringify(shops));
-        }
-    } catch (e) {
-        console.log("Utilisation des données locales");
+    const remoteShops = await readData("shops");
+    if (remoteShops && remoteShops.length > 0) {
+        shops = remoteShops;
     }
 
     container.innerHTML = '';
@@ -415,7 +473,7 @@ function deleteArtwork(artId) {
 function logout() {
     localStorage.removeItem('lg_pro_user');
     window.location.href = 'index.html';
-}
+        }
 
 function initSelectionMode() {
     const urlParams = new URLSearchParams(window.location.search);

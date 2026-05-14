@@ -356,8 +356,10 @@
 
     <footer class="border-t border-white/10 py-10 text-center text-gray-400 text-sm">
         <p class="max-w-3xl mx-auto">LeGrandArt - Plateforme de valorisation des arts et métiers. Un espace dédié à l’organisation de boutiques, profils et partenariats business.</p>
+    
     </footer>
 
+    <script src="app.js"></script>
     <script>
         // Check authentication
         if (!localStorage.getItem('lg_user_name')) {
@@ -377,7 +379,7 @@
             if (section) section.classList.remove('hidden-section');
         }
 
-        function submitBusinessForm() {
+        async function submitBusinessForm() {
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -400,6 +402,19 @@
                 domainDetails = `Domaine: ${document.getElementById('pro-domain').value || 'Non renseigné'}\nFonction: ${document.getElementById('pro-title').value || 'Non renseigné'}\nCompétences: ${document.getElementById('pro-skills').value || 'Non renseigné'}\nExpérience: ${document.getElementById('pro-experience').value || 'Non renseigné'}\nDisponibilité: ${[...document.querySelectorAll('input[name="pro-availability"]:checked')].map(i => i.value).join(', ') || 'Non renseigné'}\n`;
             }
             const objectives = [...document.querySelectorAll('input[name="objectives"]:checked')].map(i => i.value).join(', ') || 'Non renseigné';
+            
+            // Sauvegarde en BDD
+            await addEntry("shops", [
+                name,
+                email,
+                phone,
+                document.getElementById('country').value,
+                document.getElementById('city').value,
+                activeDomain,
+                bio,
+                objectives
+            ]);
+
             const message = `*FICHE D’ADHÉSION – LEGRANDART*\n\n*Profil:* ${domainLabel}\n*Nom:* ${name}\n*Email:* ${email}\n*Téléphone:* ${phone}\n*Bio:* ${bio}\n\n*Objectifs:* ${objectives}\n\n*Détails du domaine:*\n${domainDetails}`;
             window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`, '_blank');
         }

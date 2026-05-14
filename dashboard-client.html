@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Espace Gérant - LeGrandArt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-glass: #ffffff;
+            --border-glass: rgba(255,255,255,0.12);
+            --text-primary: #f8fafc;
+            --text-secondary: #d1d5db;
+            --accent: #fbbf24;
+            --accent-hover: #f59e0b;
+        }
+        .light-theme {
+            --bg-primary: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%);
+            --bg-glass: rgba(255, 255, 255, 0.9);
+            --border-glass: rgba(0,0,0,0.1);
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --accent: #10b981;
+            --accent-hover: #059669;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .sidebar { background: #000000; width: 260px; transition: all 0.3s; }
+        .main-content { background: #f1f5f9; flex: 1; }
+        .stat-card { 
+            background: white; 
+            border-radius: 1.5rem; 
+            padding: 1.5rem; 
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .btn-bold {
+            background: #10b981;
+            color: #000;
+            font-weight: 700;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .btn-bold:hover { background: #059669; }
+        .nav-link { 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+            padding: 0.75rem 1rem; 
+            color: #94a3b8; 
+            border-radius: 0.75rem;
+            transition: 0.2s;
+        }
+        .nav-link:hover, .nav-link.active { background: #facc15; color: black; font-weight: bold; }
+        .table-container { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; overflow: hidden; }
+        .section-content { animation: fadeIn 0.3s ease-in-out; }
+        .section-content.hidden { display: none; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar flex flex-col p-6 text-white shrink-0">
+        <div class="mb-10 px-2">
+            <a href="index.html" class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></a>
+            <p class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Manager Pro</p>
+        </div>
+        
+        <nav class="flex-1 space-y-2">
+            <a href="#" onclick="showSection('dashboard'); return false;" class="nav-link active" data-section="dashboard"><i class="fas fa-th-large w-5"></i> Dashboard</a>
+            <a href="#" onclick="showSection('produits'); return false;" class="nav-link" data-section="produits"><i class="fas fa-box w-5"></i> Produits</a>
+            <a href="#" onclick="showSection('commandes'); return false;" class="nav-link" data-section="commandes"><i class="fas fa-shopping-cart w-5"></i> Commandes</a>
+            <a href="#" onclick="showSection('clients'); return false;" class="nav-link" data-section="clients"><i class="fas fa-users w-5"></i> Clients</a>
+            <a href="#" onclick="showSection('parametres'); return false;" class="nav-link" data-section="parametres"><i class="fas fa-cog w-5"></i> Paramètres</a>
+        </nav>
+
+        <div class="mt-auto border-t border-white/10 pt-6">
+            <button onclick="logout()" class="nav-link w-full text-red-400 hover:bg-red-500/10 hover:text-red-500">
+                <i class="fas fa-sign-out-alt w-5"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Area -->
+    <main class="main-content flex flex-col overflow-y-auto">
+        <!-- Top Toolbar -->
+        <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
+            <div class="relative w-96">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" placeholder="Rechercher une transaction..." class="w-full bg-gray-100 border-none rounded-xl py-2 pl-12 pr-4 text-sm focus:ring-2 focus:ring-yellow-400 transition-all">
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <button onclick="toggleTheme()" class="text-gray-400 hover:text-black transition"><i class="fas fa-moon"></i></button>
+                <div class="h-8 w-[1px] bg-gray-200"></div>
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="editManagerName()">
+                    <div class="text-right">
+                        <p id="dash-name-top" class="text-sm font-bold text-black leading-none group-hover:text-yellow-600 transition-colors">Gérant</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-black">Admin Boutique</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center font-black text-black">G</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content Sections -->
+        <div class="p-8 space-y-10">
+            <!-- SECTION DASHBOARD -->
+            <section id="dashboard-section" class="section-content">
+                <!-- Welcome Header -->
+                <div class="flex justify-between items-end mb-10">
+                    <div>
+                        <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Bienvenue, <span id="dash-name-title" class="cursor-pointer hover:text-yellow-600 transition-colors" onclick="editManagerName()">Gérant</span></h1>
+                        <p class="text-gray-500 text-sm font-medium">Voici ce qui se passe sur votre boutique aujourd'hui.</p>
+                    </div>
+                    <button onclick="showSection('produits')" class="btn-bold bg-black text-white hover:bg-gray-800 flex items-center gap-2">
+                        <i class="fas fa-plus text-xs"></i> Nouveau Produit
+                    </button>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="stat-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center text-yellow-600">
+                                <i class="fas fa-shopping-bag text-xl"></i>
+                            </div>
+                            <span class="text-emerald-500 text-xs font-bold">+12% <i class="fas fa-arrow-up"></i></span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Commandes en attente</p>
+                        <h3 class="text-3xl font-black text-black">12</h3>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                            <span class="text-blue-500 text-xs font-bold">Live</span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Visiteurs en direct</p>
+                        <h3 class="text-3xl font-black text-black">34</h3>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center text-red-600">
+                                <i class="fas fa-exclamation-triangle text-xl"></i>
+                            </div>
+                            <span class="text-red-500 text-xs font-bold">Alerte</span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Stocks bas</p>
+                        <h3 class="text-3xl font-black text-black">05</h3>
+                    </div>
+                </div>
+
+                <!-- Transactions Table -->
+                <div class="table-container">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Dernières Transactions</h2>
+                        <button class="text-xs font-bold text-gray-500 hover:text-black uppercase tracking-widest">Voir tout le rapport</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400">
+                                    <tr>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">ID</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Client</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Montant</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Statut</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Date</th>
+                                    </tr>
+                                </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">#TRX001</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Alice Dupont</td>
+                                    <td class="px-6 py-4 text-sm font-black text-black">$120.00</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Terminé</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">2026-05-13</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">#TRX002</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Bob Martin</td>
+                                    <td class="px-6 py-4 text-sm font-black text-black">$75.50</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-black uppercase">Attente</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">2026-05-13</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION PRODUITS -->
+            <section id="produits-section" class="section-content hidden">
+                <div class="flex justify-between items-end mb-10">
+                    <div>
+                        <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Gestion des Produits</h1>
+                        <p class="text-gray-500 text-sm font-medium">Gérez tous vos produits et leur stock</p>
+                    </div>
+                    <button onclick="toggleAddProductForm()" class="btn-bold bg-black text-white hover:bg-gray-800 flex items-center gap-2">
+                        <i class="fas fa-plus text-xs"></i> Nouveau Produit
+                    </button>
+                </div>
+
+                <div id="add-product-form" class="stat-card mb-8 hidden">
+                    <h3 class="text-lg font-bold text-black mb-6">Ajouter un Produit</h3>
+                    <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" placeholder="Nom du produit" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400">
+                        <input type="text" placeholder="Catégorie" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400">
+                        <input type="number" placeholder="Prix (€)" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400" step="0.01">
+                        <input type="number" placeholder="Stock" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400">
+                        <button type="submit" class="btn-bold bg-black text-white col-span-1 md:col-span-2 hover:bg-gray-800">Enregistrer</button>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Mes Produits</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Nom</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Catégorie</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Prix</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Stock</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">Peinture Abstraite</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Art</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-black">150€</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black">5</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800 font-bold">Modifier</button>
+                                        <button class="text-red-600 hover:text-red-800 font-bold">Supprimer</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION COMMANDES -->
+            <section id="commandes-section" class="section-content hidden">
+                <div class="mb-10">
+                    <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Gestion des Commandes</h1>
+                    <p class="text-gray-500 text-sm font-medium">Suivi de toutes les commandes de votre boutique</p>
+                </div>
+
+                <div class="table-container">
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Commandes</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">ID</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Client</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Montant</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Statut</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Date</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">#CMD001</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Alice Dupont</td>
+                                    <td class="px-6 py-4 text-sm font-black text-black">$120.00</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Expédiée</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">2026-05-13</td>
+                                    <td class="px-6 py-4 text-sm space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800 font-bold">Détails</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION CLIENTS -->
+            <section id="clients-section" class="section-content hidden">
+                <div class="mb-10">
+                    <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Gestion des Clients</h1>
+                    <p class="text-gray-500 text-sm font-medium">Liste et suivi de vos clients</p>
+                </div>
+
+                <div class="table-container">
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Clients</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Nom</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Email</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Téléphone</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Commandes</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Total dépensé</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">Alice Dupont</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">alice@email.com</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">+33 6 12 34 56 78</td>
+                                    <td class="px-6 py-4 text-sm font-black text-black">5</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-black">$600.00</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase">Actif</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">Bob Martin</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">bob@email.com</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">+33 6 98 76 54 32</td>
+                                    <td class="px-6 py-4 text-sm font-black text-black">3</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-black">$350.00</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase">Actif</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION PARAMETRES -->
+            <section id="parametres-section" class="section-content hidden">
+                <div class="mb-10">
+                    <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Paramètres</h1>
+                    <p class="text-gray-500 text-sm font-medium">Configurez votre boutique et vos préférences</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="stat-card">
+                        <h3 class="text-lg font-bold text-black mb-4">Informations de la Boutique</h3>
+                        <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" placeholder="Nom de la boutique" value="Ma Boutique" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400">
+                            <input type="email" placeholder="Email" value="shop@email.com" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400">
+                            <textarea placeholder="Description" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400 md:col-span-2" rows="4"></textarea>
+                            <button type="submit" class="btn-bold bg-black text-white col-span-1 md:col-span-2 hover:bg-gray-800">Sauvegarder</button>
+                        </form>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3 class="text-lg font-bold text-black mb-4">Sécurité</h3>
+                        <button class="btn-bold bg-red-600 text-white hover:bg-red-700 w-full">Changer le mot de passe</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        // Authentication logic
+        const sessionUser = localStorage.getItem('lg_user_name');
+        if (sessionUser) {
+            document.getElementById('dash-name-top').innerText = sessionUser;
+            document.getElementById('dash-name-title').innerText = sessionUser;
+        }
+
+        // Fonction pour modifier le nom du gérant
+        function editManagerName() {
+            const currentName = localStorage.getItem('lg_user_name') || 'Gérant';
+            const newName = prompt("Entrez votre nouveau nom :", currentName);
+            
+            if (newName && newName.trim() !== "") {
+                const trimmedName = newName.trim();
+                localStorage.setItem('lg_user_name', trimmedName);
+                document.getElementById('dash-name-top').innerText = trimmedName;
+                document.getElementById('dash-name-title').innerText = trimmedName;
+            }
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+            localStorage.setItem('theme', theme);
+        }
+
+        // Show section based on selection
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Show selected section
+            const selectedSection = document.getElementById(sectionName + '-section');
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+
+            // Add active class to selected nav link
+            const selectedLink = document.querySelector(`[data-section="${sectionName}"]`);
+            if (selectedLink) {
+                selectedLink.classList.add('active');
+            }
+
+            // Scroll to top
+            document.querySelector('.main-content').scrollTop = 0;
+        }
+
+        // Toggle add product form
+        function toggleAddProductForm() {
+            const form = document.getElementById('add-product-form');
+            if (form) {
+                form.classList.toggle('hidden');
+            }
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('lg_user_name');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
