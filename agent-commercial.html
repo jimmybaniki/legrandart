@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Espace Agent Commercial - LeGrandArt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+        .sidebar { background: #000000; width: 260px; transition: all 0.3s; }
+        .nav-link { 
+            display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; 
+            color: #94a3b8; border-radius: 0.75rem; transition: 0.2s; 
+        }
+        .nav-link:hover, .nav-link.active { background: #facc15; color: black; font-weight: bold; }
+        .glass-card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .btn-action { background: #10b981; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; }
+        .btn-action:hover { background: #059669; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar flex flex-col p-6 text-white shrink-0">
+        <div class="mb-10 px-2">
+            <a href="index.html" class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></a>
+            <p class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Agent Commercial</p>
+        </div>
+        <nav class="flex-1 space-y-2">
+            <a href="#" onclick="showSection('overview')" class="nav-link active" id="nav-overview"><i class="fas fa-chart-line w-5"></i> Vue d'ensemble</a>
+            <a href="#" onclick="showSection('clients')" class="nav-link" id="nav-clients"><i class="fas fa-users w-5"></i> Mes Clients</a>
+            <a href="#" onclick="showSection('shops')" class="nav-link" id="nav-shops"><i class="fas fa-store w-5"></i> Boutiques Gérées</a>
+            <a href="#" onclick="showSection('tech')" class="nav-link" id="nav-tech"><i class="fas fa-tools w-5"></i> Support Technique</a>
+        </nav>
+        <div class="mt-auto border-t border-white/10 pt-6">
+            <button onclick="logout()" class="nav-link w-full text-red-400 hover:bg-red-500/10 hover:text-red-500">
+                <i class="fas fa-sign-out-alt w-5"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Area -->
+    <main class="flex-1 flex flex-col overflow-y-auto">
+        <!-- Top Toolbar -->
+        <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
+            <h2 class="font-bold text-lg" id="section-title">Tableau de bord Agent</h2>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleNotifications()" class="relative text-gray-500 hover:text-black transition">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-count" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-[10px] text-white font-black">0</span>
+                </button>
+                <span id="agent-name" class="font-bold">Agent</span>
+                <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center font-black text-black">A</div>
+            </div>
+        </header>
+
+        <div id="notification-panel" class="glass-card p-6 mx-8 hidden">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-black uppercase text-sm tracking-widest">Notifications de vente</h3>
+                    <p class="text-gray-500 text-xs">Les alertes apparaissent quand un client réalise une vente.</p>
+                </div>
+                <button onclick="clearNotifications()" class="text-xs font-bold text-gray-500 hover:text-black">Effacer</button>
+            </div>
+            <div id="notification-list" class="space-y-3"></div>
+        </div>
+
+        <div class="p-8 space-y-8">
+            <!-- Vue d'ensemble -->
+            <div id="section-overview" class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-6">
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Portefeuille Clients</p>
+                        <h3 class="text-3xl font-black">24</h3>
+                    </div>
+                    <div class="glass-card p-6">
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Boutiques Actives</p>
+                        <h3 class="text-3xl font-black">08</h3>
+                    </div>
+                    <div class="glass-card p-6">
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Commissions estimées</p>
+                        <h3 class="text-3xl font-black">450$</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste Clients -->
+            <div id="section-clients" class="hidden glass-card overflow-hidden">
+                <div class="p-6 border-b border-gray-100"><h3 class="font-black uppercase">Apporteurs d'Affaires : Mes Clients</h3></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left"><thead class="bg-gray-50 text-gray-400 text-[10px] uppercase font-black tracking-widest">
+                        <tr><th class="px-6 py-4">Nom</th><th class="px-6 py-4">Email</th><th class="px-6 py-4">Status</th></tr>
+                    </thead><tbody id="clients-list-body" class="divide-y divide-gray-100"></tbody></table>
+                </div>
+            </div>
+
+            <!-- Liste Boutiques -->
+            <div id="section-shops" class="hidden glass-card overflow-hidden">
+                <div class="p-6 border-b border-gray-100"><h3 class="font-black uppercase">Gestion de Réseau : Boutiques</h3></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left"><thead class="bg-gray-50 text-gray-400 text-[10px] uppercase font-black tracking-widest">
+                        <tr><th class="px-6 py-4">Boutique</th><th class="px-6 py-4">Gérant</th><th class="px-6 py-4">Actions</th></tr>
+                    </thead><tbody id="shops-list-body" class="divide-y divide-gray-100"></tbody></table>
+                </div>
+            </div>
+
+            <!-- Support Tech -->
+            <div id="section-tech" class="hidden glass-card p-8">
+                <h3 class="text-xl font-black uppercase mb-6">Assistance Technique de Réseau</h3>
+                <form class="space-y-4" onsubmit="sendTechSupport(event)">
+                    <select id="tech-target" class="w-full p-4 bg-gray-50 rounded-xl border-none ring-1 ring-gray-200"></select>
+                    <textarea id="tech-msg" placeholder="Décrivez le problème technique de votre partenaire..." class="w-full p-4 bg-gray-50 rounded-xl h-32"></textarea>
+                    <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs">Signaler au Support central</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Discount -->
+    <div id="discount-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-md p-8 relative">
+            <button onclick="closeDiscountModal()" class="absolute top-4 right-4 text-gray-400"><i class="fas fa-times"></i></button>
+            <h3 class="text-xl font-black uppercase mb-6">Appliquer une Remise de Réseau</h3>
+            <p id="discount-shop-name" class="text-sm font-bold text-yellow-600 mb-4"></p>
+            <input type="number" id="discount-val" placeholder="Pourcentage (%)" class="w-full p-4 bg-gray-50 rounded-xl border-none ring-1 ring-gray-200 mb-6">
+            <button onclick="saveDiscount()" class="w-full btn-action py-4 uppercase tracking-widest text-xs">Appliquer le Discount</button>
+        </div>
+    </div>
+
+    <!-- Accès Agent Commercial -->
+    <div id="access-overlay" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
+        <div class="glass-card w-full max-w-md p-8">
+            <h3 class="text-2xl font-black uppercase mb-3">Espace Agent Commercial</h3>
+            <p class="text-sm text-gray-500 mb-6">Entrez votre code d'accès pour accéder à votre tableau de bord.</p>
+            <form onsubmit="checkAccessCode(event)" class="space-y-4">
+                <input id="access-code" type="password" placeholder="Code d'accès" class="w-full p-4 rounded-2xl border border-gray-200 bg-gray-50 text-black focus:ring-2 focus:ring-yellow-400" />
+                <p id="access-error" class="text-sm text-red-600 min-h-[1rem]"></p>
+                <button type="submit" class="btn-action w-full py-4 uppercase tracking-widest text-xs">Valider le code</button>
+            </form>
+            <p class="text-[10px] text-gray-500 mt-4">Code d'accès&nbsp;: <span class="font-black">admin2026</span></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const agentName = localStorage.getItem('lg_user_name') || 'Agent';
+        document.getElementById('agent-name').innerText = agentName;
+
+        function showSection(id) {
+            ['overview', 'clients', 'shops', 'tech'].forEach(s => {
+                document.getElementById('section-' + s).classList.add('hidden');
+                document.getElementById('nav-' + s).classList.remove('active');
+            });
+            document.getElementById('section-' + id).classList.remove('hidden');
+            document.getElementById('nav-' + id).classList.add('active');
+        }
+
+        async function loadData() {
+            const shops = await readData("shops");
+            const shopsBody = document.getElementById('shops-list-body');
+            const clientsBody = document.getElementById('clients-list-body');
+            const techSelect = document.getElementById('tech-target');
+
+            shops.forEach(shop => {
+                const name = Array.isArray(shop) ? shop[0] : shop.shopName;
+                const owner = Array.isArray(shop) ? shop[1] : shop.owner;
+
+                shopsBody.innerHTML += `
+                    <tr class="hover:bg-gray-50"><td class="px-6 py-4 font-bold">${name}</td><td class="px-6 py-4 text-sm text-gray-500">${owner}</td>
+                    <td class="px-6 py-4 space-x-2">
+                        <button onclick="openDiscount('${name}')" class="text-yellow-600 font-bold">Discount</button>
+                        <button onclick="showSection('tech')" class="text-blue-600 font-bold">Support Tech</button>
+                    </td></tr>`;
+
+                clientsBody.innerHTML += `
+                    <tr class="hover:bg-gray-50"><td class="px-6 py-4 font-bold">${owner}</td><td class="px-6 py-4 text-sm text-gray-500">${Array.isArray(shop) ? shop[1] : shop.email}</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Actif</span></td></tr>`;
+                
+                techSelect.innerHTML += `<option value="${name}">${name} (${owner})</option>`;
+            });
+
+            if (shops.length > 0) {
+                const firstShop = shops[0];
+                const shopName = Array.isArray(firstShop) ? firstShop[0] : firstShop.shopName || 'Boutique';
+                const clientName = Array.isArray(firstShop) ? firstShop[1] : firstShop.owner || 'Client';
+                addNotification('Vente réalisée', `Votre client ${clientName} a généré une vente dans ${shopName}.`, 'À l’instant');
+            }
+        }
+
+        let target = '';
+        function openDiscount(name) {
+            target = name;
+            document.getElementById('discount-shop-name').innerText = "Cible : " + name;
+            document.getElementById('discount-modal').classList.remove('hidden');
+        }
+
+        function closeDiscountModal() { document.getElementById('discount-modal').classList.add('hidden'); }
+
+        function saveDiscount() {
+            const val = document.getElementById('discount-val').value;
+            alert(`Demande de remise de ${val}% pour ${target} envoyée au gérant.`);
+            closeDiscountModal();
+        }
+
+        function sendTechSupport(e) {
+            e.preventDefault();
+            const t = document.getElementById('tech-target').value;
+            const m = document.getElementById('tech-msg').value;
+            const wa = `*SUPPORT AGENT LEGRANDART*\n\nAgent: ${agentName}\nPartenaire: ${t}\nProblème: ${m}`;
+            window.open(`https://wa.me/243815022325?text=${encodeURIComponent(wa)}`, '_blank');
+        }
+
+        function addNotification(title, message, time) {
+            const list = document.getElementById('notification-list');
+            const count = document.getElementById('notification-count');
+            const item = document.createElement('div');
+            item.className = 'p-4 rounded-2xl border border-gray-200 bg-white';
+            item.innerHTML = `
+                <div class="flex justify-between items-start gap-4">
+                    <div>
+                        <p class="text-sm font-bold text-black">${title}</p>
+                        <p class="text-xs text-gray-500 mt-1">${message}</p>
+                    </div>
+                    <span class="text-[10px] uppercase tracking-widest text-gray-400">${time}</span>
+                </div>
+            `;
+            list.prepend(item);
+            const current = Number(count.innerText) || 0;
+            count.innerText = current + 1;
+            document.getElementById('notification-panel').classList.remove('hidden');
+        }
+
+        function clearNotifications() {
+            document.getElementById('notification-list').innerHTML = '';
+            document.getElementById('notification-count').innerText = '0';
+            document.getElementById('notification-panel').classList.add('hidden');
+        }
+
+        function toggleNotifications() {
+            const panel = document.getElementById('notification-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function showAccessOverlay() {
+            document.getElementById('access-overlay').classList.remove('hidden');
+        }
+
+        function hideAccessOverlay() {
+            document.getElementById('access-overlay').classList.add('hidden');
+        }
+
+        function checkAccessCode(e) {
+            e.preventDefault();
+            const code = document.getElementById('access-code').value.trim();
+            const error = document.getElementById('access-error');
+            if (code === 'admin2026') {
+                localStorage.setItem('agent_access_granted', 'true');
+                hideAccessOverlay();
+                loadData();
+            } else {
+                error.innerText = 'Code incorrect. Utilisez : admin2026';
+            }
+        }
+
+        function initAgentCommercial() {
+            const auth = localStorage.getItem('agent_access_granted');
+            if (auth === 'true') {
+                loadData();
+            } else {
+                showAccessOverlay();
+            }
+        }
+
+        window.onload = initAgentCommercial;
+    </script>
+</body>
+</html>
