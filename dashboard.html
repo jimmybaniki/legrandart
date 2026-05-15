@@ -65,7 +65,7 @@
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
-    <!-- Sidebar -->
+    <!-- SIDEBAR -->
     <aside class="sidebar flex flex-col p-6 text-white shrink-0">
         <div class="mb-10 px-2">
             <a href="index.html" class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></a>
@@ -87,7 +87,7 @@
         </div>
     </aside>
 
-    <!-- Main Area -->
+    <!-- MAIN CONTENT AREA -->
     <main class="main-content flex flex-col overflow-y-auto">
         <!-- Top Toolbar -->
         <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
@@ -113,139 +113,374 @@
             </div>
         </header>
 
-        <!-- Dashboard Content -->
         <div class="p-8 space-y-10">
-            <!-- Welcome Header -->
-            <div class="flex justify-between items-end">
-                <div>
-                    <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Bienvenue, <span id="dash-name-title">Gérant</span></h1>
-                    <p class="text-gray-500 text-sm font-medium">Dernière mise à jour : <span id="last-sync-time">À l'instant</span></p>
+            <!-- DASHBOARD SECTION -->
+            <section id="dashboard-section" class="section-content ">
+                <div class="flex justify-between items-end mb-10">
+                    <div>
+                        <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Bienvenue, <span id="dash-name-title">Gérant</span></h1>
+                        <p class="text-gray-500 text-sm font-medium">Dernière mise à jour : <span id="last-sync-time">À l'instant</span></p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button class="bg-white border border-gray-200 text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition">Exporter Rapport</button>
+                        <button onclick="showSection('produits'); toggleAddProductForm();" class="btn-bold bg-black text-white hover:bg-gray-800 flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                            <i class="fas fa-plus text-xs"></i> Nouveau Produit
+                        </button>
+                    </div>
                 </div>
-                <div class="flex gap-3">
-                    <button class="bg-white border border-gray-200 text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition">Exporter Rapport</button>
-                    <button onclick="window.location.href='produit.html'" class="btn-bold bg-black text-white hover:bg-gray-800 flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="stat-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center text-yellow-600">
+                                <i class="fas fa-shopping-bag text-xl"></i>
+                            </div>
+                            <span class="text-emerald-500 text-xs font-bold">+12% <i class="fas fa-arrow-up"></i></span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Commandes totales</p>
+                        <h3 class="text-3xl font-black text-black">12</h3>
+                    </div>
+                    <div class="stat-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                            <span class="text-blue-500 text-xs font-bold">Live</span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Produits en stock</p>
+                        <h3 class="text-3xl font-black text-black">34</h3>
+                    </div>
+                    <div class="stat-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center text-red-600">
+                                <i class="fas fa-exclamation-triangle text-xl"></i>
+                            </div>
+                            <span class="text-red-500 text-xs font-bold">Alerte</span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Bénéfice potentiel</p>
+                        <h3 class="text-3xl font-black text-black">05</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card mb-10">
+                    <h2 class="text-xl font-black text-black uppercase tracking-tighter mb-6">Performance des Ventes (7 derniers jours)</h2>
+                    <div class="h-64"><canvas id="salesChart"></canvas></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 table-container">
+                        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                            <h2 class="text-xl font-black text-black uppercase tracking-tighter">Dernières Transactions</h2>
+                            <button class="text-xs font-bold text-gray-500 hover:text-black uppercase tracking-widest">Voir tout</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50 text-gray-400">
+                                    <tr>
+                                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">ID</th>
+                                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Client</th>
+                                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Montant</th>
+                                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Statut</th>
+                                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-body" class="divide-y divide-gray-100">
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="px-6 py-4 text-sm font-bold text-black">#TRX001</td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">Alice Dupont</td>
+                                        <td class="px-6 py-4 text-sm font-black text-black">$120.00</td>
+                                        <td class="px-6 py-4 text-sm">
+                                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Terminé</span>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Aujourd'hui</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <h2 class="text-lg font-black text-black uppercase tracking-tighter mb-6">Activités Récentes</h2>
+                        <div class="space-y-6">
+                            <div class="flex gap-4">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0"><i class="fas fa-plus text-[10px]"></i></div>
+                                <div>
+                                    <p class="text-xs font-bold text-black">Produit ajouté</p>
+                                    <p class="text-[10px] text-gray-500">"Vase en céramique" a été créé.</p>
+                                    <p class="text-[9px] text-gray-400 mt-1 uppercase font-black">Il y a 10 min</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="produits-section" class="section-content hidden">
+                <div class="flex justify-between items-end mb-10">
+                    <div>
+                        <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Gestion des Produits</h1>
+                        <p class="text-gray-500 text-sm font-medium">Gérez tous vos produits et leur stock</p>
+                    </div>
+                    <button onclick="window.location.href='produit.html'" class="btn-bold bg-black text-white hover:bg-gray-800 flex items-center gap-2">
                         <i class="fas fa-plus text-xs"></i> Nouveau Produit
                     </button>
                 </div>
-            </div>
 
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="stat-card">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center text-yellow-600">
-                            <i class="fas fa-shopping-bag text-xl"></i>
-                        </div>
-                        <span class="text-emerald-500 text-xs font-bold">+12% <i class="fas fa-arrow-up"></i></span>
-                    </div>
-                    <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Commandes en attente</p>
-                    <h3 class="text-3xl font-black text-black">12</h3>
-                </div>
-
-                <div class="stat-card">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
-                            <i class="fas fa-users text-xl"></i>
-                        </div>
-                        <span class="text-blue-500 text-xs font-bold">Live</span>
-                    </div>
-                    <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Visiteurs en direct</p>
-                    <h3 class="text-3xl font-black text-black">34</h3>
-                </div>
-
-                <div class="stat-card">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center text-red-600">
-                            <i class="fas fa-exclamation-triangle text-xl"></i>
-                        </div>
-                        <span class="text-red-500 text-xs font-bold">Alerte</span>
-                    </div>
-                    <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Stocks bas</p>
-                    <h3 class="text-3xl font-black text-black">05</h3>
-                </div>
-            </div>
-
-            <!-- Sales Trend Chart -->
-            <div class="stat-card">
-                <h2 class="text-xl font-black text-black uppercase tracking-tighter mb-6">Performance des Ventes (7 derniers jours)</h2>
-                <div class="h-64">
-                    <canvas id="salesChart"></canvas>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Transactions Table -->
-                <div class="lg:col-span-2 table-container">
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Dernières Transactions</h2>
-                        <button class="text-xs font-bold text-gray-500 hover:text-black uppercase tracking-widest">Voir tout</button>
+                <div class="table-container">
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Mes Produits</h2>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-gray-50 text-gray-400">
-                                    <tr>
-                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">ID</th>
-                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Client</th>
-                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Montant</th>
-                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Statut</th>
-                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Date</th>
-                                    </tr>
-                                </thead>
-                            <tbody id="transactions-body" class="divide-y divide-gray-100">
-                                <!-- Rempli dynamiquement -->
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Nom</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Catégorie</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Prix</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Stock</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="products-table-body" class="divide-y divide-gray-100">
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 text-sm font-bold text-black">#TRX001</td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">Alice Dupont</td>
-                                    <td class="px-6 py-4 text-sm font-black text-black">$120.00</td>
-                                    <td class="px-6 py-4 text-sm">
-                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Terminé</span>
+                                    <td class="px-6 py-4 text-sm font-bold text-black">Peinture Abstraite</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Art</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-black">150€</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black">5</span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-500">Aujourd'hui</td>
+                                    <td class="px-6 py-4 text-sm space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800 font-bold">Modifier</button>
+                                        <button class="text-red-600 hover:text-red-800 font-bold">Supprimer</button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">Sculpture Moderne</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Sculpture</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-black">300€</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-black">2</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800 font-bold">Modifier</button>
+                                        <button class="text-red-600 hover:text-red-800 font-bold">Supprimer</button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-
-                <!-- Activity Feed -->
-                <div class="stat-card">
-                    <h2 class="text-lg font-black text-black uppercase tracking-tighter mb-6">Activités Récentes</h2>
-                    <div class="space-y-6">
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0"><i class="fas fa-plus text-[10px]"></i></div>
-                            <div>
-                                <p class="text-xs font-bold text-black">Produit ajouté</p>
-                                <p class="text-[10px] text-gray-500">"Vase en céramique" a été créé.</p>
-                                <p class="text-[9px] text-gray-400 mt-1 uppercase font-black">Il y a 10 min</p>
-                            </div>
+                <!-- Add product form (hidden by default) and history -->
+                <div id="product-add-form" class="hidden mt-6 p-6 bg-white rounded-2xl border border-gray-100">
+                    <form id="product-add-form-el">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <input id="add-product-name" placeholder="Nom du produit" class="p-3 border rounded-lg" />
+                            <input id="add-product-category" placeholder="Catégorie" class="p-3 border rounded-lg" />
+                            <input id="add-product-price" type="number" step="0.01" placeholder="Prix" class="p-3 border rounded-lg" />
+                            <input id="add-product-cost" type="number" step="0.01" placeholder="Coût" class="p-3 border rounded-lg" />
+                            <input id="add-product-stock" type="number" placeholder="Stock" class="p-3 border rounded-lg" />
+                            <input id="add-product-image" placeholder="URL image (optionnel)" class="p-3 border rounded-lg" />
                         </div>
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 shrink-0"><i class="fas fa-sync text-[10px]"></i></div>
-                            <div>
-                                <p class="text-xs font-bold text-black">Stock mis à jour</p>
-                                <p class="text-[10px] text-gray-500">Stock de "Peinture" : 5 -> 12.</p>
-                                <p class="text-[9px] text-gray-400 mt-1 uppercase font-black">Il y a 1h</p>
+                        <div class="mt-4 flex gap-2">
+                            <button type="button" onclick="(function(e){ addProduct({preventDefault:()=>{}}); })()" class="btn-bold">Ajouter</button>
+                            <button type="button" onclick="toggleAddProductForm()" class="px-4 py-2 rounded-lg border">Annuler</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="product-history-log" class="mt-6 text-sm text-gray-600"></div>
+            </section>
+
+            <section id="commandes-section" class="section-content hidden">
+                <div class="mb-10">
+                    <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Gestion des Commandes</h1>
+                    <p class="text-gray-500 text-sm font-medium">Suivi de toutes les commandes de votre boutique</p>
+                </div>
+
+                <div class="table-container">
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Commandes</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">ID</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Client</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Montant</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Statut</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Date</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body" class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">#CMD001</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Alice Dupont</td>
+                                    <td class="px-6 py-4 text-sm font-black text-black">$120.00</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Expédiée</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">2026-05-13</td>
+                                    <td class="px-6 py-4 text-sm space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800 font-bold">Détails</button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">#CMD002</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Bob Martin</td>
+                                    <td class="px-6 py-4 text-sm font-black text-black">$75.50</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-black uppercase">En attente</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">2026-05-12</td>
+                                    <td class="px-6 py-4 text-sm space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800 font-bold">Détails</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="clients-section" class="section-content hidden">
+                <div class="mb-10">
+                    <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Gestion des Clients</h1>
+                    <p class="text-gray-500 text-sm font-medium">Liste et suivi de vos clients</p>
+                </div>
+
+                <div class="table-container">
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Clients</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Nom</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Email</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Téléphone</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Commandes</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Total dépensé</th>
+                                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clients-table-body" class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">Alice Dupont</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">alice@email.com</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">+33 6 12 34 56 78</td>
+                                    <td class="px-6 py-4 text-sm font-black text-black">5</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-black">$600.00</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase">Actif</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 text-sm font-bold text-black">Bob Martin</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">bob@email.com</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">+33 6 98 76 54 32</td>
+                                    <td class="px-6 py-4 text-sm font-black text-black">3</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-black">$350.00</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase">Actif</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="parametres-section" class="section-content hidden">
+                <div class="mb-10">
+                    <h1 class="text-3xl font-black text-black uppercase tracking-tighter">Paramètres</h1>
+                    <p class="text-gray-500 text-sm font-medium">Configurez votre boutique et vos préférences</p>
+                </div>
+
+                <!-- Manager profile quick settings used by script -->
+                <div class="mb-6 p-4 bg-white rounded-2xl border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <img id="settings-profile-img" src="https://via.placeholder.com/80" alt="profile" class="w-20 h-20 rounded-full object-cover">
+                        <div>
+                            <h3 id="settings-name-display" class="text-lg font-bold">Gérant</h3>
+                            <p class="text-sm text-gray-500">Profil gérant</p>
+                            <div class="mt-2 flex gap-2">
+                                <button onclick="updateProfilePhoto()" class="px-3 py-1 border rounded">Changer Photo</button>
+                                <button onclick="editManagerName()" class="px-3 py-1 border rounded">Modifier Nom</button>
                             </div>
                         </div>
                     </div>
+                    <form id="settings-manager-form" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3" onsubmit="saveSettings(event)">
+                        <input id="set-mgr-name" placeholder="Nom gérant" class="p-2 border rounded" />
+                        <input id="set-mgr-phone" placeholder="Téléphone" class="p-2 border rounded" />
+                        <input id="set-mgr-address" placeholder="Adresse" class="p-2 border rounded" />
+                        <div class="md:col-span-3 mt-2">
+                            <button type="submit" class="btn-bold">Sauvegarder profil gérant</button>
+                        </div>
+                    </form>
                 </div>
-            </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="stat-card">
+                        <h3 class="text-lg font-bold text-black mb-4">Informations de la Boutique</h3>
+                        <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" placeholder="Nom de la boutique" value="Ma Boutique" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400">
+                            <input type="email" placeholder="Email" value="shop@email.com" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400">
+                            <textarea placeholder="Description" class="bg-gray-100 rounded-lg px-4 py-2 text-black border-none focus:ring-2 focus:ring-yellow-400 md:col-span-2" rows="4"></textarea>
+                            <button type="submit" class="btn-bold bg-black text-white col-span-1 md:col-span-2 hover:bg-gray-800">Sauvegarder</button>
+                        </form>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3 class="text-lg font-bold text-black mb-4">Sécurité</h3>
+                        <button class="btn-bold bg-red-600 text-white hover:bg-red-700 w-full">Changer le mot de passe</button>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
     <script src="app.js"></script>
     <script>
         // Authentication logic
+        // --- Data helpers & defaults (restore missing constants/utilities) ---
+        const SAMPLE_PRODUCTS = [
+            { id: 'prod1', name: 'Peinture Abstraite', category: 'Art', price: 150, cost: 80, stock: 5, img: 'https://via.placeholder.com/50', added: '2026-05-01' },
+            { id: 'prod2', name: 'Sculpture Moderne', category: 'Sculpture', price: 300, cost: 160, stock: 2, img: 'https://via.placeholder.com/50', added: '2026-04-28' }
+        ];
+
+        const SAMPLE_ORDERS = [
+            { id: '#CMD001', client: 'Alice Dupont', products: ['Peinture Abstraite'], amount: 120.00, status: 'Expédiée', date: '2026-05-13' },
+            { id: '#CMD002', client: 'Bob Martin', products: ['Sculpture Moderne'], amount: 75.5, status: 'En attente', date: '2026-05-12' }
+        ];
+
+        const SAMPLE_CLIENTS = [
+            { name: 'Alice Dupont', email: 'alice@email.com', phone: '+33 6 12 34 56 78', orders: 5, total: 600.00, coords: 'Gombe, Kinshasa', status: 'Actif' },
+            { name: 'Bob Martin', email: 'bob@email.com', phone: '+33 6 98 76 54 32', orders: 3, total: 350.00, coords: 'Matonge, Kinshasa', status: 'Actif' }
+        ];
+
+        function getDb(key, fallback) {
+            try { return JSON.parse(localStorage.getItem(key)) || JSON.parse(JSON.stringify(fallback)); } catch(e) { return JSON.parse(JSON.stringify(fallback)); }
+        }
+
+        function setDb(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function loadDefaults() {
+            if (!localStorage.getItem('mgr_products')) setDb('mgr_products', SAMPLE_PRODUCTS);
+            if (!localStorage.getItem('mgr_orders')) setDb('mgr_orders', SAMPLE_ORDERS);
+            if (!localStorage.getItem('mgr_clients')) setDb('mgr_clients', SAMPLE_CLIENTS);
+            if (!localStorage.getItem('mgr_product_history')) setDb('mgr_product_history', []);
+        }
         const sessionUser = localStorage.getItem('lg_user_name');
         if (sessionUser) {
             document.getElementById('dash-name-top').innerText = sessionUser;
             document.getElementById('dash-name-title').innerText = sessionUser;
         }
 
-        window.onload = () => {
-            document.getElementById('last-sync-time').innerText = new Date().toLocaleTimeString();
-            initSalesChart();
-        };
+        
 
         function initSalesChart() {
             const ctx = document.getElementById('salesChart').getContext('2d');
@@ -270,7 +505,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: {
+                    scales: { // Corrected scales property
                         y: {
                             beginAtZero: true,
                             grid: { color: '#f1f5f9' },
@@ -284,13 +519,294 @@
                 }
             });
         }
+        
+        function updateDashboardStats() {
+            const products = getDb('mgr_products', SAMPLE_PRODUCTS);
+            const orders = getDb('mgr_orders', SAMPLE_ORDERS);
+            const clients = getDb('mgr_clients', SAMPLE_CLIENTS);
 
-        // Toggle theme
+            const totalOrders = orders.length;
+            const totalProducts = products.reduce((sum, p) => sum + p.stock, 0);
+            const totalPotentialProfit = products.reduce((sum, p) => sum + ((p.price - p.cost) * p.stock), 0);
+
+            document.querySelector('#dashboard-section .stat-card:nth-child(1) h3').innerText = totalOrders;
+            document.querySelector('#dashboard-section .stat-card:nth-child(2) h3').innerText = totalProducts;
+            document.querySelector('#dashboard-section .stat-card:nth-child(3) h3').innerText = `${totalPotentialProfit.toFixed(2)}€`;
+
+            const transactionsBody = document.getElementById('transactions-body');
+            transactionsBody.innerHTML = orders.slice(0, 5).map(o => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-sm font-bold text-black">${o.id}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${o.client}</td>
+                    <td class="px-6 py-4 text-sm font-black text-black">${o.amount.toFixed(2)}€</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="px-3 py-1 ${o.status === 'Expédiée' ? 'bg-green-100 text-green-700' : o.status === 'En attente' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'} rounded-full text-[10px] font-black uppercase">${o.status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${o.date}</td>
+                </tr>
+            `).join('');
+        }
+
+        // --- PRODUITS RENDERING ---
+        function renderProducts() {
+            const products = getDb('mgr_products', SAMPLE_PRODUCTS);
+            const tbody = document.getElementById('products-table-body');
+            const historyLog = document.getElementById('product-history-log');
+
+            tbody.innerHTML = products.map((p, index) => {
+                const profit = (p.price - p.cost) * p.stock;
+                return `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4"><img src="${p.img}" alt="${p.name}" class="w-10 h-10 object-cover rounded-md"></td>
+                        <td class="px-6 py-4 text-sm font-bold text-black">${p.name}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${p.category}</td>
+                        <td class="px-6 py-4 text-sm font-bold text-black">${p.price.toFixed(2)}€</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${p.cost.toFixed(2)}€</td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 ${p.stock > 5 ? 'bg-green-100 text-green-700' : p.stock > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'} rounded-full text-[10px] font-black">${p.stock}</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm font-black text-emerald-600">${profit.toFixed(2)}€</td>
+                        <td class="px-6 py-4 text-sm space-x-2">
+                            <button onclick="editProduct(${index})" class="text-blue-600 hover:text-blue-800 font-bold">Modifier</button>
+                            <button onclick="deleteProduct(${index})" class="text-red-600 hover:text-red-800 font-bold">Supprimer</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const productHistory = getDb('mgr_product_history', []);
+            historyLog.innerHTML = productHistory.slice(-5).reverse().map(entry => `
+                <div class="flex justify-between items-center border-b border-gray-50 pb-2">
+                    <span>${entry.action}: <strong>${entry.name}</strong></span>
+                    <span class="text-[10px] text-gray-400 uppercase font-bold">${entry.date}</span>
+                </div>
+            `).join('') || '<p>Aucune activité récente.</p>';
+        }
+
+        function addProduct(event) {
+            event.preventDefault();
+            const name = document.getElementById('add-product-name').value;
+            const category = document.getElementById('add-product-category').value;
+            const price = parseFloat(document.getElementById('add-product-price').value);
+            const cost = parseFloat(document.getElementById('add-product-cost').value);
+            const stock = parseInt(document.getElementById('add-product-stock').value);
+            const img = document.getElementById('add-product-image').value || 'https://via.placeholder.com/50';
+
+            const products = getDb('mgr_products', SAMPLE_PRODUCTS);
+            const newProduct = { id: `prod${products.length + 1}`, name, category, price, cost, stock, img, added: new Date().toISOString().split('T')[0] };
+            products.push(newProduct);
+            setDb('mgr_products', products);
+
+            const history = getDb('mgr_product_history', []);
+            history.push({ action: 'Ajout', name: newProduct.name, date: new Date().toLocaleDateString() });
+            setDb('mgr_product_history', history);
+
+            const pafel = document.getElementById('product-add-form-el');
+            if (pafel) pafel.reset();
+            toggleAddProductForm();
+            renderProducts();
+            updateDashboardStats();
+        }
+
+        function editProduct(index) {
+            alert(`Fonctionnalité d'édition du produit ${getDb('mgr_products', SAMPLE_PRODUCTS)[index].name} à implémenter.`);
+        }
+
+        function deleteProduct(index) {
+            if (!confirm('Voulez-vous vraiment supprimer ce produit ?')) return;
+            const products = getDb('mgr_products', SAMPLE_PRODUCTS);
+            const deletedProduct = products.splice(index, 1)[0];
+            setDb('mgr_products', products);
+            const history = getDb('mgr_product_history', []);
+            history.push({ action: 'Suppression', name: deletedProduct.name, date: new Date().toLocaleDateString() });
+            setDb('mgr_product_history', history);
+            renderProducts();
+            updateDashboardStats();
+        }
+
+        // --- COMMANDES RENDERING ---
+        function renderOrders() {
+            const orders = getDb('mgr_orders', SAMPLE_ORDERS);
+            const tbody = document.getElementById('orders-table-body');
+            tbody.innerHTML = orders.map((o, index) => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-sm font-bold text-black">${o.id}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${o.client}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${o.products.join(', ')}</td>
+                    <td class="px-6 py-4 text-sm font-black text-black">${o.amount.toFixed(2)}€</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="px-3 py-1 ${o.status === 'Expédiée' ? 'bg-green-100 text-green-700' : o.status === 'En attente' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'} rounded-full text-[10px] font-black uppercase">${o.status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${o.date}</td>
+                    <td class="px-6 py-4 text-sm space-x-2">
+                        <button onclick="confirmOrder(${index})" class="text-emerald-600 hover:text-emerald-800 font-bold">Confirmer</button>
+                        <button onclick="printInvoice(${index})" class="text-blue-600 hover:text-blue-800 font-bold">Facture</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function confirmOrder(index) {
+            const orders = getDb('mgr_orders', SAMPLE_ORDERS);
+            orders[index].status = 'Confirmée';
+            setDb('mgr_orders', orders);
+            renderOrders();
+            updateDashboardStats();
+            alert(`Commande ${orders[index].id} confirmée !`);
+        }
+
+        function printInvoice(index) {
+            const orders = getDb('mgr_orders', SAMPLE_ORDERS);
+            const order = orders[index];
+            const invoiceContent = `
+                <h1>Facture #${order.id}</h1>
+                <p>Client: ${order.client}</p>
+                <p>Date: ${order.date}</p>
+                <p>Produits: ${order.products.join(', ')}</p>
+                <p>Montant Total: ${order.amount.toFixed(2)}€</p>
+                <p>Statut: ${order.status}</p>
+                <p>Merci pour votre achat chez LeGrandArt !</p>
+            `;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(invoiceContent);
+            printWindow.print();
+            printWindow.close();
+        }
+
+        // --- CLIENTS RENDERING ---
+        function renderClients() {
+            const clients = getDb('mgr_clients', SAMPLE_CLIENTS);
+            const tbody = document.getElementById('clients-table-body');
+            const promoThreshold = 500; // Montant pour offrir promo/cadeau
+
+            tbody.innerHTML = clients.map((c, index) => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-sm font-bold text-black">${c.name}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${c.email}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${c.phone}</td>
+                    <td class="px-6 py-4 text-sm font-black text-black">${c.orders}</td>
+                    <td class="px-6 py-4 text-sm font-bold text-black">${c.total.toFixed(2)}€</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="px-3 py-1 ${c.total >= promoThreshold ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'} rounded-full text-[10px] font-black uppercase">
+                            ${c.total >= promoThreshold ? 'VIP' : c.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm space-x-2">
+                        <button onclick="showClientDetails(${index})" class="text-blue-600 hover:text-blue-800 font-bold">Détails</button>
+                        ${c.total >= promoThreshold ? '<span title="Éligible promo" class="ml-2 text-emerald-600"><i class="fas fa-gift"></i></span>' : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showClientDetails(index) {
+            const clients = getDb('mgr_clients', SAMPLE_CLIENTS);
+            const client = clients[index];
+            if (!client) return;
+            alert(`Détails Client:\nNom: ${client.name}\nEmail: ${client.email}\nTéléphone: ${client.phone}\nTotal dépensé: ${client.total.toFixed(2)}€\nCoordonnées: ${client.coords}\nStatut: ${client.status}`);
+        }
+
+        // --- PARAMETRES RENDERING ---
+        function renderSettings() {
+            document.getElementById('settings-profile-img').src = localStorage.getItem('lg_mgr_photo') || 'https://via.placeholder.com/100';
+            document.getElementById('settings-name-display').innerText = localStorage.getItem('lg_user_name') || 'Gérant';
+            document.getElementById('set-mgr-name').value = localStorage.getItem('lg_user_name') || '';
+            document.getElementById('set-mgr-phone').value = localStorage.getItem('lg_mgr_phone') || '';
+            document.getElementById('set-mgr-address').value = localStorage.getItem('lg_mgr_address') || '';
+        }
+
+        function saveSettings(event) {
+            event.preventDefault();
+            localStorage.setItem('lg_user_name', document.getElementById('set-mgr-name').value);
+            localStorage.setItem('lg_mgr_phone', document.getElementById('set-mgr-phone').value);
+            localStorage.setItem('lg_mgr_address', document.getElementById('set-mgr-address').value);
+            alert('Paramètres du profil gérant sauvegardés !');
+            renderSettings();
+            document.getElementById('dash-name-top').innerText = localStorage.getItem('lg_user_name');
+            document.getElementById('dash-name-title').innerText = localStorage.getItem('lg_user_name');
+        }
+
+        function updateProfilePhoto() {
+            const newPhotoUrl = prompt("Entrez l'URL de votre nouvelle photo de profil :");
+            if (newPhotoUrl) {
+                localStorage.setItem('lg_mgr_photo', newPhotoUrl);
+                renderSettings();
+                alert('Photo de profil mise à jour !');
+            }
+        }
+
+        // --- GENERAL UI FUNCTIONS ---
+        function editManagerName() {
+            const currentName = localStorage.getItem('lg_user_name') || 'Gérant';
+            const newName = prompt("Entrez votre nouveau nom :", currentName);
+            if (newName && newName.trim() !== "") {
+                const trimmedName = newName.trim();
+                localStorage.setItem('lg_user_name', trimmedName);
+                document.getElementById('dash-name-top').innerText = trimmedName;
+                document.getElementById('dash-name-title').innerText = trimmedName;
+                renderSettings(); // Update settings section if open
+            }
+        }
+
         function toggleTheme() {
             document.body.classList.toggle('light-theme');
             const theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
             localStorage.setItem('theme', theme);
         }
+
+        function showSection(sectionName) {
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            const selectedSection = document.getElementById(sectionName + '-section');
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+            const selectedLink = document.querySelector(`.nav-link[data-section="${sectionName}"]`);
+            if (selectedLink) {
+                selectedLink.classList.add('active');
+            }
+
+            // Render content for the selected section
+            if (sectionName === 'dashboard') updateDashboardStats();
+            if (sectionName === 'produits') renderProducts();
+            if (sectionName === 'commandes') renderOrders();
+            if (sectionName === 'clients') renderClients();
+            if (sectionName === 'parametres') renderSettings();
+
+            document.querySelector('.main-content').scrollTop = 0;
+        }
+
+        function toggleAddProductForm() {
+            const form = document.getElementById('add-product-form');
+            if (form) {
+                form.classList.toggle('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('lg_user_name');
+            localStorage.removeItem('lg_mgr_phone');
+            localStorage.removeItem('lg_mgr_address');
+            localStorage.removeItem('lg_mgr_photo');
+            window.location.href = 'index.html';
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            loadDefaults(); // Load or initialize static data
+            document.getElementById('last-sync-time').innerText = new Date().toLocaleTimeString();
+            initSalesChart();
+            showSection('dashboard'); // Show dashboard by default
+
+            // Attach event listener for adding product form
+            const paf = document.getElementById('product-add-form-el');
+            if (paf) paf.addEventListener('submit', function(e){ e.preventDefault(); addProduct(e); });
+        };
     </script>
 </body>
 </html>
