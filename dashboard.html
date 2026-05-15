@@ -33,8 +33,21 @@
             min-height: 100vh;
             transition: background 0.3s ease, color 0.3s ease;
         }
-        .sidebar { background: #000000; width: 260px; transition: all 0.3s; }
-        .main-content { background: #f1f5f9; flex: 1; }
+        .sidebar { 
+            background: #000000; 
+            width: 260px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            overflow-x: hidden;
+            flex-shrink: 0;
+        }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .logo-name, .sidebar.collapsed .nav-text, .sidebar.collapsed p { 
+            display: none; 
+        }
+        .sidebar.collapsed .nav-link { justify-content: center; padding: 0.75rem; }
+        .sidebar.collapsed .nav-link i { margin-right: 0; font-size: 1.25rem; }
+
+        .main-content { background: #f1f5f9; flex: 1; min-width: 0; }
         .stat-card { 
             background: white; 
             border-radius: 1.5rem; 
@@ -62,27 +75,46 @@
         }
         .nav-link:hover, .nav-link.active { background: #facc15; color: black; font-weight: bold; }
         .table-container { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; overflow: hidden; }
+
+        @media (max-width: 1024px) {
+            .sidebar { 
+                position: fixed; 
+                height: 100%; 
+                z-index: 100; 
+                left: -260px; 
+            }
+            .sidebar.open { left: 0; }
+            .sidebar-overlay { 
+                display: none; 
+                position: fixed; 
+                inset: 0; 
+                background: rgba(0,0,0,0.5); 
+                z-index: 90; 
+            }
+            .sidebar-overlay.show { display: block; }
+        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
     <!-- SIDEBAR -->
-    <aside class="sidebar flex flex-col p-6 text-white shrink-0">
+    <aside id="dashboard-sidebar" class="sidebar flex flex-col p-6 text-white collapsed">
         <div class="mb-10 px-2">
-            <a href="index.html" class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></a>
+            <a href="index.html" class="text-2xl font-black italic logo-name">LeGrand<span class="text-yellow-400">Art</span></a>
             <p class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Manager Pro</p>
         </div>
         
         <nav class="flex-1 space-y-2">
-            <a href="#" onclick="showSection('dashboard'); return false;" class="nav-link active" data-section="dashboard"><i class="fas fa-th-large w-5"></i> Dashboard</a>
-            <a href="#" onclick="showSection('produits'); return false;" class="nav-link" data-section="produits"><i class="fas fa-box w-5"></i> Produits</a>
-            <a href="#" onclick="showSection('commandes'); return false;" class="nav-link" data-section="commandes"><i class="fas fa-shopping-cart w-5"></i> Commandes</a>
-            <a href="#" onclick="showSection('clients'); return false;" class="nav-link" data-section="clients"><i class="fas fa-users w-5"></i> Clients</a>
-            <a href="#" onclick="showSection('parametres'); return false;" class="nav-link" data-section="parametres"><i class="fas fa-cog w-5"></i> Paramètres</a>
+            <a href="#" onclick="showSection('dashboard'); return false;" class="nav-link active" data-section="dashboard"><i class="fas fa-th-large w-5"></i> <span class="nav-text">Dashboard</span></a>
+            <a href="#" onclick="showSection('produits'); return false;" class="nav-link" data-section="produits"><i class="fas fa-box w-5"></i> <span class="nav-text">Produits</span></a>
+            <a href="#" onclick="showSection('commandes'); return false;" class="nav-link" data-section="commandes"><i class="fas fa-shopping-cart w-5"></i> <span class="nav-text">Commandes</span></a>
+            <a href="#" onclick="showSection('clients'); return false;" class="nav-link" data-section="clients"><i class="fas fa-users w-5"></i> <span class="nav-text">Clients</span></a>
+            <a href="#" onclick="showSection('parametres'); return false;" class="nav-link" data-section="parametres"><i class="fas fa-cog w-5"></i> <span class="nav-text">Paramètres</span></a>
         </nav>
 
         <div class="mt-auto border-t border-white/10 pt-6">
-            <button onclick="logout()" class="nav-link w-full text-red-400 hover:bg-red-500/10 hover:text-red-500">
-                <i class="fas fa-sign-out-alt w-5"></i> Déconnexion
+            <button onclick="logout()" class="nav-link w-full text-red-400 hover:bg-red-500/10 hover:text-red-500 flex items-center gap-4">
+                <i class="fas fa-sign-out-alt w-5"></i> <span class="nav-text">Déconnexion</span>
             </button>
         </div>
     </aside>
@@ -91,9 +123,14 @@
     <main class="main-content flex flex-col overflow-y-auto">
         <!-- Top Toolbar -->
         <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
-            <div class="relative w-96">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="text-gray-500 hover:text-black transition">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <div class="relative w-48 md:w-96">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                <input type="text" placeholder="Rechercher une transaction..." class="w-full bg-gray-100 border-none rounded-xl py-2 pl-12 pr-4 text-sm focus:ring-2 focus:ring-yellow-400 transition-all">
+                <input type="text" id="global-search" placeholder="Recherche rapide..." class="w-full bg-gray-100 border-none rounded-xl py-2 pl-12 pr-4 text-sm focus:ring-2 focus:ring-yellow-400 transition-all">
+                </div>
             </div>
             
             <div class="flex items-center gap-6">
@@ -102,7 +139,7 @@
                     <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                     <span class="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Boutique en ligne</span>
                 </div>
-                <div class="h-8 w-[1px] bg-gray-200"></div>
+                <div class="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
                 <div class="flex items-center gap-3">
                     <div class="text-right">
                         <p id="dash-name-top" class="text-sm font-bold text-black leading-none">Gérant</p>
@@ -226,8 +263,9 @@
                 </div>
 
                 <div class="table-container">
-                    <div class="p-6 border-b border-gray-100">
-                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Mes Produits</h2>
+                    <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter shrink-0">Mes Produits</h2>
+                        <input type="text" id="product-search" oninput="handleSearch('products', this.value)" placeholder="Filtrer les produits..." class="bg-gray-100 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-yellow-400 w-full md:w-64">
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
@@ -268,6 +306,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- Pagination Produits -->
+                    <div id="products-pagination" class="p-4 border-t border-gray-100 flex justify-between items-center text-sm font-bold text-gray-500"></div>
                 </div>
                 <!-- Add product form (hidden by default) and history -->
                 <div id="product-add-form" class="hidden mt-6 p-6 bg-white rounded-2xl border border-gray-100">
@@ -297,8 +337,9 @@
                 </div>
 
                 <div class="table-container">
-                    <div class="p-6 border-b border-gray-100">
-                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Commandes</h2>
+                    <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter shrink-0">Commandes</h2>
+                        <input type="text" id="order-search" oninput="handleSearch('orders', this.value)" placeholder="Filtrer les commandes..." class="bg-gray-100 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-yellow-400 w-full md:w-64">
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
@@ -340,6 +381,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- Pagination Commandes -->
+                    <div id="orders-pagination" class="p-4 border-t border-gray-100 flex justify-between items-center text-sm font-bold text-gray-500"></div>
                 </div>
             </section>
 
@@ -350,8 +393,9 @@
                 </div>
 
                 <div class="table-container">
-                    <div class="p-6 border-b border-gray-100">
-                        <h2 class="text-xl font-black text-black uppercase tracking-tighter">Clients</h2>
+                    <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <h2 class="text-xl font-black text-black uppercase tracking-tighter shrink-0">Clients</h2>
+                        <input type="text" id="client-search" oninput="handleSearch('clients', this.value)" placeholder="Filtrer les clients..." class="bg-gray-100 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-yellow-400 w-full md:w-64">
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
@@ -389,6 +433,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- Pagination Clients -->
+                    <div id="clients-pagination" class="p-4 border-t border-gray-100 flex justify-between items-center text-sm font-bold text-gray-500"></div>
                 </div>
             </section>
 
@@ -547,13 +593,54 @@
             `).join('');
         }
 
+        // --- Global state for Search & Pagination ---
+        const tableState = {
+            products: { query: '', page: 1, perPage: 5 },
+            orders: { query: '', page: 1, perPage: 5 },
+            clients: { query: '', page: 1, perPage: 5 }
+        };
+
+        function handleSearch(type, val) {
+            tableState[type].query = val.toLowerCase();
+            tableState[type].page = 1;
+            if (type === 'products') renderProducts();
+            if (type === 'orders') renderOrders();
+            if (type === 'clients') renderClients();
+        }
+
+        function changePage(type, delta) {
+            tableState[type].page += delta;
+            if (type === 'products') renderProducts();
+            if (type === 'orders') renderOrders();
+            if (type === 'clients') renderClients();
+        }
+
+        function renderPagination(type, totalItems, containerId) {
+            const { page, perPage } = tableState[type];
+            const totalPages = Math.ceil(totalItems / perPage) || 1;
+            const container = document.getElementById(containerId);
+            
+            container.innerHTML = `
+                <span>Page ${page} sur ${totalPages}</span>
+                <div class="flex gap-2">
+                    <button onclick="changePage('${type}', -1)" ${page === 1 ? 'disabled' : ''} class="px-3 py-1 border rounded disabled:opacity-30 hover:bg-gray-100 transition">Précédent</button>
+                    <button onclick="changePage('${type}', 1)" ${page === totalPages ? 'disabled' : ''} class="px-3 py-1 border rounded disabled:opacity-30 hover:bg-gray-100 transition">Suivant</button>
+                </div>
+            `;
+        }
+
         // --- PRODUITS RENDERING ---
         function renderProducts() {
             const products = getDb('mgr_products', SAMPLE_PRODUCTS);
             const tbody = document.getElementById('products-table-body');
             const historyLog = document.getElementById('product-history-log');
+            
+            const filtered = products.filter(p => p.name.toLowerCase().includes(tableState.products.query) || p.category.toLowerCase().includes(tableState.products.query));
+            const start = (tableState.products.page - 1) * tableState.products.perPage;
+            const paginated = filtered.slice(start, start + tableState.products.perPage);
 
-            tbody.innerHTML = products.map((p, index) => {
+            tbody.innerHTML = paginated.map((p) => {
+                const originalIndex = products.findIndex(item => item.id === p.id);
                 const profit = (p.price - p.cost) * p.stock;
                 return `
                     <tr class="hover:bg-gray-50 transition">
@@ -567,12 +654,14 @@
                         </td>
                         <td class="px-6 py-4 text-sm font-black text-emerald-600">${profit.toFixed(2)}€</td>
                         <td class="px-6 py-4 text-sm space-x-2">
-                            <button onclick="editProduct(${index})" class="text-blue-600 hover:text-blue-800 font-bold">Modifier</button>
-                            <button onclick="deleteProduct(${index})" class="text-red-600 hover:text-red-800 font-bold">Supprimer</button>
+                            <button onclick="editProduct(${originalIndex})" class="text-blue-600 hover:text-blue-800 font-bold"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteProduct(${originalIndex})" class="text-red-600 hover:text-red-800 font-bold"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             }).join('');
+            
+            renderPagination('products', filtered.length, 'products-pagination');
 
             const productHistory = getDb('mgr_product_history', []);
             historyLog.innerHTML = productHistory.slice(-5).reverse().map(entry => `
@@ -628,7 +717,14 @@
         function renderOrders() {
             const orders = getDb('mgr_orders', SAMPLE_ORDERS);
             const tbody = document.getElementById('orders-table-body');
-            tbody.innerHTML = orders.map((o, index) => `
+            
+            const filtered = orders.filter(o => o.client.toLowerCase().includes(tableState.orders.query) || o.id.toLowerCase().includes(tableState.orders.query));
+            const start = (tableState.orders.page - 1) * tableState.orders.perPage;
+            const paginated = filtered.slice(start, start + tableState.orders.perPage);
+
+            tbody.innerHTML = paginated.map((o) => {
+                const originalIndex = orders.findIndex(item => item.id === o.id);
+                return `
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 text-sm font-bold text-black">${o.id}</td>
                     <td class="px-6 py-4 text-sm text-gray-600">${o.client}</td>
@@ -639,11 +735,13 @@
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-500">${o.date}</td>
                     <td class="px-6 py-4 text-sm space-x-2">
-                        <button onclick="confirmOrder(${index})" class="text-emerald-600 hover:text-emerald-800 font-bold">Confirmer</button>
-                        <button onclick="printInvoice(${index})" class="text-blue-600 hover:text-blue-800 font-bold">Facture</button>
+                        <button onclick="confirmOrder(${originalIndex})" class="text-emerald-600 hover:text-emerald-800 font-bold">Confirmer</button>
+                        <button onclick="printInvoice(${originalIndex})" class="text-blue-600 hover:text-blue-800 font-bold">Facture</button>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
+
+            renderPagination('orders', filtered.length, 'orders-pagination');
         }
 
         function confirmOrder(index) {
@@ -679,7 +777,13 @@
             const tbody = document.getElementById('clients-table-body');
             const promoThreshold = 500; // Montant pour offrir promo/cadeau
 
-            tbody.innerHTML = clients.map((c, index) => `
+            const filtered = clients.filter(c => c.name.toLowerCase().includes(tableState.clients.query) || c.email.toLowerCase().includes(tableState.clients.query));
+            const start = (tableState.clients.page - 1) * tableState.clients.perPage;
+            const paginated = filtered.slice(start, start + tableState.clients.perPage);
+
+            tbody.innerHTML = paginated.map((c) => {
+                const originalIndex = clients.findIndex(item => item.email === c.email);
+                return `
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 text-sm font-bold text-black">${c.name}</td>
                     <td class="px-6 py-4 text-sm text-gray-600">${c.email}</td>
@@ -692,11 +796,13 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-sm space-x-2">
-                        <button onclick="showClientDetails(${index})" class="text-blue-600 hover:text-blue-800 font-bold">Détails</button>
+                        <button onclick="showClientDetails(${originalIndex})" class="text-blue-600 hover:text-blue-800 font-bold">Détails</button>
                         ${c.total >= promoThreshold ? '<span title="Éligible promo" class="ml-2 text-emerald-600"><i class="fas fa-gift"></i></span>' : ''}
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
+
+            renderPagination('clients', filtered.length, 'clients-pagination');
         }
 
         function showClientDetails(index) {
