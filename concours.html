@@ -340,6 +340,9 @@
                 <button onclick="downloadTicketAsJpg()" class="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-black py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs transition-all">
                     <i class="fas fa-camera"></i> Photo
                 </button>
+                <button onclick="shareTicketOnWhatsApp()" class="flex items-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs transition-all">
+                    <i class="fab fa-whatsapp"></i> Partager
+                </button>
                 <button onclick="window.print()" class="bg-yellow-500 hover:bg-yellow-400 text-black py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs">Imprimer</button>
                 <button onclick="document.getElementById('ticket-preview').classList.add('hidden')" class="border border-white/10 text-white py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white/10">Fermer</button>
             </div>
@@ -804,6 +807,37 @@
                 console.error("Erreur Photo:", err);
                 alert("Erreur lors de la génération de la photo.");
                 printArea.classList.add('hidden');
+            }
+        }
+
+        async function shareTicketOnWhatsApp() {
+            const element = document.getElementById('ticket-content');
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 3,
+                    useCORS: true,
+                    backgroundColor: '#0a0a0b',
+                    logging: false
+                });
+                
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+                const file = new File([blob], 'invitation-legrandart.jpg', { type: 'image/jpeg' });
+
+                // Vérifie si l'API de partage est disponible et accepte les fichiers
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Mon Invitation LeGrandArt',
+                        text: 'Voici mon invitation pour le concours Art, Foi & Racines 2026 !'
+                    });
+                } else {
+                    const message = encodeURIComponent("Voici mon invitation pour le concours LeGrandArt !");
+                    window.open(`https://wa.me/?text=${message}`, '_blank');
+                    alert("Le partage direct de fichiers n'est pas supporté par votre navigateur. L'image ne peut pas être jointe automatiquement, mais vous pouvez envoyer le message.");
+                }
+            } catch (err) {
+                console.error("Erreur Partage:", err);
+                alert("Erreur lors de la préparation du partage.");
             }
         }
     </script>
