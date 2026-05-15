@@ -11,8 +11,43 @@
             window.location.href = 'index.html';
         }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #ticket-preview, #ticket-preview * {
+            visibility: visible;
+        }
+        #ticket-preview {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            background: none; /* Remove modal background during print */
+            backdrop-filter: none;
+            display: block !important; /* Ensure it's visible */
+        }
+        #ticket-preview > div { /* The inner modal content */
+            width: auto;
+            max-width: none;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            margin: 0;
+            background: none;
+        }
+        #ticket-preview .flex.justify-between.items-center.mb-6, /* Header */
+        #ticket-preview .mt-6.flex.gap-4.flex-col.md\:flex-row.justify-center /* Buttons */
+        {
+            display: none !important;
+        }
+    }
+</style>
 <body class="bg-[#0a0a0b] text-white min-h-screen">
     <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/10">
         <div class="max-w-[1400px] mx-auto px-4 md:px-6 flex justify-between items-center h-20">
@@ -97,6 +132,12 @@
                     <p class="font-bold text-sm mb-6">Du 1er mai au 15 juin 2026</p>
                     <button onclick="toggleModal('submit-modal')" class="w-full bg-black text-white font-black py-4 rounded-xl uppercase text-xs tracking-widest hover:scale-105 transition">Participer maintenant</button>
                 </div>
+
+                <div class="bg-white/5 p-8 rounded-[2rem] border border-white/10 text-center">
+                    <h3 class="font-black text-lg uppercase mb-4">Espace Administrateur</h3>
+                    <p class="text-gray-300 text-sm mb-4">Accédez à la liste des inscriptions via un code sécurisé.</p>
+                    <button onclick="showAdminOverlay()" class="w-full bg-black text-white font-black py-4 rounded-xl uppercase text-xs tracking-widest hover:bg-gray-900 transition">Accès admin</button>
+                </div>
             </div>
         </section>
     </main>
@@ -174,43 +215,398 @@
 
     <!-- MODAL D'INSCRIPTION -->
     <div id="submit-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
-        <div class="bg-[#0a0a0b] border border-white/10 w-full max-w-4xl rounded-[3rem] p-8 md:p-12 overflow-y-auto max-h-[90vh]">
-            <div class="flex justify-between items-start mb-8">
-                <h3 class="text-3xl font-black uppercase">Inscription <span class="text-emerald-500 italic">Concours</span></h3>
-                <button onclick="toggleModal('submit-modal')" class="text-white hover:text-red-500 text-2xl">&times;</button>
+        <div class="bg-[#0a0a0b] border border-white/10 w-full max-w-5xl rounded-[3rem] p-6 md:p-10 overflow-y-auto max-h-[90vh]">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
+                <div>
+                    <h3 class="text-3xl font-black uppercase">Inscription <span class="text-emerald-500 italic">Concours</span></h3>
+                    <p class="text-gray-400 mt-3 text-sm max-w-2xl">Choisissez votre type d'inscription puis remplissez le formulaire adapté. Les tickets peuvent être imprimés après paiement.</p>
+                </div>
+                <button onclick="toggleModal('submit-modal')" class="text-white hover:text-red-500 text-3xl">&times;</button>
             </div>
-            <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <input type="text" id="contest-fullname" placeholder="Nom Complet" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-emerald-500">
-                <input type="email" id="contest-email" placeholder="Email" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-emerald-500">
-                <input type="tel" id="contest-phone" placeholder="Téléphone / WhatsApp" class="bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-emerald-500">
-                <select id="contest-category" class="bg-zinc-900 border border-white/10 rounded-2xl p-4 outline-none focus:border-emerald-500">
-                    <option value="" disabled selected>Choisir une catégorie</option>
-                    <option value="Peinture">Peinture</option>
-                    <option value="Photo">Photo</option>
-                    <option value="Vidéo">Vidéo</option>
-                </select>
-                <input type="text" id="contest-title" placeholder="Titre de l'Œuvre" class="col-span-full bg-white/5 border border-white/10 rounded-2xl p-4">
-                <textarea id="contest-desc" rows="4" placeholder="Description / Concept" class="col-span-full bg-white/5 border border-white/10 rounded-2xl p-4"></textarea>
-                <button type="button" onclick="sendContestToWhatsApp()" class="col-span-full bg-emerald-500 text-black font-black py-4 rounded-2xl uppercase tracking-widest">Envoyer mon Inscription</button>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <button type="button" id="tab-participant-btn" onclick="showContestTab('participant')" class="col-span-1 bg-white/10 text-white py-4 rounded-2xl font-black uppercase tracking-widest">Spectateur</button>
+                <button type="button" id="tab-artist-btn" onclick="showContestTab('artist')" class="col-span-1 bg-white/5 text-gray-300 py-4 rounded-2xl font-black uppercase tracking-widest">Artiste</button>
+                <button type="button" onclick="printTicketPreview()" class="col-span-1 bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest">Aperçu Ticket</button>
+            </div>
+
+            <div id="contest-tabs" class="space-y-8">
+                <div id="contest-tab-participant" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="participant-name" placeholder="Nom du Spectateur" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white" />
+                        <input type="email" id="participant-email" placeholder="Email" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white" />
+                        <input type="tel" id="participant-phone" placeholder="Téléphone / WhatsApp" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white" />
+                        <input type="text" id="participant-group" placeholder="Organisation / Groupe (facultatif)" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white" />
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <select id="participant-ticket-type" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white" onchange="updateParticipantTotal()">
+                            <option value="Standard" selected>Ticket Spectateur Standard - 15$</option>
+                            <option value="Premium">Ticket Spectateur Premium - 25$</option>
+                            <option value="VIP">Ticket VIP Premium - 40$</option>
+                        </select>
+                        <input type="number" id="participant-count" min="1" value="1" placeholder="Nombre de tickets" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white" oninput="updateParticipantTotal()" />
+                    </div>
+                    <textarea id="participant-note" rows="4" placeholder="Message ou précision" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white"></textarea>
+                    <div class="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col gap-4">
+                        <div class="flex items-center justify-between text-sm uppercase tracking-widest text-gray-300">
+                            <span>Ticket Spectateur</span>
+                            <span class="font-black" id="participant-ticket-label">15$ / ticket</span>
+                        </div>
+                        <div class="flex items-center justify-between text-white font-bold text-lg">
+                            <span>Total à payer</span>
+                            <span id="participant-total">0$</span>
+                        </div>
+                        <button type="button" onclick="payParticipantTicket()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest">S'enregistrer au concours</button>
+                        <button type="button" onclick="printTicket('participant')" class="w-full border border-yellow-500 text-yellow-500 py-4 rounded-2xl font-black uppercase tracking-widest">Imprimer Ticket Spectateur</button>
+                    </div>
+                </div>
+
+                <div id="contest-tab-artist" class="hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="artist-name" placeholder="Nom de l'Artiste" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white" />
+                        <input type="email" id="artist-email" placeholder="Email" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white" />
+                        <input type="tel" id="artist-phone" placeholder="Téléphone / WhatsApp" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white" />
+                        <select id="artist-category" class="bg-white/5 border border-white/10 rounded-2xl p-4 text-white">
+                            <option value="" disabled selected>Catégorie d'artiste</option>
+                            <option value="Peinture">Peinture</option>
+                            <option value="Photo">Photo</option>
+                            <option value="Vidéo">Vidéo</option>
+                            <option value="Musique">Musique</option>
+                            <option value="Danse">Danse</option>
+                            <option value="Art Digital">Art Digital</option>
+                        </select>
+                    </div>
+                    <textarea id="artist-bio" rows="4" placeholder="Bio courte ou message d’intention" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white"></textarea>
+                    <textarea id="artist-piece" rows="4" placeholder="Description de l'œuvre ou performance" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white"></textarea>
+                    <div class="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col gap-4">
+                        <div class="flex items-center justify-between text-sm uppercase tracking-widest text-gray-300">
+                            <span>Ticket artiste</span>
+                            <span class="font-black">10$</span>
+                        </div>
+                        <button type="button" onclick="payArtistTicket()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest">S'enregistrer au concours</button>
+                        <button type="button" onclick="printTicket('artist')" class="w-full border border-yellow-500 text-yellow-500 py-4 rounded-2xl font-black uppercase tracking-widest">Imprimer Ticket Artiste</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-overlay" class="fixed inset-0 z-[120] hidden items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
+        <div class="bg-[#0a0a0b] border border-white/10 w-full max-w-3xl rounded-[3rem] p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-3xl font-black uppercase">Espace Admin</h3>
+                <button onclick="hideAdminOverlay()" class="text-white hover:text-red-500 text-3xl">&times;</button>
+            </div>
+            <form onsubmit="checkAdminCode(event)" class="space-y-4 mb-6">
+                <input id="admin-code" type="password" placeholder="Code admin" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white" />
+                <p id="admin-error" class="text-sm text-red-500 min-h-[1rem]"></p>
+                <button type="submit" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest">Valider</button>
             </form>
+            <div id="admin-list" class="space-y-4 hidden">
+                <h4 class="text-xl font-black uppercase text-white mb-4">Liste des inscriptions</h4>
+                <div class="overflow-x-auto bg-white/5 border border-white/10 rounded-3xl p-4 max-h-96 overflow-y-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="border-b border-white/10 text-gray-400 uppercase tracking-widest">
+                            <tr><th class="p-3">Type</th><th class="p-3">Nom</th><th class="p-3">Email</th><th class="p-3">Téléphone</th><th class="p-3">Total</th></tr>
+                        </thead>
+                        <tbody id="admin-registrations" class="divide-y divide-white/10"></tbody>
+                    </table>
+                </div>
+                <p class="text-[10px] text-gray-500">Zone réservée pour script Google Sheets.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="ticket-preview" class="fixed inset-0 z-[130] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-3xl">
+        <div class="bg-[#0a0a0b] border border-white/10 w-full max-w-xl rounded-[3rem] p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black uppercase">Aperçu du Ticket</h3>
+                <button onclick="document.getElementById('ticket-preview').classList.add('hidden')" class="text-white text-3xl">&times;</button>
+            </div>
+            <div id="ticket-content" class="bg-white/5 rounded-3xl p-6 text-gray-100">
+                <!-- Le contenu du ticket sera injecté ici -->
+            </div>
+            <div class="mt-6 flex gap-3 justify-center items-center">
+                <button onclick="sendTicketByEmail()" class="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-black py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs transition-all">
+                    <i class="fas fa-envelope"></i> Email
+                </button>
+                <button onclick="downloadTicketAsPdf()" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+                <button onclick="window.print()" class="bg-yellow-500 hover:bg-yellow-400 text-black py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs">Imprimer</button>
+                <button onclick="document.getElementById('ticket-preview').classList.add('hidden')" class="border border-white/10 text-white py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white/10">Fermer</button>
+            </div>
         </div>
     </div>
 
     <script>
-        function toggleModal(id) { 
+        let lastEntry = null; // Stocke la dernière inscription pour l'envoi d'email
+
+        function toggleModal(id) {
             const el = document.getElementById(id);
-            if (el) el.classList.toggle('hidden'); 
+            if (el) el.classList.toggle('hidden');
         }
 
-        function sendContestToWhatsApp() {
-            const fullname = document.getElementById('contest-fullname').value;
-            const category = document.getElementById('contest-category').value;
-            const title = document.getElementById('contest-title').value;
-            
-            if(!fullname || !category || !title) { alert('Veuillez remplir les champs.'); return; }
-            
-            const message = `*INSCRIPTION CONCOURS*\n*Nom:* ${fullname}\n*Catégorie:* ${category}\n*Titre:* ${title}`;
-            window.open(`https://wa.me/243815022325?text=${encodeURIComponent(message)}`, '_blank');
+        function showContestTab(type) {
+            document.getElementById('contest-tab-participant').classList.toggle('hidden', type !== 'participant');
+            document.getElementById('contest-tab-artist').classList.toggle('hidden', type !== 'artist');
+            document.getElementById('tab-participant-btn').classList.toggle('bg-white/10', type !== 'participant');
+            document.getElementById('tab-participant-btn').classList.toggle('bg-white/5', type === 'participant');
+            document.getElementById('tab-artist-btn').classList.toggle('bg-white/10', type !== 'artist');
+            document.getElementById('tab-artist-btn').classList.toggle('bg-white/5', type === 'artist');
+        }
+        // Initialisation de l'onglet par défaut
+        showContestTab('participant', true);
+
+
+        function updateParticipantTotal() {
+            const count = Number(document.getElementById('participant-count').value) || 1;
+            const ticketType = document.getElementById('participant-ticket-type').value;
+            const price = ticketType === 'Premium' ? 25 : ticketType === 'VIP' ? 40 : 15;
+            document.getElementById('participant-ticket-label').innerText = `${price}$ / ticket`;
+            const total = price * Math.max(1, count);
+            document.getElementById('participant-total').innerText = `${total}$`;
+        } updateParticipantTotal(); // Appel initial pour afficher le total
+
+        function payParticipantTicket() {
+            const name = document.getElementById('participant-name').value;
+            const email = document.getElementById('participant-email').value;
+            const phone = document.getElementById('participant-phone').value;
+            const ticketType = document.getElementById('participant-ticket-type').value;
+            const count = Number(document.getElementById('participant-count').value) || 1;
+            const group = document.getElementById('participant-group').value;
+            const note = document.getElementById('participant-note').value;
+            const prices = { Standard: 15, Premium: 25, VIP: 40 };
+            const price = prices[ticketType] || 15;
+            const total = price * Math.max(1, count);
+            if (!name || !email || !phone || !ticketType) {
+                alert('Veuillez remplir tous les champs spectateur.');
+                return;
+            }
+            const registration = {
+                type: 'Participant',
+                name, email, phone,
+                ticketType,
+                group: group || '',
+                note: note || '',
+                total: `${total}$`,
+                quantity: count
+            };
+            lastEntry = registration;
+            saveRegistration(registration); // Enregistre l'inscription
+            printTicket('participant');
+        }
+
+        function payArtistTicket() {
+            const name = document.getElementById('artist-name').value;
+            const email = document.getElementById('artist-email').value;
+            const phone = document.getElementById('artist-phone').value;
+            const category = document.getElementById('artist-category').value;
+            const bio = document.getElementById('artist-bio').value;
+            const piece = document.getElementById('artist-piece').value;
+            if (!name || !email || !phone || !category || !bio || !piece) {
+                alert('Veuillez remplir tous les champs artiste.');
+                return;
+            }
+            const registration = {
+                type: 'Artiste',
+                name, email, phone, category, total: '10$', bio, piece
+            };
+            lastEntry = registration;
+            saveRegistration(registration); // Enregistre l'inscription
+            printTicket('artist');
+        }
+
+        function printTicketPreview() {
+            const activeParticipantTab = !document.getElementById('contest-tab-participant').classList.contains('hidden');
+            printTicket(activeParticipantTab ? 'participant' : 'artist');
+        }
+
+        function printTicket(type) {
+            // Générer un ID de ticket unique
+            const ticketId = 'LGA-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            const content = document.getElementById('ticket-content');
+            let html = '';
+            if (type === 'participant') {
+                const name = document.getElementById('participant-name').value;
+                const email = document.getElementById('participant-email').value;
+                const phone = document.getElementById('participant-phone').value;
+                const ticketType = document.getElementById('participant-ticket-type').value;
+                const count = Number(document.getElementById('participant-count').value) || 1;
+                const group = document.getElementById('participant-group').value;
+                const note = document.getElementById('participant-note').value;
+                const prices = { Standard: 15, Premium: 25, VIP: 40 };
+                const price = prices[ticketType] || 15;
+                const total = price * Math.max(1, count);
+
+                html = `
+                    <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-black p-8 rounded-3xl shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-black transform -rotate-12 scale-150"></div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-3xl font-black uppercase">LEGRAND<span class="text-black">ART</span></h2>
+                                <span class="text-sm font-bold uppercase tracking-widest">${ticketId}</span>
+                            </div>
+                            <div class="text-center mb-8">
+                                <p class="text-xs uppercase font-bold tracking-widest mb-2">Présente</p>
+                                <h3 class="text-4xl font-black uppercase leading-tight">Art, Foi & Racines</h3>
+                                <p class="text-sm uppercase font-bold tracking-widest mt-2">Concours Panafricain 2026</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm font-medium mb-8">
+                                <div>
+                                    <p class="uppercase text-xs text-gray-800">Type de Ticket</p>
+                                    <p class="font-bold text-lg">${ticketType} Spectateur</p>
+                                </div>
+                                <div>
+                                    <p class="uppercase text-xs text-gray-800">Participant</p>
+                                    <p class="font-bold text-lg">${name}</p>
+                                </div>
+                                <div>
+                                    <p class="uppercase text-xs text-gray-800">Date</p>
+                                    <p class="font-bold text-lg">1er Août 2026</p>
+                                </div>
+                                <div>
+                                    <p class="uppercase text-xs text-gray-800">Lieu</p>
+                                    <p class="font-bold text-lg">En ligne / Kinshasa</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${ticketId}" alt="QR Code" class="w-24 h-24 bg-white p-2 rounded-lg">
+                            </div>
+                        </div>
+                    </div>`;
+            } else {
+                const name = document.getElementById('artist-name').value;
+                const email = document.getElementById('artist-email').value;
+                const phone = document.getElementById('artist-phone').value;
+                const category = document.getElementById('artist-category').value;
+                const bio = document.getElementById('artist-bio').value;
+                const piece = document.getElementById('artist-piece').value;
+
+                html = `
+                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-black p-8 rounded-3xl shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-black transform -rotate-12 scale-150"></div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-3xl font-black uppercase">LEGRAND<span class="text-black">ART</span></h2>
+                                <span class="text-sm font-bold uppercase tracking-widest">${ticketId}</span>
+                            </div>
+                            <div class="text-center mb-8">
+                                <p class="text-xs uppercase font-bold tracking-widest mb-2">Présente</p>
+                                <h3 class="text-4xl font-black uppercase leading-tight">Art, Foi & <span class="italic">Racines</span></h3>
+                                <p class="text-sm uppercase font-bold tracking-widest mt-2">Concours Panafricain 2026</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm font-medium mb-8">
+                                <div>
+                                    <p class="uppercase text-xs text-gray-800">Type de Ticket</p>
+                                    <p class="font-bold text-lg">Artiste</p>
+                                </div>
+                                <div>
+                                    <p class="uppercase text-xs text-gray-800">Artiste</p>
+                                    <p class="font-bold text-lg">${name}</p>
+                                </div>
+                                <div>
+                                    <p class="uppercase text-xs text-gray-800">Catégorie</p>
+                                    <p class="font-bold text-lg">${category}</p>
+                                </div>
+                                <div>
+                                    <p class="uppercase text-xs text-gray-800">Date</p>
+                                    <p class="font-bold text-lg">1er Août 2026</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${ticketId}" alt="QR Code" class="w-24 h-24 bg-white p-2 rounded-lg">
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            content.innerHTML = html;
+            document.getElementById('ticket-preview').classList.remove('hidden');
+        }
+
+        const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbzca254x0YPsuVgQwd9bLmjiX3FkDdC3MwRzZCfM9JbjjTEDyNTR4-hc48L0HNN9EsLOQ/exec';
+        const registrations = [];
+
+        async function saveRegistration(entry) {
+            registrations.push(entry);
+            const params = new URLSearchParams();
+            params.set('action', 'save');
+            params.set('type', entry.type);
+            params.set('name', entry.name);
+            params.set('email', entry.email);
+            params.set('phone', entry.phone);
+            params.set('total', entry.total);
+            if (entry.type === 'Participant') {
+                params.set('ticketType', entry.ticketType);
+                params.set('quantity', entry.quantity);
+                params.set('group', entry.group || '');
+                params.set('note', entry.note || '');
+            } else {
+                params.set('bio', entry.bio || '');
+                params.set('piece', entry.piece || '');
+            }
+
+            try {
+                const response = await fetch(`${SHEET_API_URL}?${params.toString()}`);
+                const result = await response.json();
+                if (!response.ok || result.error) {
+                    console.warn('Enregistrement Google Sheets échoué:', result.error || response.statusText);
+                }
+            } catch (error) {
+                console.warn('Impossible de contacter Google Sheets:', error);
+            }
+        }
+
+        function showAdminOverlay() {
+            document.getElementById('admin-overlay').classList.remove('hidden');
+        }
+
+        function hideAdminOverlay() {
+            document.getElementById('admin-overlay').classList.add('hidden');
+        }
+
+        async function checkAdminCode(event) {
+            event.preventDefault();
+            const code = document.getElementById('admin-code').value.trim();
+            const error = document.getElementById('admin-error');
+            if (code === 'admin2026') {
+                error.innerText = '';
+                document.getElementById('admin-list').classList.remove('hidden');
+                await loadAdminRegistrations();
+            } else {
+                error.innerText = 'Code incorrect. Essayez admin2026.';
+            }
+        }
+
+        async function loadAdminRegistrations() {
+            const body = document.getElementById('admin-registrations');
+            body.innerHTML = '<tr><td class="p-3 text-gray-400" colspan="5">Chargement des inscriptions...</td></tr>';
+            try {
+                const response = await fetch(`${SHEET_API_URL}?action=read`);
+                const items = await response.json();
+                if (!Array.isArray(items)) {
+                    throw new Error('Réponse invalide');
+                }
+                registrations.length = 0;
+                items.forEach(item => registrations.push(item));
+                body.innerHTML = '';
+                registrations.forEach(reg => {
+                    body.innerHTML += `
+                        <tr>
+                            <td class="p-3">${reg.type || ''}</td>
+                            <td class="p-3">${reg.name || ''}</td>
+                            <td class="p-3">${reg.email || ''}</td>
+                            <td class="p-3">${reg.phone || ''}</td>
+                            <td class="p-3">${reg.total || ''}</td>
+                        </tr>`;
+                });
+                if (!registrations.length) {
+                    body.innerHTML = '<tr><td class="p-3 text-gray-400" colspan="5">Aucune inscription enregistrée pour l’instant.</td></tr>';
+                }
+            } catch (error) {
+                body.innerHTML = '<tr><td class="p-3 text-red-500" colspan="5">Impossible de charger les inscriptions.</td></tr>';
+                console.warn('Erreur admin Google Sheets:', error);
+            }
         }
     </script>
 </body>
