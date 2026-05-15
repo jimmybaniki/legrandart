@@ -12,15 +12,18 @@
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <style>
     @media print {
         body * {
-            visibility: hidden;
+            visibility: hidden !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
         #ticket-preview, #ticket-preview * {
-            visibility: visible;
+            visibility: visible !important;
         }
         #ticket-preview {
             position: absolute;
@@ -42,10 +45,17 @@
             background: none;
         }
         #ticket-preview .flex.justify-between.items-center.mb-6, /* Header */
-        #ticket-preview .mt-6.flex.gap-4.flex-col.md\:flex-row.justify-center /* Buttons */
+        #ticket-preview .mt-6.flex.gap-3.flex-wrap.justify-center.items-center /* Conteneur des boutons */
         {
             display: none !important;
         }
+    }
+    
+    /* Rendu des couleurs pour le PDF et l'écran */
+    .ticket-colored {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
     }
 </style>
 <body class="bg-[#0a0a0b] text-white min-h-screen">
@@ -297,22 +307,22 @@
                 <h3 class="text-3xl font-black uppercase">Espace Admin</h3>
                 <button onclick="hideAdminOverlay()" class="text-white hover:text-red-500 text-3xl">&times;</button>
             </div>
-            <form onsubmit="checkAdminCode(event)" class="space-y-4 mb-6">
+            <form id="admin-login-form" onsubmit="checkAdminCode(event)" class="space-y-4 mb-6">
                 <input id="admin-code" type="password" placeholder="Code admin" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white" />
                 <p id="admin-error" class="text-sm text-red-500 min-h-[1rem]"></p>
                 <button type="submit" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase tracking-widest">Valider</button>
             </form>
             <div id="admin-list" class="space-y-4 hidden">
+                <input id="admin-search" type="text" oninput="filterAdminRegistrations()" placeholder="Rechercher par nom ou email..." class="w-full mb-4 bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-yellow-500" />
                 <h4 class="text-xl font-black uppercase text-white mb-4">Liste des inscriptions</h4>
                 <div class="overflow-x-auto bg-white/5 border border-white/10 rounded-3xl p-4 max-h-96 overflow-y-auto">
                     <table class="w-full text-left text-xs text-gray-300">
                         <thead class="border-b border-white/10 text-gray-400 uppercase tracking-widest">
-                            <tr><th class="p-3">Type</th><th class="p-3">Nom</th><th class="p-3">Email</th><th class="p-3">Téléphone</th><th class="p-3">Total</th></tr>
+                            <tr><th class="p-3">Type</th><th class="p-3">Nom</th><th class="p-3">Email</th><th class="p-3">Téléphone</th><th class="p-3">Total</th><th class="p-3">Actions</th></tr>
                         </thead>
                         <tbody id="admin-registrations" class="divide-y divide-white/10"></tbody>
                     </table>
                 </div>
-                <p class="text-[10px] text-gray-500">Zone réservée pour script Google Sheets.</p>
             </div>
         </div>
     </div>
@@ -323,12 +333,12 @@
                 <h3 class="text-2xl font-black uppercase">Aperçu du Ticket</h3>
                 <button onclick="document.getElementById('ticket-preview').classList.add('hidden')" class="text-white text-3xl">&times;</button>
             </div>
-            <div id="ticket-content" class="bg-white/5 rounded-3xl p-6 text-gray-100">
+            <div id="ticket-content" class="bg-white/5 rounded-3xl p-6 text-gray-100 ticket-colored">
                 <!-- Le contenu du ticket sera injecté ici -->
             </div>
-            <div class="mt-6 flex gap-3 justify-center items-center">
-                <button onclick="sendTicketByEmail()" class="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-black py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs transition-all">
-                    <i class="fas fa-envelope"></i> Email
+            <div class="mt-6 flex gap-3 flex-wrap justify-center items-center">
+                <button onclick="downloadTicketAsJpg()" class="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-black py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs transition-all">
+                    <i class="fas fa-camera"></i> Photo
                 </button>
                 <button onclick="downloadTicketAsPdf()" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs">
                     <i class="fas fa-file-pdf"></i> PDF
@@ -337,9 +347,64 @@
                 <button onclick="document.getElementById('ticket-preview').classList.add('hidden')" class="border border-white/10 text-white py-2 px-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white/10">Fermer</button>
             </div>
         </div>
+        <div id="ticket-print-area" class="hidden"></div> <!-- Zone cachée pour l'impression PDF -->
+    </div>
+
+    <!-- MODAL ÉDITION INSCRIPTION -->
+    <div id="edit-registration-modal" class="fixed inset-0 z-[140] hidden items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
+        <div class="bg-[#0a0a0b] border border-white/10 w-full max-w-2xl rounded-[3rem] p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-black uppercase text-white">Modifier <span class="text-yellow-500">Inscription</span></h3>
+                <button onclick="closeEditRegistrationModal()" class="text-white hover:text-red-500 text-3xl">&times;</button>
+            </div>
+            <form id="edit-registration-form" class="grid gap-6">
+                <input type="hidden" id="edit-reg-index">
+                <input type="hidden" id="edit-reg-old-email">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2">Nom</label>
+                        <input type="text" id="edit-reg-name" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-yellow-500">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2">Email</label>
+                        <input type="email" id="edit-reg-email" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-yellow-500">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2">Téléphone</label>
+                        <input type="tel" id="edit-reg-phone" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-yellow-500">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2">Total</label>
+                        <input type="text" id="edit-reg-total" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-yellow-500">
+                    </div>
+                </div>
+                <button type="button" onclick="updateRegistration()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl uppercase tracking-widest mt-4">Enregistrer les modifications</button>
+            </form>
+        </div>
     </div>
 
     <script>
+        // URL unique et centralisée pour la base de données
+        const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxG9oNMlXhd8yrIMQ85i10WtesoZPhqYLTGch_rnRADw4Cjj0fQhA5q7Qu15wQEfHpK6Q/exec';
+
+        // Helper pour envoyer des requêtes POST à Google Sheets
+        async function sendToGoogleSheets(action, payload) {
+            try {
+                const response = await fetch(SHEET_API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Important pour Google Apps Script
+                    headers: {
+                        'Content-Type': 'text/plain' // Évite le preflight OPTIONS que GAS ne gère pas
+                    },
+                    body: JSON.stringify({ action, ...payload })
+                });
+                return { status: 'success' }; 
+            } catch (error) {
+                console.error("Erreur de communication avec Google Sheets:", error);
+                throw error;
+            }
+        }
+
         let lastEntry = null; // Stocke la dernière inscription pour l'envoi d'email
 
         function toggleModal(id) {
@@ -392,7 +457,7 @@
                 total: `${total}$`,
                 quantity: count
             };
-            lastEntry = registration;
+            lastEntry = registration; // Stocke la dernière inscription
             saveRegistration(registration); // Enregistre l'inscription
             printTicket('participant');
         }
@@ -412,7 +477,7 @@
                 type: 'Artiste',
                 name, email, phone, category, total: '10$', bio, piece
             };
-            lastEntry = registration;
+            lastEntry = registration; // Stocke la dernière inscription
             saveRegistration(registration); // Enregistre l'inscription
             printTicket('artist');
         }
@@ -438,10 +503,10 @@
                 const prices = { Standard: 15, Premium: 25, VIP: 40 };
                 const price = prices[ticketType] || 15;
                 const total = price * Math.max(1, count);
-
+                
                 html = `
-                    <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-black p-8 rounded-3xl shadow-xl relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-black transform -rotate-12 scale-150"></div>
+                    <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-black p-8 rounded-3xl shadow-xl relative overflow-hidden ticket-colored">
+                        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-black transform -rotate-12 scale-150 pointer-events-none"></div>
                         <div class="relative z-10">
                             <div class="flex justify-between items-center mb-6">
                                 <h2 class="text-3xl font-black uppercase">LEGRAND<span class="text-black">ART</span></h2>
@@ -471,7 +536,7 @@
                                 </div>
                             </div>
                             <div class="flex justify-center">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${ticketId}" alt="QR Code" class="w-24 h-24 bg-white p-2 rounded-lg">
+                                <img crossorigin="anonymous" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${ticketId}" alt="QR Code" class="w-24 h-24 bg-white p-2 rounded-lg">
                             </div>
                         </div>
                     </div>`;
@@ -484,8 +549,8 @@
                 const piece = document.getElementById('artist-piece').value;
 
                 html = `
-                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-black p-8 rounded-3xl shadow-xl relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-black transform -rotate-12 scale-150"></div>
+                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-black p-8 rounded-3xl shadow-xl relative overflow-hidden ticket-colored">
+                        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-black transform -rotate-12 scale-150 pointer-events-none"></div>
                         <div class="relative z-10">
                             <div class="flex justify-between items-center mb-6">
                                 <h2 class="text-3xl font-black uppercase">LEGRAND<span class="text-black">ART</span></h2>
@@ -515,7 +580,7 @@
                                 </div>
                             </div>
                             <div class="flex justify-center">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${ticketId}" alt="QR Code" class="w-24 h-24 bg-white p-2 rounded-lg">
+                                <img crossorigin="anonymous" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${ticketId}" alt="QR Code" class="w-24 h-24 bg-white p-2 rounded-lg">
                             </div>
                         </div>
                     </div>`;
@@ -524,45 +589,40 @@
             document.getElementById('ticket-preview').classList.remove('hidden');
         }
 
-        const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbzca254x0YPsuVgQwd9bLmjiX3FkDdC3MwRzZCfM9JbjjTEDyNTR4-hc48L0HNN9EsLOQ/exec';
-        const registrations = [];
-
         async function saveRegistration(entry) {
-            registrations.push(entry);
-            const params = new URLSearchParams();
-            params.set('action', 'save');
-            params.set('type', entry.type);
-            params.set('name', entry.name);
-            params.set('email', entry.email);
-            params.set('phone', entry.phone);
-            params.set('total', entry.total);
-            if (entry.type === 'Participant') {
-                params.set('ticketType', entry.ticketType);
-                params.set('quantity', entry.quantity);
-                params.set('group', entry.group || '');
-                params.set('note', entry.note || '');
-            } else {
-                params.set('bio', entry.bio || '');
-                params.set('piece', entry.piece || '');
+            const payload = {
+                type: entry.type,
+                name: entry.name,
+                email: entry.email,
+                phone: entry.phone,
+                total: entry.total,
+                ticketType: entry.ticketType || '',
+                quantity: entry.quantity || '',
+                group: entry.group || '',
+                note: entry.note || '',
+                category: entry.category || '',
+                bio: entry.bio || '',
+                piece: entry.piece || ''
             }
-
-            try {
-                const response = await fetch(`${SHEET_API_URL}?${params.toString()}`);
-                const result = await response.json();
-                if (!response.ok || result.error) {
-                    console.warn('Enregistrement Google Sheets échoué:', result.error || response.statusText);
-                }
-            } catch (error) {
-                console.warn('Impossible de contacter Google Sheets:', error);
-            }
+            const result = await sendToGoogleSheets('save', payload);
+            if (result.status === 'error') console.warn('Enregistrement Google Sheets échoué:', result.message);
         }
+
+        const registrations = [];
 
         function showAdminOverlay() {
             document.getElementById('admin-overlay').classList.remove('hidden');
+            document.getElementById('admin-overlay').classList.add('flex');
         }
 
         function hideAdminOverlay() {
             document.getElementById('admin-overlay').classList.add('hidden');
+            document.getElementById('admin-overlay').classList.remove('flex');
+            // Réinitialisation de l'état de sécurité
+            document.getElementById('admin-list').classList.add('hidden');
+            document.getElementById('admin-login-form').classList.remove('hidden');
+            document.getElementById('admin-code').value = '';
+            document.getElementById('admin-error').innerText = '';
         }
 
         async function checkAdminCode(event) {
@@ -571,6 +631,7 @@
             const error = document.getElementById('admin-error');
             if (code === 'admin2026') {
                 error.innerText = '';
+                document.getElementById('admin-login-form').classList.add('hidden');
                 document.getElementById('admin-list').classList.remove('hidden');
                 await loadAdminRegistrations();
             } else {
@@ -580,32 +641,172 @@
 
         async function loadAdminRegistrations() {
             const body = document.getElementById('admin-registrations');
-            body.innerHTML = '<tr><td class="p-3 text-gray-400" colspan="5">Chargement des inscriptions...</td></tr>';
-            try {
+            body.innerHTML = '<tr><td class="p-3 text-gray-400" colspan="6">Chargement des inscriptions...</td></tr>';
+            try { 
                 const response = await fetch(`${SHEET_API_URL}?action=read`);
                 const items = await response.json();
                 if (!Array.isArray(items)) {
+                    body.innerHTML = '<tr><td class="p-3 text-gray-400" colspan="6">Format de données invalide.</td></tr>';
                     throw new Error('Réponse invalide');
                 }
                 registrations.length = 0;
                 items.forEach(item => registrations.push(item));
-                body.innerHTML = '';
-                registrations.forEach(reg => {
-                    body.innerHTML += `
-                        <tr>
-                            <td class="p-3">${reg.type || ''}</td>
-                            <td class="p-3">${reg.name || ''}</td>
-                            <td class="p-3">${reg.email || ''}</td>
-                            <td class="p-3">${reg.phone || ''}</td>
-                            <td class="p-3">${reg.total || ''}</td>
-                        </tr>`;
-                });
-                if (!registrations.length) {
-                    body.innerHTML = '<tr><td class="p-3 text-gray-400" colspan="5">Aucune inscription enregistrée pour l’instant.</td></tr>';
-                }
+                renderAdminRegistrations(registrations);
             } catch (error) {
-                body.innerHTML = '<tr><td class="p-3 text-red-500" colspan="5">Impossible de charger les inscriptions.</td></tr>';
+                body.innerHTML = '<tr><td class="p-3 text-red-500" colspan="6">Impossible de charger les inscriptions.</td></tr>';
                 console.warn('Erreur admin Google Sheets:', error);
+            }
+        }
+
+        function renderAdminRegistrations(data) {
+            const body = document.getElementById('admin-registrations');
+            body.innerHTML = '';
+            data.forEach((reg) => {
+                const index = registrations.indexOf(reg);
+                body.innerHTML += `
+                    <tr>
+                        <td class="p-3">${reg.type || ''}</td>
+                        <td class="p-3">${reg.name || ''}</td>
+                        <td class="p-3">${reg.email || ''}</td>
+                        <td class="p-3">${reg.phone || ''}</td>
+                        <td class="p-3">${reg.total || ''}</td>
+                        <td class="p-3 space-x-3">
+                            <button onclick="openEditRegistrationModal(${index})" class="text-blue-400 hover:text-blue-300"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteRegistration('${reg.email}', ${index})" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+            if (!data.length) {
+                body.innerHTML = '<tr><td class="p-3 text-gray-400" colspan="6">Aucun résultat trouvé.</td></tr>';
+            }
+        }
+
+        function filterAdminRegistrations() {
+            const query = document.getElementById('admin-search').value.toLowerCase().trim();
+            const filtered = registrations.filter(reg => 
+                (reg.name || '').toLowerCase().includes(query) || 
+                (reg.email || '').toLowerCase().includes(query)
+            );
+            renderAdminRegistrations(filtered);
+        }
+
+        function openEditRegistrationModal(index) {
+            const reg = registrations[index];
+            if (!reg) return;
+            
+            document.getElementById('edit-reg-index').value = index;
+            document.getElementById('edit-reg-old-email').value = reg.email;
+            document.getElementById('edit-reg-name').value = reg.name || '';
+            document.getElementById('edit-reg-email').value = reg.email || '';
+            document.getElementById('edit-reg-phone').value = reg.phone || '';
+            document.getElementById('edit-reg-total').value = reg.total || '';
+            
+            document.getElementById('edit-registration-modal').classList.remove('hidden');
+            document.getElementById('edit-registration-modal').classList.add('flex');
+        }
+
+        function closeEditRegistrationModal() {
+            document.getElementById('edit-registration-modal').classList.add('hidden');
+            document.getElementById('edit-registration-modal').classList.remove('flex');
+        }
+
+        async function updateRegistration() {
+            const index = document.getElementById('edit-reg-index').value;
+            const oldEmail = document.getElementById('edit-reg-old-email').value;
+            const name = document.getElementById('edit-reg-name').value;
+            const email = document.getElementById('edit-reg-email').value;
+            const phone = document.getElementById('edit-reg-phone').value;
+            const total = document.getElementById('edit-reg-total').value;
+            const type = registrations[index].type;
+
+            const payload = {
+                rowIndex: parseInt(index) + 2,
+                oldEmail: oldEmail,
+                type: type,
+                name: name,
+                email: email,
+                phone: phone,
+                total: total
+            };
+
+            try {
+                const result = await sendToGoogleSheets('update', payload);
+                if (result.status === 'success') {
+                    alert('Modification envoyée ! (La mise à jour de la liste peut prendre quelques secondes)');
+                    closeEditRegistrationModal();
+                    setTimeout(loadAdminRegistrations, 1500);
+                } else {
+                    alert('Erreur lors de la modification.');
+                }
+            } catch (e) { alert("Erreur de connexion"); }
+        }
+
+        async function deleteRegistration(email, index) {
+            if (!confirm(`Voulez-vous vraiment supprimer l'inscription de ${email} ?`)) return;
+
+            try {
+                const result = await sendToGoogleSheets('delete', { rowIndex: parseInt(index) + 2 });
+                if (result.status === 'success') {
+                    alert('Suppression envoyée !');
+                    setTimeout(loadAdminRegistrations, 1500);
+                } else {
+                    alert('Erreur lors de la suppression.');
+                }
+            } catch (e) { alert("Erreur de connexion"); }
+        }
+
+        function downloadTicketAsPdf() {
+            const element = document.getElementById('ticket-content');
+            const printArea = document.getElementById('ticket-print-area');
+            printArea.innerHTML = element.outerHTML; // On utilise outerHTML pour capturer les classes de fond
+            printArea.classList.remove('hidden');
+
+            const opt = {
+                margin: [10, 10],
+                filename: 'ticket-legrandart.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 3, // Haute résolution pour les couleurs
+                    useCORS: true, 
+                    letterRendering: true,
+                    backgroundColor: '#0a0a0b'
+                },
+                jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(printArea.firstElementChild).save().then(() => {
+                printArea.classList.add('hidden');
+                printArea.innerHTML = '';
+            }).catch(err => {
+                console.error("Erreur PDF:", err);
+                alert("Erreur lors de la génération du PDF.");
+            });
+        }
+
+        function downloadTicketAsJpg() {
+            const element = document.getElementById('ticket-content');
+            const printArea = document.getElementById('ticket-print-area');
+            printArea.innerHTML = element.outerHTML;
+            printArea.classList.remove('hidden');
+
+            try {
+                html2canvas(printArea.firstElementChild, {
+                    scale: 3,
+                    useCORS: true,
+                    backgroundColor: '#0a0a0b',
+                    logging: false
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `invitation-legrandart-${Date.now()}.jpg`;
+                    link.href = canvas.toDataURL('image/jpeg', 0.95);
+                    link.click();
+                    printArea.classList.add('hidden');
+                    printArea.innerHTML = '';
+                });
+            } catch (err) {
+                console.error("Erreur Photo:", err);
+                alert("Erreur lors de la génération de la photo.");
+                printArea.classList.add('hidden');
             }
         }
     </script>
