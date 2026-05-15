@@ -102,36 +102,14 @@
                 </div>
 
                 <div>
-                    <h2 class="text-3xl font-black text-white mb-6 uppercase border-b border-white/10 pb-4">Communiqué Officiel de Lancement</h2>
+                    <h2 class="text-3xl font-black text-white mb-6 uppercase border-b border-white/10 pb-4">Lancement Officiel</h2>
                     <p class="text-gray-300 text-lg leading-relaxed">
                         LE GRAND ART annonce le lancement du concours panafricain « Art, Foi & Racines », une célébration artistique dédiée à l’héritage, la mémoire et la gratitude envers les ancêtres. Le concours sera diffusé durant le mois d’août, avec un point culminant le 1er août, Journée des Parents en RDC.
                     </p>
                 </div>
 
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-black text-white uppercase tracking-widest">Identité Visuelle & Slogans</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-4">
-                            <i class="fas fa-quote-left text-yellow-500 opacity-50"></i>
-                            <p class="text-yellow-500 font-bold italic text-sm">"Honorer nos racines, inspirer nos lendemains."</p>
-                        </div>
-                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-4">
-                            <i class="fas fa-quote-left text-yellow-500 opacity-50"></i>
-                            <p class="text-yellow-500 font-bold italic text-sm">"L’art comme mémoire vivante."</p>
-                        </div>
-                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-4">
-                            <i class="fas fa-quote-left text-yellow-500 opacity-50"></i>
-                            <p class="text-yellow-500 font-bold italic text-sm">"Nos ancêtres, nos forces, nos inspirations."</p>
-                        </div>
-                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-4">
-                            <i class="fas fa-quote-left text-yellow-500 opacity-50"></i>
-                            <p class="text-yellow-500 font-bold italic text-sm">"Art, Foi & Racines : un pont entre les générations."</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="bg-white/5 p-8 rounded-[2rem] border border-white/10">
-                    <h2 class="text-2xl font-black text-yellow-500 mb-6 uppercase">Règlement Intérieur</h2>
+                    <h2 class="text-2xl font-black text-yellow-500 mb-6 uppercase">Conditions d'inscription</h2>
                     <ul class="space-y-6 text-gray-300 text-sm md:text-base">
                         <li class="flex gap-4"><span class="text-yellow-500 font-black">01.</span> Le concours est ouvert à tout artiste sans distinction d’âge ou de nationalité.</li>
                         <li class="flex gap-4"><span class="text-yellow-500 font-black">02.</span> Chaque participant peut soumettre une seule œuvre originale.</li>
@@ -522,10 +500,10 @@
         }
 
         function printTicketPreview() {
-            const activeParticipantTab = !document.getElementById('contest-tab-participant').classList.contains('hidden');
-            printTicket(activeParticipantTab ? 'participant' : 'artist');
+            const isParticipantTabActive = !document.getElementById('contest-tab-participant').classList.contains('hidden');
+            printTicket(isParticipantTabActive ? 'participant' : 'artist');
         }
-
+        
         function printTicket(type) {
             // Générer un ID de ticket unique
             const ticketId = 'LGA-' + Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -880,21 +858,21 @@
             }
         }
 
-        let heroMuted = true;
-        function toggleHeroSound() {
+        // Recommencer la vidéo toutes les 38 secondes
+        setInterval(() => {
             const iframe = document.getElementById('hero-bg-video');
-            const icon = document.getElementById('hero-sound-icon');
-            heroMuted = !heroMuted;
+            if (iframe && iframe.contentWindow) {
+                // Commande de retour à 0 seconde (seek)
+                iframe.contentWindow.postMessage(JSON.stringify({ command: 'seek', parameters: [0] }), "*");
+            }
+        }, 38000);
 
-            // Communication avec le lecteur Dailymotion via postMessage
-            const command = heroMuted ? "mute" : "unmute";
-            iframe.contentWindow.postMessage(JSON.stringify({ 
-                command: command, 
-                parameters: [] 
-            }), "*");
-
-            icon.className = heroMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
-        }
+        // Initialisation de l'onglet par défaut
+        window.addEventListener('DOMContentLoaded', () => {
+            showContestTab('participant');
+            updateParticipantTotal(); // Appel initial pour afficher le total
+            startHeroMediaCycle(); // Démarrer le cycle média
+        });
     </script>
 </body>
 </html>
