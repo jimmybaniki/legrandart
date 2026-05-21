@@ -127,7 +127,7 @@
                 <button onclick="toggleSidebar()" class="text-gray-500 hover:text-black transition">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
-                <div class="relative w-48 md:w-96">
+                <div class="relative w-40 md:w-96">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
                 <input type="text" id="global-search" placeholder="Recherche rapide..." class="w-full bg-gray-100 border-none rounded-xl py-2 pl-12 pr-4 text-sm focus:ring-2 focus:ring-yellow-400 transition-all">
                 </div>
@@ -140,6 +140,10 @@
                     <span class="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Boutique en ligne</span>
                 </div>
                 <div class="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
+                <button onclick="viewAsCustomer()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition" title="Voir ma boutique en tant que client">
+                    <i class="fas fa-eye"></i> <span class="hidden md:inline">Mode Client</span>
+                </button>
+                <div class="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
                 <div class="flex items-center gap-3">
                     <div class="text-right">
                         <p id="dash-name-top" class="text-sm font-bold text-black leading-none">Gérant</p>
@@ -149,6 +153,22 @@
                 </div>
             </div>
         </header>
+
+        <!-- Navigation Dropdown for Mobile -->
+        <div class="lg:hidden px-8 py-3 bg-white border-b border-gray-200">
+            <div class="relative">
+                <select id="mobile-nav-select" onchange="showSection(this.value)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-black uppercase tracking-widest text-gray-700 outline-none focus:ring-2 focus:ring-yellow-400 appearance-none">
+                    <option value="dashboard">📊 Dashboard</option>
+                    <option value="produits">📦 Produits</option>
+                    <option value="commandes">🛒 Commandes</option>
+                    <option value="clients">👥 Clients</option>
+                    <option value="parametres">⚙️ Paramètres</option>
+                </select>
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+        </div>
 
         <div class="p-8 space-y-10">
             <!-- DASHBOARD SECTION -->
@@ -818,7 +838,11 @@
             document.getElementById('settings-name-display').innerText = localStorage.getItem('lg_user_name') || 'Gérant';
             document.getElementById('set-mgr-name').value = localStorage.getItem('lg_user_name') || '';
             document.getElementById('set-mgr-phone').value = localStorage.getItem('lg_mgr_phone') || '';
-            document.getElementById('set-mgr-address').value = localStorage.getItem('lg_mgr_address') || '';
+
+            // Charger les réglages de la vitrine "Ma Boutique"
+            document.getElementById('set-shop-hero-title').value = localStorage.getItem('lg_shop_hero_title') || "L'Élégance de l'Art dans votre Quotidien";
+            document.getElementById('set-shop-hero-desc').value = localStorage.getItem('lg_shop_hero_desc') || "Découvrez notre collection exclusive de pièces artisanales sélectionnées pour leur rareté et leur beauté intemporelle.";
+            document.getElementById('set-shop-history').value = localStorage.getItem('lg_shop_history') || "Nous sourçons les objets les plus exceptionnels pour les collectionneurs avertis et les amoureux du beau.";
         }
 
         function saveSettings(event) {
@@ -830,6 +854,18 @@
             renderSettings();
             document.getElementById('dash-name-top').innerText = localStorage.getItem('lg_user_name');
             document.getElementById('dash-name-title').innerText = localStorage.getItem('lg_user_name');
+        }
+
+        function saveShopDesign(event) {
+            event.preventDefault();
+            localStorage.setItem('lg_shop_hero_title', document.getElementById('set-shop-hero-title').value);
+            localStorage.setItem('lg_shop_hero_desc', document.getElementById('set-shop-hero-desc').value);
+            localStorage.setItem('lg_shop_history', document.getElementById('set-shop-history').value);
+            alert('Contenu de la boutique mis à jour avec succès !');
+        }
+
+        function viewAsCustomer() {
+            window.location.href = 'maboutique.html';
         }
 
         function updateProfilePhoto() {
@@ -876,6 +912,10 @@
             if (selectedLink) {
                 selectedLink.classList.add('active');
             }
+
+            // Mettre à jour la valeur du menu déroulant mobile s'il est visible
+            const mobileSelect = document.getElementById('mobile-nav-select');
+            if (mobileSelect) mobileSelect.value = sectionName;
 
             // Render content for the selected section
             if (sectionName === 'dashboard') updateDashboardStats();

@@ -115,7 +115,7 @@
                         <li class="flex gap-4"><span class="text-yellow-500 font-black">02.</span> Chaque participant peut soumettre une seule œuvre originale.</li>
                         <li class="flex gap-4"><span class="text-yellow-500 font-black">03.</span> Les catégories acceptées : peinture, photo, vidéo, poésie audio, musique, danse filmée, art digital.</li>
                         <li class="flex gap-4"><span class="text-yellow-500 font-black">04.</span> Les œuvres doivent obligatoirement traiter des thèmes : ancêtres, héritage, gratitude, foi, transmission.</li>
-                        <li class="flex gap-4"><span class="text-yellow-500 font-black">05.</span> Les œuvres doivent être téléchargées via LE GRAND ART entre le 1er mai et le 15 juin.</li>
+                        <li class="flex gap-4"><span class="text-yellow-500 font-black">05.</span> Les œuvres doivent être téléchargées via LE GRAND ART entre le 1er mai et le 30 juin.</li>
                         <li class="flex gap-4"><span class="text-yellow-500 font-black">06.</span> Les participants garantissent être détenteurs des droits de leurs œuvres.</li>
                         <li class="flex gap-4"><span class="text-yellow-500 font-black">07.</span> Les décisions du jury sont finales et sans appel.</li>
                     </ul>
@@ -125,16 +125,17 @@
             <div class="space-y-8">
                 <div class="bg-yellow-500 p-8 rounded-[2rem] text-black text-center">
                     <h3 class="font-black text-xl mb-4 uppercase">Inscriptions</h3>
-                    <p class="font-bold text-sm mb-6">Du 1er mai au 15 juin 2026</p>
+                    <p class="font-bold text-sm mb-6 uppercase">Inscription ouverte jusqu'au 30 juin 2026</p>
                     <button onclick="toggleModal('submit-modal')" class="w-full bg-black text-white font-black py-4 rounded-xl uppercase text-xs tracking-widest hover:scale-105 transition">Participer maintenant</button>
                 </div>
-
-                <div class="bg-white/5 p-8 rounded-[2rem] border border-white/10 text-center">
-                    <h3 class="font-black text-lg uppercase mb-4">Espace Administrateur</h3>
-                    <p class="text-gray-300 text-sm mb-4">Accédez à la liste des inscriptions via un code sécurisé.</p>
-                    <button onclick="showAdminOverlay()" class="w-full bg-black text-white font-black py-4 rounded-xl uppercase text-xs tracking-widest hover:bg-gray-900 transition">Accès admin</button>
-                </div>
             </div>
+        </section>
+
+        <!-- Espace Administrateur discret en bas de page -->
+        <section class="max-w-6xl mx-auto px-6 py-12 text-center">
+            <button onclick="showAdminOverlay()" class="text-gray-600 hover:text-white text-[10px] uppercase font-black tracking-[0.3em] transition-all">
+                <i class="fas fa-lock mr-2"></i> Accès Administration Concours
+            </button>
         </section>
     </main>
 
@@ -215,7 +216,7 @@
             <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
                 <div>
                     <h3 class="text-3xl font-black uppercase">Inscription <span class="text-emerald-500 italic">Concours</span></h3>
-                    <p class="text-gray-400 mt-3 text-sm max-w-2xl">Choisissez votre type d'inscription puis remplissez le formulaire adapté. Les tickets peuvent être imprimés après paiement.</p>
+                    <p class="text-gray-400 mt-3 text-sm max-w-2xl">Inscription ouverte jusqu'au 30 juin 2026. Choisissez votre type d'inscription puis remplissez le formulaire adapté.</p>
                 </div>
                 <button onclick="toggleModal('submit-modal')" class="text-white hover:text-red-500 text-3xl">&times;</button>
             </div>
