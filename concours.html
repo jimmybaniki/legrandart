@@ -73,7 +73,7 @@
     </header>
 
     <main class="pb-24">
-        <section class="relative h-[60vh] flex items-end p-8 md:p-24 overflow-hidden">
+        <section class="relative h-[80vh] flex items-end p-8 md:p-24 overflow-hidden">
             <img id="hero-bg-image" src="https://images.unsplash.com/photo-1523895665936-7bfe172b757d?auto=format&fit=crop&q=80&w=1920" class="absolute inset-0 w-full h-full object-cover opacity-50" alt="Hero Contest">
             <!-- Vidéo d'Arrière-plan Dailymotion -->
             <div id="hero-bg-video-wrapper" class="absolute inset-0 w-full h-full pointer-events-none opacity-40 hidden">
@@ -416,7 +416,7 @@
             const video = document.getElementById('hero-bg-video');
             const videoSrc = video.dataset.src; // Utilise data-src pour charger la vidéo
             const imageOnMs = 1000;
-            const videoOnMs = 48000;
+            const videoOnMs = 58000;
             let cycleTimer;
 
             function showImageThenVideo() {
@@ -866,7 +866,7 @@
                 // Commande de retour à 0 seconde (seek)
                 iframe.contentWindow.postMessage(JSON.stringify({ command: 'seek', parameters: [0] }), "*");
             }
-        }, 57000); // La vidéo est censée durer 57 secondes, donc on la redémarre à ce moment-là.
+        }, 58000); // La vidéo est censée durer 58 secondes, donc on la redémarre à ce moment-là.
 
         // Initialisation de l'onglet par défaut
         window.addEventListener('DOMContentLoaded', () => {
