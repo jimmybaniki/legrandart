@@ -78,8 +78,8 @@
             <!-- Vidéo d'Arrière-plan Dailymotion -->
             <div id="hero-bg-video-wrapper" class="absolute inset-0 w-full h-full pointer-events-none opacity-40 hidden">
                 <iframe id="hero-bg-video" 
-                    src="" 
-                    data-src="https://geo.dailymotion.com/player.html?video=xa9v7jm&autoplay=1&mute=1&controls=0&ui-start-screen-info=0&sharing-enable=0" 
+                    src=""
+                    data-src="https://geo.dailymotion.com/player.html?video=xaaht4i&autoplay=1&mute=1&controls=0&ui-start-screen-info=0&sharing-enable=0"
                     style="width:100%; height:100%; position:absolute; left:0px; top:0px; overflow:hidden; border:none;" 
                     allow="autoplay"></iframe>
             </div>
@@ -414,7 +414,7 @@
             const image = document.getElementById('hero-bg-image');
             const videoWrapper = document.getElementById('hero-bg-video-wrapper');
             const video = document.getElementById('hero-bg-video');
-            const videoSrc = video.dataset.src;
+            const videoSrc = video.dataset.src; // Utilise data-src pour charger la vidéo
             const imageOnMs = 1000;
             const videoOnMs = 48000;
             let cycleTimer;
@@ -426,7 +426,7 @@
 
                 setTimeout(() => {
                     image.classList.add('hidden');
-                    videoWrapper.classList.remove('hidden');
+                    videoWrapper.classList.remove('hidden'); // Affiche le conteneur de la vidéo
                     video.src = videoSrc;
                 }, imageOnMs);
             }
@@ -441,7 +441,7 @@
         }
 
         window.addEventListener('load', startHeroMediaCycle);
-
+        
         function updateParticipantTotal() {
             const count = Number(document.getElementById('participant-count').value) || 1;
             const ticketType = document.getElementById('participant-ticket-type').value;
@@ -860,13 +860,13 @@
         }
 
         // Recommencer la vidéo toutes les 38 secondes
-        setInterval(() => {
+        setInterval(() => { // Cette fonction est maintenant redondante avec le cycle image/vidéo
             const iframe = document.getElementById('hero-bg-video');
             if (iframe && iframe.contentWindow) {
                 // Commande de retour à 0 seconde (seek)
                 iframe.contentWindow.postMessage(JSON.stringify({ command: 'seek', parameters: [0] }), "*");
             }
-        }, 38000);
+        }, 57000); // La vidéo est censée durer 57 secondes, donc on la redémarre à ce moment-là.
 
         // Initialisation de l'onglet par défaut
         window.addEventListener('DOMContentLoaded', () => {
