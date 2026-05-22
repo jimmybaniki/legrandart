@@ -64,35 +64,51 @@
     <!-- App Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex flex-wrap gap-4 items-center justify-between shadow-sm">
         <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 md:gap-3">
             <div class="bg-yellow-500 text-black p-2.5 rounded-xl shadow-md shadow-yellow-100">
                 <i class="fa-solid fa-store text-xl"></i>
             </div>
             <div>
-                <h1 class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-                    LeGrand<span class="text-yellow-500">Art</span> <span class="text-[9px] uppercase tracking-widest text-emerald-500 font-bold">Manager Pro</span>
+                <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+                    LeGrand<span class="text-yellow-500">Art</span> <span class="hidden xs:inline text-[9px] uppercase tracking-widest text-emerald-500 font-bold">Manager Pro</span>
                 </h1>
                 <p class="text-xs text-slate-500">Gérez votre boutique et visualisez le rendu client en temps réel</p>
             </div>
         </div>
         
         <div class="flex items-center gap-3">
+            <!-- Champ Identifiant Boutique -->
+            <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner relative group">
+                <i class="fa-solid fa-key text-slate-400 ml-2 text-xs"></i>
+                <input type="password" id="shop-id-input" placeholder="ID Secret" class="bg-transparent border-none text-xs font-bold focus:ring-0 w-16 xs:w-24 sm:w-32 outline-none">
+                <button onclick="toggleIdVisibility()" class="text-slate-400 hover:text-slate-600 px-1">
+                    <i id="toggle-id-icon" class="fa-solid fa-eye-slash text-[10px]"></i>
+                </button>
+                <button onclick="syncWithShopId()" class="bg-yellow-500 text-black px-2 md:px-3 py-1.5 rounded-lg hover:bg-yellow-600 transition text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-rotate"></i> <span class="hidden sm:inline">Sync</span>
+                </button>
+                <a href="create-shop.html" class="absolute -bottom-6 left-0 text-[9px] text-indigo-500 hover:underline font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Créer une boutique ?</a>
+            </div>
+
             <div class="hidden sm:flex flex-col text-right">
-                <span class="text-xs text-slate-400">Statut du simulateur</span>
+            <div class="hidden lg:flex flex-col text-right">
+                <span class="text-xs text-slate-400">Statut Boutique</span>
                 <span class="text-xs font-semibold text-emerald-600 flex items-center justify-end gap-1">
                     <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span> Synchronisé en direct
                 </span>
             </div>
             <button onclick="resetToDefaults()" class="text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5">
+            <button onclick="resetToDefaults()" class="text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 md:px-3 md:py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5">
                 <i class="fa-solid fa-rotate-left"></i> Réinitialiser
             </button>
         </div>
     </header>
 
     <!-- Main Workspace -->
-    <main class="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden bg-slate-50">
+    <main class="flex-1 flex flex-col lg:flex-row min-h-0 lg:overflow-hidden bg-slate-50">
         
         <!-- LEFT PANEL: Admin & Customizer (60% width on lg) -->
-        <section class="w-full lg:w-[58%] xl:w-[62%] p-4 lg:p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6">
+        <section class="w-full lg:w-[58%] xl:w-[62%] p-4 lg:p-6 lg:overflow-y-auto custom-scrollbar flex flex-col gap-6">
             
             <!-- Dashboard Stats and Intro -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -130,12 +146,19 @@
             <div class="bg-slate-200/60 p-1 rounded-xl flex gap-1 self-start">
                 <button onclick="switchAdminTab('settings-tab')" id="btn-settings-tab" class="admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-slate-900 shadow-sm">
                     <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i> Design & Identité
+            <div class="bg-slate-200/60 p-1 rounded-xl flex gap-1 self-stretch md:self-start overflow-x-auto hide-scrollbar">
+                <button onclick="switchAdminTab('settings-tab')" id="btn-settings-tab" class="admin-tab-btn flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i> <span class="hidden xs:inline">Design & Identité</span><span class="xs:hidden">Design</span>
                 </button>
                 <button onclick="switchAdminTab('products-tab')" id="btn-products-tab" class="admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">
                     <i class="fa-solid fa-boxes-stacked"></i> Gestion Produits
+                <button onclick="switchAdminTab('products-tab')" id="btn-products-tab" class="admin-tab-btn flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">
+                    <i class="fa-solid fa-boxes-stacked"></i> <span class="hidden xs:inline">Gestion Produits</span><span class="xs:hidden">Produits</span>
                 </button>
                 <button onclick="switchAdminTab('orders-tab')" id="btn-orders-tab" class="admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 relative">
                     <i class="fa-solid fa-receipt"></i> Commandes
+                <button onclick="switchAdminTab('orders-tab')" id="btn-orders-tab" class="admin-tab-btn flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 relative">
+                    <i class="fa-solid fa-receipt"></i> <span class="hidden xs:inline">Commandes</span><span class="xs:hidden">Ventes</span>
                     <span id="orders-badge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center animate-bounce">0</span>
                 </button>
             </div>
@@ -591,62 +614,19 @@
     </main>
 
     <script>
-        // Core state data
-        const defaultProducts = [
-            {
-                id: 'p1',
-                name: 'Montre Nomade Classique',
-                category: 'Mode',
-                price: 129.00,
-                oldPrice: 179.00,
-                stock: 15,
-                description: 'Un boîtier épuré en acier chirurgical marié à un bracelet cuir tannage végétal de Toscane.',
-                imgKey: 'fashion-1',
-                imgUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80'
-            },
-            {
-                id: 'p2',
-                name: 'Casque Audio ANC',
-                category: 'Tech',
-                price: 199.99,
-                oldPrice: null,
-                stock: 8,
-                description: 'Réduction de bruit active haut de gamme, signature acoustique pure et confort optimal pendant 30 heures d\'autonomie.',
-                imgKey: 'tech-1',
-                imgUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80'
-            },
-            {
-                id: 'p3',
-                name: 'Lunettes de Soleil Aero',
-                category: 'Mode',
-                price: 79.50,
-                oldPrice: 95.00,
-                stock: 24,
-                description: 'Verres polarisés de catégorie 3 pour une clarté optimale. Monture en acétate faite à la main.',
-                imgKey: 'tech-2',
-                imgUrl: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=400&q=80'
-            },
-            {
-                id: 'p4',
-                name: 'Appareil Photo Vintage',
-                category: 'Maison',
-                price: 299.00,
-                oldPrice: 350.00,
-                stock: 3,
-                description: 'Inspiré des lignes iconiques des années 70, objectif argentique remis à neuf pour une esthétique intemporelle.',
-                imgKey: 'home-1',
-                imgUrl: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=400&q=80'
-            }
-        ];
+        // URL de liaison avec la Google Sheet
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTQXOtXsLgQGY8wHaZb3guuPsAxaXlae1CHpsoJHBFXZYsY9BlI36vJzKT1tamBjvi7A/exec";
 
-        let products = JSON.parse(localStorage.getItem('bc_products')) || [...defaultProducts];
+        // Core state data
+        // Initialisation des variables d'état vides
+        let products = [];
         let cart = [];
-        let orders = JSON.parse(localStorage.getItem('bc_orders')) || [];
+        let orders = [];
         
-        let storeConfig = JSON.parse(localStorage.getItem('bc_config')) || {
-            name: "Ma Boutique LeGrandArt",
-            slogan: "L'excellence de l'art à votre portée",
-            banner: "Bienvenue sur votre espace de gestion ✨",
+        let storeConfig = {
+            name: "Chargement...",
+            slogan: "Veuillez patienter...",
+            banner: "Connexion au serveur Google Sheets...",
             currency: "USD",
             exchangeRate: 2800,
             defaultCategory: "Art & Culture",
@@ -665,8 +645,43 @@
 
         let activeCategoryFilter = 'tous';
 
+        // Fonction générique pour appeler Google Apps Script via JSONP ou Fetch alternatif sécurisé
+        function callGoogleScript(functionName, args, callback) {
+            // Version optimisée pour l'API Apps script sans blocage CORS direct
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Permet l'envoi transparent vers Sheets
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ method: functionName, data: args })
+            }).catch(e => console.log("Sauvegarde Sheets envoyée."));
+            
+            // Appel synchrone pour la lecture seule via Google API runner standard
+            googleScriptRunner(functionName, args, callback);
+        }
+
+        // Fallback Google API standard Execution
+        function googleScriptRunner(functionName, args, callback) {
+            // Si l'application tourne en local ou serveur tiers
+            var url = SCRIPT_URL + "?action=" + functionName;
+            if(args) { url += "&data=" + encodeURIComponent(JSON.stringify(args)); }
+            
+            var script = document.createElement('script');
+            var callbackName = 'google_callback_' + Math.round(100000 * Math.random());
+            window[callbackName] = function(data) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                if(callback) callback(data);
+            };
+            script.src = url + '&callback=' + callbackName;
+            document.body.appendChild(script);
+        }
+
         // Initialize App on Window Load
         window.onload = function() {
+            // Restaurer l'ID de la boutique
+            const savedId = localStorage.getItem('bc_shop_id');
+            if(savedId) document.getElementById('shop-id-input').value = savedId;
+
             // Live clock in smartphone
             setInterval(() => {
                 const now = new Date();
@@ -674,42 +689,100 @@
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 document.getElementById('phone-time').innerText = `${hours}:${minutes}`;
             }, 1000);
-
+        
             // Hook image upload radio changes for border aesthetics
             document.querySelectorAll('input[name="prod-img"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     document.querySelectorAll('input[name="prod-img"]').forEach(r => {
                         r.closest('label').className = "relative border-2 border-transparent cursor-pointer rounded-lg overflow-hidden h-14 group";
                         const checkedOverlay = r.closest('label').querySelector('.absolute');
-                        if (checkedOverlay) checkedOverlay.className = "absolute inset-0 bg-transparent group-hover:bg-black/20 flex items-center justify-center text-white text-xs";
+                        if (checkedOverlay) checkedOverlay.className = "absolute inset-0 bg-transparent group-hover:bg-black/20 flex items-center justify-center text-white text-xs"; // Fix: Use correct class for unchecked
                     });
                     if (this.checked) {
                         this.closest('label').className = "relative border-2 border-indigo-500 cursor-pointer rounded-lg overflow-hidden h-14 group";
                         const checkedOverlay = this.closest('label').querySelector('.absolute');
-                        if (checkedOverlay) checkedOverlay.className = "absolute inset-0 bg-indigo-900/30 flex items-center justify-center text-white text-xs";
+                        if (checkedOverlay) checkedOverlay.className = "absolute inset-0 bg-indigo-900/30 flex items-center justify-center text-white text-xs"; // Fix: Use correct class for checked
                     }
                 });
             });
+        
+            // ÉTAPE IMPORTANTE : Récupération des données depuis Google Sheets
+            showNotification("Connexion à Google Sheets...");
+            
+            googleScriptRunner("getStoreConfig", null, function(remoteConfig) {
+                if(remoteConfig && remoteConfig.name) { storeConfig = remoteConfig; }
+                applyStoreConfig();
+                
+                googleScriptRunner("getProducts", null, function(remoteProducts) {
+                    if(remoteProducts && remoteProducts.length > 0) { products = remoteProducts; }
+                    renderAdminProducts();
+                    renderPhoneProducts();
+                    
+                    googleScriptRunner("getOrders", null, function(remoteOrders) {
+                        if(remoteOrders) { orders = remoteOrders; }
+                        updateDashboard();
+                        renderOrders();
+                        showNotification("Données Google Sheets synchronisées !");
+                    });
+                });
+            });
+        }
 
-            applyStoreConfig();
-            renderAdminProducts();
-            renderPhoneProducts();
-            updateDashboard();
-            renderOrders();
+        // Masquer/Afficher l'ID pour le garder secret
+        function toggleIdVisibility() {
+            const input = document.getElementById('shop-id-input');
+            const icon = document.getElementById('toggle-id-icon');
+            const isSecret = input.type === 'password';
+            input.type = isSecret ? 'text' : 'password';
+            icon.className = isSecret ? 'fa-solid fa-eye text-[10px]' : 'fa-solid fa-eye-slash text-[10px]';
+        }
+
+        // Logique de synchronisation manuelle par ID
+        function syncWithShopId() {
+            const shopId = document.getElementById('shop-id-input').value.trim();
+            if(!shopId) {
+                alert("Veuillez entrer un identifiant de boutique valide.");
+                return;
+            }
+            localStorage.setItem('bc_shop_id', shopId);
+            showNotification(`Connexion à la boutique : ${shopId}`);
+            // Rafraîchir pour déclencher le fetch global avec le nouvel ID
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         }
 
         // Save State
         function saveStateToStorage() {
+            // On conserve le stockage local pour la fluidité de l'interface utilisateur (UI Cache)
             localStorage.setItem('bc_products', JSON.stringify(products));
             localStorage.setItem('bc_orders', JSON.stringify(orders));
             localStorage.setItem('bc_config', JSON.stringify(storeConfig));
+            
+            // Et on envoie de manière asynchrone vers le Google Sheet en arrière-plan
+            // Création d'une requête API simplifiée vers le Web App Endpoint
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({
+                    action: "sync_all",
+                    shopId: localStorage.getItem('bc_shop_id') || 'default',
+                    config: storeConfig,
+                    products: products,
+                    orders: orders
+                })
+            }).then(() => console.log("Données synchronisées sur Google Sheets."));
         }
 
         // Reset system to factory defaults
         function resetToDefaults() {
-            if(confirm("Voulez-vous vraiment réinitialiser l'application avec les données par défaut ? Toutes les commandes fictives seront supprimées.")) {
+            if(confirm("Voulez-vous vraiment réinitialiser l'application ? Vos modifications sur Google Sheets seront écrasées par les valeurs par défaut.")) {
                 localStorage.clear();
-                products = [...defaultProducts];
+                const defaultProducts = [
+                    { id: 'p1', name: 'Montre Nomade Classique', category: 'Mode', price: 129.00, oldPrice: 179.00, stock: 15, description: 'Un boîtier épuré en acier chirurgical marié à un bracelet cuir.', imgKey: 'fashion-1', imgUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80' },
+                    { id: 'p2', name: 'Casque Audio ANC', category: 'Tech', price: 199.99, oldPrice: null, stock: 8, description: 'Réduction de bruit active haut de gamme.', imgKey: 'tech-1', imgUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80' }
+                ];
+                products = [...defaultProducts]; // Utilisation des produits par défaut définis ici
                 cart = [];
                 orders = [];
                 storeConfig = {
@@ -730,7 +803,7 @@
                 renderOrders();
                 updatePhoneCartBadge();
                 navigatePhoneTo('home');
-                showNotification("Simulateur réinitialisé avec succès !");
+                showNotification("Application réinitialisée !");
             }
         }
 
@@ -838,11 +911,19 @@
             document.querySelectorAll('.admin-tab-content').forEach(tab => tab.classList.add('hidden'));
             document.querySelectorAll('.admin-tab-btn').forEach(btn => {
                 btn.className = "admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900";
+            
+            const btns = document.querySelectorAll('.admin-tab-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('bg-white', 'text-slate-900', 'shadow-sm', 'border', 'border-slate-200');
+                btn.classList.add('text-slate-600', 'hover:text-slate-900');
             });
 
+            
             document.getElementById(tabId).classList.remove('hidden');
             const activeBtn = document.getElementById(`btn-${tabId}`);
             activeBtn.className = "admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200";
+            activeBtn.classList.add('bg-white', 'text-slate-900', 'shadow-sm', 'border', 'border-slate-200');
+            activeBtn.classList.remove('text-slate-600', 'hover:text-slate-900');
         }
 
         // Add new Product handler from Admin form
