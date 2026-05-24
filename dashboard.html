@@ -15,6 +15,9 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    screens: {
+                        'xs': '480px',
+                    },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
@@ -62,15 +65,14 @@
 <body class="font-sans antialiased text-slate-800 h-full flex flex-col">
 
     <!-- App Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex flex-wrap gap-4 items-center justify-between shadow-sm">
-        <div class="flex items-center gap-3">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex lg:flex-nowrap flex-wrap gap-4 items-center justify-between shadow-sm">
         <div class="flex items-center gap-2 md:gap-3">
             <div class="bg-yellow-500 text-black p-2.5 rounded-xl shadow-md shadow-yellow-100">
                 <i class="fa-solid fa-store text-xl"></i>
             </div>
             <div>
                 <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-                    LeGrand<span class="text-yellow-500">Art</span> <span class="hidden xs:inline text-[9px] uppercase tracking-widest text-emerald-500 font-bold">Manager Pro</span>
+                    LeGrand<span class="text-yellow-500">Art</span> <span class="hidden xs:inline text-[10px] uppercase tracking-widest text-emerald-500 font-bold">Manager Pro</span>
                 </h1>
                 <p class="text-xs text-slate-500">Gérez votre boutique et visualisez le rendu client en temps réel</p>
             </div>
@@ -80,7 +82,7 @@
             <!-- Champ Identifiant Boutique -->
             <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner relative group">
                 <i class="fa-solid fa-key text-slate-400 ml-2 text-xs"></i>
-                <input type="password" id="shop-id-input" placeholder="ID Secret" class="bg-transparent border-none text-xs font-bold focus:ring-0 w-16 xs:w-24 sm:w-32 outline-none">
+                <input type="password" id="shop-id-input" placeholder="ID Secret" class="bg-transparent border-none text-xs font-bold focus:ring-0 w-16 sm:w-32 outline-none">
                 <button onclick="toggleIdVisibility()" class="text-slate-400 hover:text-slate-600 px-1">
                     <i id="toggle-id-icon" class="fa-solid fa-eye-slash text-[10px]"></i>
                 </button>
@@ -90,14 +92,12 @@
                 <a href="create-shop.html" class="absolute -bottom-6 left-0 text-[9px] text-indigo-500 hover:underline font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Créer une boutique ?</a>
             </div>
 
-            <div class="hidden sm:flex flex-col text-right">
             <div class="hidden lg:flex flex-col text-right">
                 <span class="text-xs text-slate-400">Statut Boutique</span>
                 <span class="text-xs font-semibold text-emerald-600 flex items-center justify-end gap-1">
                     <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span> Synchronisé en direct
                 </span>
             </div>
-            <button onclick="resetToDefaults()" class="text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5">
             <button onclick="resetToDefaults()" class="text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 md:px-3 md:py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5">
                 <i class="fa-solid fa-rotate-left"></i> Réinitialiser
             </button>
@@ -108,14 +108,14 @@
     <main class="flex-1 flex flex-col lg:flex-row min-h-0 lg:overflow-hidden bg-slate-50">
         
         <!-- LEFT PANEL: Admin & Customizer (60% width on lg) -->
-        <section class="w-full lg:w-[58%] xl:w-[62%] p-4 lg:p-6 lg:overflow-y-auto custom-scrollbar flex flex-col gap-6">
+        <section class="w-full lg:w-[58%] xl:w-[62%] lg:shrink-0 p-4 lg:p-6 lg:overflow-y-scroll custom-scrollbar flex flex-col gap-6">
             
             <!-- Dashboard Stats and Intro -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ventes Totales</span>
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ventes Totales ($ / FC)</span>
                     <div class="flex items-baseline justify-between mt-2">
-                        <span id="dashboard-sales" class="text-2xl font-bold text-slate-900">0,00 €</span>
+                        <span id="dashboard-sales" class="text-lg md:text-2xl font-bold text-slate-900">0.00 $ / 0 FC</span>
                         <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded flex items-center gap-0.5"><i class="fa-solid fa-chart-line"></i> +100%</span>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                     <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Commandes</span>
                     <div class="flex items-baseline justify-between mt-2">
                         <span id="dashboard-orders-count" class="text-2xl font-bold text-slate-900">0</span>
-                        <span class="text-xs text-slate-500">Panier moyen: <span id="dashboard-avg-cart">0 €</span></span>
+                        <span class="text-xs text-slate-500">Moyenne: <span id="dashboard-avg-cart" class="font-bold">0.00 $ / 0 FC</span></span>
                     </div>
                 </div>
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -143,22 +143,15 @@
             </div>
 
             <!-- Tab Controls -->
-            <div class="bg-slate-200/60 p-1 rounded-xl flex gap-1 self-start">
-                <button onclick="switchAdminTab('settings-tab')" id="btn-settings-tab" class="admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-slate-900 shadow-sm">
+            <div class="bg-slate-50/95 backdrop-blur-md p-1 rounded-xl flex gap-1 self-stretch overflow-x-auto hide-scrollbar sticky top-[73px] lg:top-[-24px] lg:-mx-6 lg:px-6 lg:py-4 lg:rounded-none z-20 shadow-sm border-b border-slate-200/60">
+                <button onclick="switchAdminTab('settings-tab')" id="btn-settings-tab" class="admin-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200 whitespace-nowrap">
                     <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i> Design & Identité
-            <div class="bg-slate-200/60 p-1 rounded-xl flex gap-1 self-stretch md:self-start overflow-x-auto hide-scrollbar">
-                <button onclick="switchAdminTab('settings-tab')" id="btn-settings-tab" class="admin-tab-btn flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200">
-                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i> <span class="hidden xs:inline">Design & Identité</span><span class="xs:hidden">Design</span>
                 </button>
-                <button onclick="switchAdminTab('products-tab')" id="btn-products-tab" class="admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">
+                <button onclick="switchAdminTab('products-tab')" id="btn-products-tab" class="admin-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent whitespace-nowrap">
                     <i class="fa-solid fa-boxes-stacked"></i> Gestion Produits
-                <button onclick="switchAdminTab('products-tab')" id="btn-products-tab" class="admin-tab-btn flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">
-                    <i class="fa-solid fa-boxes-stacked"></i> <span class="hidden xs:inline">Gestion Produits</span><span class="xs:hidden">Produits</span>
                 </button>
-                <button onclick="switchAdminTab('orders-tab')" id="btn-orders-tab" class="admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 relative">
+                <button onclick="switchAdminTab('orders-tab')" id="btn-orders-tab" class="admin-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent relative whitespace-nowrap">
                     <i class="fa-solid fa-receipt"></i> Commandes
-                <button onclick="switchAdminTab('orders-tab')" id="btn-orders-tab" class="admin-tab-btn flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 relative">
-                    <i class="fa-solid fa-receipt"></i> <span class="hidden xs:inline">Commandes</span><span class="xs:hidden">Ventes</span>
                     <span id="orders-badge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center animate-bounce">0</span>
                 </button>
             </div>
@@ -364,8 +357,8 @@
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-base font-bold text-slate-900">Commandes Reçues</h3>
-                            <p class="text-xs text-slate-500">Flux d'achats en temps réel</p>
+                            <h3 class="text-lg md:text-xl font-extrabold text-slate-900">Commandes Reçues</h3>
+                            <p class="text-xs md:text-sm text-slate-500 font-medium">Flux d'achats en temps réel</p>
                         </div>
                         <button onclick="clearAllOrders()" class="text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1">
                             <i class="fa-solid fa-trash-can"></i> Tout effacer
@@ -381,11 +374,11 @@
         </section>
 
         <!-- RIGHT PANEL: Realistic Smartphone Simulator Frame (40% width on lg) -->
-        <section class="w-full lg:w-[42%] xl:w-[38%] p-4 lg:p-6 bg-slate-100 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200">
+        <section class="w-full lg:w-[42%] xl:w-[38%] lg:shrink-0 p-4 lg:p-6 bg-slate-100 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200">
             
             <div class="sticky top-6 flex flex-col items-center">
                 <!-- Device Container -->
-                <div class="relative w-[340px] h-[670px] bg-slate-900 rounded-[50px] shadow-phone border-[8px] border-slate-800 p-2.5 flex flex-col overflow-hidden ring-[6px] ring-slate-900/10">
+                <div id="phone-simulator" class="relative w-[340px] h-[670px] bg-slate-900 rounded-[50px] shadow-phone border-[8px] border-slate-800 p-2.5 flex flex-col overflow-hidden ring-[6px] ring-slate-900/10">
                     
                     <!-- Dynamic Island Notch Mockup -->
                     <div class="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-50 flex items-center justify-between px-3 text-white">
@@ -626,7 +619,7 @@
         let storeConfig = {
             name: "Chargement...",
             slogan: "Veuillez patienter...",
-            banner: "Connexion au serveur Google Sheets...",
+            banner: "Connexion à la base de données...",
             currency: "USD",
             exchangeRate: 2800,
             defaultCategory: "Art & Culture",
@@ -707,7 +700,7 @@
             });
         
             // ÉTAPE IMPORTANTE : Récupération des données depuis Google Sheets
-            showNotification("Connexion à Google Sheets...");
+            showNotification("Connexion à la base de données...");
             
             googleScriptRunner("getStoreConfig", null, function(remoteConfig) {
                 if(remoteConfig && remoteConfig.name) { storeConfig = remoteConfig; }
@@ -722,7 +715,7 @@
                         if(remoteOrders) { orders = remoteOrders; }
                         updateDashboard();
                         renderOrders();
-                        showNotification("Données Google Sheets synchronisées !");
+                        showNotification("Base de données synchronisée !");
                     });
                 });
             });
@@ -771,7 +764,7 @@
                     products: products,
                     orders: orders
                 })
-            }).then(() => console.log("Données synchronisées sur Google Sheets."));
+            }).then(() => console.log("Données synchronisées."));
         }
 
         // Reset system to factory defaults
@@ -818,36 +811,50 @@
         // Apply Design/Layout Config to Smartphone view
         function applyStoreConfig() {
             // Update admin inputs to sync
-            document.getElementById('config-store-name').value = storeConfig.name;
-            document.getElementById('config-store-slogan').value = storeConfig.slogan;
-            document.getElementById('config-banner-text').value = storeConfig.banner;
-            document.getElementById('config-exchange-rate').value = storeConfig.exchangeRate || 2800;
-            document.getElementById('config-default-cat').value = storeConfig.defaultCategory;
+            const nameInput = document.getElementById('config-store-name');
+            if(nameInput) nameInput.value = storeConfig.name;
+            const sloganInput = document.getElementById('config-store-slogan');
+            if(sloganInput) sloganInput.value = storeConfig.slogan;
+            const bannerInput = document.getElementById('config-banner-text');
+            if(bannerInput) bannerInput.value = storeConfig.banner;
+            const rateInput = document.getElementById('config-exchange-rate');
+            if(rateInput) rateInput.value = storeConfig.exchangeRate || 2800;
+            const catInput = document.getElementById('config-default-cat');
+            if(catInput) catInput.value = storeConfig.defaultCategory;
 
             // Update Phone Title & Slogan
-            document.getElementById('phone-hero-title').innerText = storeConfig.name;
-            document.getElementById('phone-hero-desc').innerText = storeConfig.slogan;
-            document.getElementById('phone-hero-subtitle').innerText = storeConfig.defaultCategory;
+            const pTitle = document.getElementById('phone-hero-title');
+            if(pTitle) pTitle.innerText = storeConfig.name;
+            const pDesc = document.getElementById('phone-hero-desc');
+            if(pDesc) pDesc.innerText = storeConfig.slogan;
+            const pSub = document.getElementById('phone-hero-subtitle');
+            if(pSub) pSub.innerText = storeConfig.defaultCategory;
 
             // Update Banner
             const banner = document.getElementById('phone-promo-banner');
-            if (storeConfig.banner.trim()) {
-                banner.innerText = storeConfig.banner;
-                banner.classList.remove('hidden');
-            } else {
-                banner.classList.add('hidden');
+            if (banner) {
+                if (storeConfig.banner && storeConfig.banner.trim()) {
+                    banner.innerText = storeConfig.banner;
+                    banner.classList.remove('hidden');
+                    banner.style.backgroundColor = storeConfig.themeColor;
+                } else {
+                    banner.classList.add('hidden');
+                }
             }
 
             // Apply global CSS variable for primary theme color
             document.documentElement.style.setProperty('--primary-rgb', storeConfig.themeRgb);
             
-            // Apply customized background gradients / colors
-            const elementsToStyle = document.querySelectorAll('.bg-indigo-600, .bg-indigo-900, .text-indigo-600, .border-indigo-600, .text-indigo-400');
+            // Important: Render products BEFORE color loop
+            renderPhoneProducts();
+
+            // Apply colors to simulator elements
+            const elementsToStyle = document.querySelectorAll('#phone-simulator .bg-indigo-600, #phone-simulator .bg-indigo-900, #phone-simulator .text-indigo-600, #phone-simulator .border-indigo-600, #phone-simulator .text-indigo-400');
             elementsToStyle.forEach(el => {
-                if(el.classList.contains('bg-indigo-600')) {
+                if(el.classList.contains('bg-indigo-600') || el.classList.contains('bg-indigo-900')) {
                     el.style.backgroundColor = storeConfig.themeColor;
                 }
-                if(el.classList.contains('text-indigo-600')) {
+                if(el.classList.contains('text-indigo-600') || el.classList.contains('text-indigo-400')) {
                     el.style.color = storeConfig.themeColor;
                 }
                 if(el.classList.contains('border-indigo-600')) {
@@ -868,14 +875,18 @@
             
             // Highlight current layout button
             const isGrid = storeConfig.layout === 'grid';
-            document.getElementById('btn-layout-grid').className = isGrid 
-                ? 'layout-btn py-2 px-3 text-xs font-semibold rounded-lg border-2 border-indigo-600 bg-indigo-50/50 flex items-center justify-center gap-1.5 text-indigo-700'
-                : 'layout-btn py-2 px-3 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-1.5 text-slate-600';
-            document.getElementById('btn-layout-list').className = !isGrid 
-                ? 'layout-btn py-2 px-3 text-xs font-semibold rounded-lg border-2 border-indigo-600 bg-indigo-50/50 flex items-center justify-center gap-1.5 text-indigo-700'
-                : 'layout-btn py-2 px-3 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-1.5 text-slate-600';
-
-            renderPhoneProducts();
+            const btnGrid = document.getElementById('btn-layout-grid');
+            const btnList = document.getElementById('btn-layout-list');
+            
+            if(btnGrid && btnList) {
+                btnGrid.style.borderColor = isGrid ? storeConfig.themeColor : '';
+                btnGrid.style.color = isGrid ? storeConfig.themeColor : '';
+                btnGrid.style.borderWidth = isGrid ? '2px' : '1px';
+                
+                btnList.style.borderColor = !isGrid ? storeConfig.themeColor : '';
+                btnList.style.color = !isGrid ? storeConfig.themeColor : '';
+                btnList.style.borderWidth = !isGrid ? '2px' : '1px';
+            }
         }
 
         // Update config based on input fields change
@@ -908,22 +919,24 @@
 
         // Admin Tabs switching control
         function switchAdminTab(tabId) {
+            // Hide all tab contents
             document.querySelectorAll('.admin-tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-                btn.className = "admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900";
             
-            const btns = document.querySelectorAll('.admin-tab-btn');
-            btns.forEach(btn => {
-                btn.classList.remove('bg-white', 'text-slate-900', 'shadow-sm', 'border', 'border-slate-200');
-                btn.classList.add('text-slate-600', 'hover:text-slate-900');
+            // Reset all buttons style
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-slate-900', 'shadow-sm', 'border-slate-200');
+                btn.classList.add('text-slate-600', 'hover:text-slate-900', 'border-transparent');
             });
 
-            
+            // Show targeted tab
             document.getElementById(tabId).classList.remove('hidden');
+            
+            // Set active style to clicked button
             const activeBtn = document.getElementById(`btn-${tabId}`);
-            activeBtn.className = "admin-tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200";
-            activeBtn.classList.add('bg-white', 'text-slate-900', 'shadow-sm', 'border', 'border-slate-200');
-            activeBtn.classList.remove('text-slate-600', 'hover:text-slate-900');
+            if(activeBtn) {
+                activeBtn.classList.add('bg-white', 'text-slate-900', 'shadow-sm', 'border-slate-200');
+                activeBtn.classList.remove('text-slate-600', 'hover:text-slate-900', 'border-transparent');
+            }
         }
 
         // Add new Product handler from Admin form
