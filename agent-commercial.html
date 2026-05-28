@@ -4,8 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Espace Agent Commercial - LeGrandArt</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
         .sidebar { background: #000000; width: 260px; transition: all 0.3s; }
@@ -15,138 +20,535 @@
         }
         .nav-link:hover, .nav-link.active { background: #facc15; color: black; font-weight: bold; }
         .glass-card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        .btn-action { background: #10b981; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; }
+        .btn-action { background: #10b981; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: 0.2s; }
         .btn-action:hover { background: #059669; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
     <aside class="sidebar flex flex-col p-6 text-white shrink-0">
         <div class="mb-10 px-2">
-            <a href="index.html" class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></a>
+            <a href="#" class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></a>
             <p class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Agent Commercial</p>
         </div>
         <nav class="flex-1 space-y-2">
             <a href="#" onclick="showSection('overview')" class="nav-link active" id="nav-overview"><i class="fas fa-chart-line w-5"></i> Vue d'ensemble</a>
-            <a href="#" onclick="showSection('clients')" class="nav-link" id="nav-clients"><i class="fas fa-users w-5"></i> Mes Clients</a>
+            <a href="#" onclick="showSection('clients')" class="nav-link" id="nav-clients"><i class="fas fa-users w-5"></i> Mes Clients (Gérants)</a>
             <a href="#" onclick="showSection('shops')" class="nav-link" id="nav-shops"><i class="fas fa-store w-5"></i> Boutiques Gérées</a>
             <a href="#" onclick="showSection('tech')" class="nav-link" id="nav-tech"><i class="fas fa-tools w-5"></i> Support Technique</a>
         </nav>
         <div class="mt-auto border-t border-white/10 pt-6">
-            <button onclick="logout()" class="nav-link w-full text-red-400 hover:bg-red-500/10 hover:text-red-500">
+            <div id="cloud-status" class="flex items-center gap-2 mb-4 px-2 text-[10px] uppercase tracking-widest font-bold text-yellow-500">
+                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Connexion base...
+            </div>
+            <button onclick="handleLogout()" class="nav-link w-full text-red-400 hover:bg-red-500/10 hover:text-red-500">
                 <i class="fas fa-sign-out-alt w-5"></i> Déconnexion
             </button>
         </div>
     </aside>
 
     <!-- Main Area -->
-    <main class="flex-1 flex flex-col overflow-y-auto">
+    <main class="flex-1 flex flex-col overflow-y-auto relative">
         <!-- Top Toolbar -->
-        <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
+        <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-20">
             <h2 class="font-bold text-lg" id="section-title">Tableau de bord Agent</h2>
             <div class="flex items-center gap-4">
                 <button onclick="toggleNotifications()" class="relative text-gray-500 hover:text-black transition">
-                    <i class="fas fa-bell"></i>
-                    <span id="notification-count" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-[10px] text-white font-black">0</span>
+                    <i class="fas fa-bell text-xl"></i>
+                    <span id="notification-count" class="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-[9px] text-white font-black">0</span>
                 </button>
-                <span id="agent-name" class="font-bold">Agent</span>
-                <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center font-black text-black">A</div>
+                <div class="h-6 w-px bg-gray-200 mx-2"></div>
+                <div class="flex flex-col text-right">
+                    <span id="agent-name" class="font-bold text-sm">Agent</span>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase">Commercial</span>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center font-black text-black shadow-sm">A</div>
             </div>
         </header>
 
-        <div id="notification-panel" class="glass-card p-6 mx-8 hidden">
-            <div class="flex items-center justify-between mb-4">
+        <!-- Notifications Dropdown -->
+        <div id="notification-panel" class="absolute top-20 right-8 w-80 glass-card p-0 shadow-xl hidden z-30 overflow-hidden border border-gray-200">
+            <div class="bg-gray-50 p-4 border-b border-gray-100 flex items-center justify-between">
                 <div>
-                    <h3 class="font-black uppercase text-sm tracking-widest">Notifications de vente</h3>
-                    <p class="text-gray-500 text-xs">Les alertes apparaissent quand un client réalise une vente.</p>
+                    <h3 class="font-black uppercase text-xs tracking-widest text-gray-800">Alertes Réseau</h3>
                 </div>
-                <button onclick="clearNotifications()" class="text-xs font-bold text-gray-500 hover:text-black">Effacer</button>
+                <button onclick="clearNotifications()" class="text-[10px] font-bold text-gray-400 hover:text-red-500 uppercase">Effacer</button>
             </div>
-            <div id="notification-list" class="space-y-3"></div>
+            <div id="notification-list" class="max-h-80 overflow-y-auto p-2 space-y-1">
+                <p class="text-center text-xs text-gray-400 py-4">Aucune notification.</p>
+            </div>
         </div>
 
         <div class="p-8 space-y-8">
-            <!-- Vue d'ensemble -->
+            <!-- VUE D'ENSEMBLE -->
             <div id="section-overview" class="space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="glass-card p-6">
-                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Portefeuille Clients</p>
-                        <h3 class="text-3xl font-black">24</h3>
+                    <div class="glass-card p-6 border-l-4 border-l-black">
+                        <p class="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Gérants (Clients)</p>
+                        <h3 id="stat-clients" class="text-4xl font-black text-black">0</h3>
+                        <p class="text-xs text-gray-400 mt-2"><i class="fas fa-arrow-up text-green-500"></i> Partenaires inscrits</p>
                     </div>
-                    <div class="glass-card p-6">
-                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Boutiques Actives</p>
-                        <h3 class="text-3xl font-black">08</h3>
+                    <div class="glass-card p-6 border-l-4 border-l-yellow-400">
+                        <p class="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Boutiques Déployées</p>
+                        <h3 id="stat-shops" class="text-4xl font-black text-black">0</h3>
+                        <p class="text-xs text-gray-400 mt-2"><i class="fas fa-store text-yellow-500"></i> Boutiques actives</p>
                     </div>
-                    <div class="glass-card p-6">
-                        <p class="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Commissions estimées</p>
-                        <h3 class="text-3xl font-black">450$</h3>
+                    <div class="glass-card p-6 border-l-4 border-l-green-500 bg-green-50/30">
+                        <p class="text-green-700 text-[10px] font-black uppercase tracking-widest mb-1">Commissions Estimées (5%)</p>
+                        <h3 id="stat-commissions" class="text-4xl font-black text-green-600">0.00 $</h3>
+                        <p class="text-xs text-green-600/70 mt-2 font-semibold">Basé sur le total des ventes réseau</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6">
+                    <h3 class="font-black uppercase text-sm mb-4">Activité Récente du Réseau</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-400 text-[10px] uppercase font-black tracking-widest">
+                                <tr>
+                                    <th class="px-4 py-3 rounded-tl-lg">ID Commande</th>
+                                    <th class="px-4 py-3">Boutique</th>
+                                    <th class="px-4 py-3">Montant</th>
+                                    <th class="px-4 py-3 rounded-tr-lg">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-activity-body" class="divide-y divide-gray-100">
+                                <tr><td colspan="4" class="px-4 py-8 text-center text-xs text-gray-400">Chargement de l'activité...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Liste Clients -->
+            <!-- LISTE CLIENTS (Gérants) -->
             <div id="section-clients" class="hidden glass-card overflow-hidden">
-                <div class="p-6 border-b border-gray-100"><h3 class="font-black uppercase">Apporteurs d'Affaires : Mes Clients</h3></div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left"><thead class="bg-gray-50 text-gray-400 text-[10px] uppercase font-black tracking-widest">
-                        <tr><th class="px-6 py-4">Nom</th><th class="px-6 py-4">Email</th><th class="px-6 py-4">Status</th></tr>
-                    </thead><tbody id="clients-list-body" class="divide-y divide-gray-100"></tbody></table>
+                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+                    <h3 class="font-black uppercase text-sm">Apporteurs d'Affaires : Gérants</h3>
+                    <p class="text-xs text-gray-500 mt-1">Liste des propriétaires uniques de boutiques.</p>
+                </div>
+                <div class="overflow-x-auto p-4">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-100 text-gray-500 text-[10px] uppercase font-black tracking-widest">
+                            <tr>
+                                <th class="px-6 py-3 rounded-l-lg">ID Propriétaire</th>
+                                <th class="px-6 py-3">Nombre de boutiques</th>
+                                <th class="px-6 py-3 rounded-r-lg">Statut Réseau</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-list-body" class="divide-y divide-gray-50">
+                            <!-- Rempli en JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Liste Boutiques -->
+            <!-- LISTE BOUTIQUES -->
             <div id="section-shops" class="hidden glass-card overflow-hidden">
-                <div class="p-6 border-b border-gray-100"><h3 class="font-black uppercase">Gestion de Réseau : Boutiques</h3></div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left"><thead class="bg-gray-50 text-gray-400 text-[10px] uppercase font-black tracking-widest">
-                        <tr><th class="px-6 py-4">Boutique</th><th class="px-6 py-4">Gérant</th><th class="px-6 py-4">Actions</th></tr>
-                    </thead><tbody id="shops-list-body" class="divide-y divide-gray-100"></tbody></table>
+                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+                    <h3 class="font-black uppercase text-sm">Gestion de Réseau : Boutiques</h3>
+                    <p class="text-xs text-gray-500 mt-1">Toutes les boutiques créées sur la plateforme.</p>
+                </div>
+                <div class="overflow-x-auto p-4">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-100 text-gray-500 text-[10px] uppercase font-black tracking-widest">
+                            <tr>
+                                <th class="px-6 py-3 rounded-l-lg">Boutique</th>
+                                <th class="px-6 py-3">Catégorie</th>
+                                <th class="px-6 py-3">Devise</th>
+                                <th class="px-6 py-3 rounded-r-lg text-right">Actions Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shops-list-body" class="divide-y divide-gray-50">
+                            <!-- Rempli en JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Support Tech -->
-            <div id="section-tech" class="hidden glass-card p-8">
-                <h3 class="text-xl font-black uppercase mb-6">Assistance Technique de Réseau</h3>
+            <!-- SUPPORT TECH -->
+            <div id="section-tech" class="hidden glass-card p-8 max-w-2xl">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black uppercase">Assistance Technique</h3>
+                        <p class="text-xs text-gray-500">Signalez un problème pour une boutique via WhatsApp.</p>
+                    </div>
+                </div>
                 <form class="space-y-4" onsubmit="sendTechSupport(event)">
-                    <select id="tech-target" class="w-full p-4 bg-gray-50 rounded-xl border-none ring-1 ring-gray-200"></select>
-                    <textarea id="tech-msg" placeholder="Décrivez le problème technique de votre partenaire..." class="w-full p-4 bg-gray-50 rounded-xl h-32"></textarea>
-                    <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs">Signaler au Support central</button>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Boutique concernée</label>
+                        <select id="tech-target" class="w-full p-3.5 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black font-semibold text-sm">
+                            <option value="">Sélectionner une boutique...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Description du problème</label>
+                        <textarea id="tech-msg" required placeholder="Décrivez le problème technique rencontré par le gérant..." class="w-full p-4 bg-gray-50 rounded-xl h-32 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black text-sm"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-black hover:bg-gray-800 transition text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+                        <i class="fas fa-paper-plane"></i> Envoyer au Support Central
+                    </button>
                 </form>
             </div>
         </div>
     </main>
 
     <!-- Modal Discount -->
-    <div id="discount-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
-        <div class="glass-card w-full max-w-md p-8 relative">
-            <button onclick="closeDiscountModal()" class="absolute top-4 right-4 text-gray-400"><i class="fas fa-times"></i></button>
-            <h3 class="text-xl font-black uppercase mb-6">Appliquer une Remise de Réseau</h3>
-            <p id="discount-shop-name" class="text-sm font-bold text-yellow-600 mb-4"></p>
-            <input type="number" id="discount-val" placeholder="Pourcentage (%)" class="w-full p-4 bg-gray-50 rounded-xl border-none ring-1 ring-gray-200 mb-6">
-            <button onclick="saveDiscount()" class="w-full btn-action py-4 uppercase tracking-widest text-xs">Appliquer le Discount</button>
+    <div id="discount-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeDiscountModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                <i class="fas fa-tags"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-2">Appliquer une Remise</h3>
+            <p class="text-xs text-gray-500 mb-6">Demandez une remise commerciale pour : <span id="discount-shop-name" class="font-bold text-black"></span></p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Pourcentage de remise (%)</label>
+                    <input type="number" id="discount-val" placeholder="Ex: 10" min="1" max="100" class="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-bold text-lg">
+                </div>
+                <button onclick="saveDiscount()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-4 rounded-xl font-black uppercase tracking-widest text-xs transition">
+                    Envoyer la demande
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Accès Agent Commercial -->
-    <div id="access-overlay" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
-        <div class="glass-card w-full max-w-md p-8">
-            <h3 class="text-2xl font-black uppercase mb-3">Espace Agent Commercial</h3>
-            <p class="text-sm text-gray-500 mb-6">Entrez votre code d'accès pour accéder à votre tableau de bord.</p>
-            <form onsubmit="checkAccessCode(event)" class="space-y-4">
-                <input id="access-code" type="password" placeholder="Code d'accès" class="w-full p-4 rounded-2xl border border-gray-200 bg-gray-50 text-black focus:ring-2 focus:ring-yellow-400" />
-                <p id="access-error" class="text-sm text-red-600 min-h-[1rem]"></p>
-                <button type="submit" class="btn-action w-full py-4 uppercase tracking-widest text-xs">Valider le code</button>
-            </form>
-            <p class="text-[10px] text-gray-500 mt-4">Code d'accès&nbsp;: <span class="font-black">admin2026</span></p>
+    <!-- Accès Agent Commercial (Auth Overlay) -->
+    <div id="access-overlay" class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 transition-all">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-black p-8 text-center relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-yellow-400/20 rounded-full blur-xl"></div>
+                <i class="fas fa-user-tie text-4xl text-yellow-400 mb-3"></i>
+                <h3 class="text-2xl font-black uppercase text-white tracking-wide">Espace Agent</h3>
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mt-1">Accès Sécurisé LeGrandArt</p>
+            </div>
+            
+            <div class="p-8 space-y-6">
+                <form id="auth-form" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-1.5 tracking-widest">Email Agent</label>
+                        <div class="relative">
+                            <i class="fas fa-envelope absolute left-4 top-3.5 text-gray-400"></i>
+                            <input id="agent-email" type="email" required placeholder="agent@legrandart.com" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-1.5 tracking-widest">Mot de passe</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-4 top-3.5 text-gray-400"></i>
+                            <input id="agent-password" type="password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
+                        </div>
+                    </div>
+                    <button type="submit" id="btn-login" class="w-full bg-black hover:bg-gray-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
+                        Connexion
+                    </button>
+                </form>
+
+            </div>
         </div>
     </div>
 
-    <script src="app.js"></script>
     <script>
-        const agentName = localStorage.getItem('lg_user_name') || 'Agent';
-        document.getElementById('agent-name').innerText = agentName;
+        // --- SUPABASE CONFIGURATION ---
+        const CLOUD_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
+        const CLOUD_KEY = 'sb_publishable_fYpLwujskWmD2rQRsxD5TQ_qgAG6Bm_';
+        
+        let sb = null;
+        let currentUser = null;
+        let allShops = [];
+        let allOrders = [];
 
+        window.onload = async function() {
+            initCloud();
+            await verifierAccesAgent();
+        };
+
+        // Ajoutez cette vérification dans agent-commercial.html
+        async function verifierAccesAgent() {
+            const { data: { user } } = await sb.auth.getUser();
+            
+            // On ne redirige que si un utilisateur est déjà connecté avec le mauvais email
+            if (user && user.email !== 'banikimukishijimmy@gmail.com') {
+                await sb.auth.signOut();
+                window.location.href = 'boutiques.html';
+            }
+        }
+
+        function initCloud() {
+            try {
+                sb = supabase.createClient(CLOUD_URL, CLOUD_KEY);
+                document.getElementById('cloud-status').innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Cloud Connecté`;
+                document.getElementById('cloud-status').className = "flex items-center gap-2 mb-4 px-2 text-[10px] uppercase tracking-widest font-bold text-green-500";
+                
+                // Auth Listener
+                sb.auth.onAuthStateChange((event, session) => {
+                    if (session) {
+                        // Vérification stricte de l'email lors de la connexion
+                        if (session.user.email === 'banikimukishijimmy@gmail.com') {
+                            currentUser = session.user;
+                            finalizeLogin(currentUser.email);
+                        } else {
+                            alert("Accès refusé : Ce compte n'est pas autorisé.");
+                            sb.auth.signOut();
+                            window.location.href = 'boutiques.html';
+                        }
+                    } else {
+                        currentUser = null;
+                        document.getElementById('access-overlay').classList.remove('hidden');
+                    }
+                });
+            } catch (e) {
+                console.error("Supabase Init Error:", e);
+                document.getElementById('cloud-status').innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Erreur Cloud`;
+                document.getElementById('cloud-status').className = "flex items-center gap-2 mb-4 px-2 text-[10px] uppercase tracking-widest font-bold text-red-500";
+            }
+        }
+
+        // --- AUTHENTICATION ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            if (!sb) return alert("Système Cloud indisponible.");
+            
+            const email = document.getElementById('agent-email').value;
+            const password = document.getElementById('agent-password').value;
+            const btn = document.getElementById('btn-login');
+            
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Connexion...`;
+            btn.disabled = true;
+
+            try {
+                const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                // Le listener onAuthStateChange va prendre le relais
+            } catch (err) {
+                alert("Erreur de connexion : " + err.message);
+                btn.innerHTML = `Connexion`;
+                btn.disabled = false;
+            }
+        }
+
+        function finalizeLogin(email) {
+            document.getElementById('agent-name').innerText = email.split('@')[0];
+            document.getElementById('access-overlay').classList.add('hidden');
+            loadData();
+        }
+
+        async function handleLogout() {
+            if (sb && currentUser && !currentUser.email.includes('demo')) {
+                await sb.auth.signOut();
+            } else {
+                currentUser = null;
+                document.getElementById('access-overlay').classList.remove('hidden');
+                document.getElementById('agent-email').value = '';
+                document.getElementById('agent-password').value = '';
+                document.getElementById('btn-login').innerHTML = `Connexion`;
+                document.getElementById('btn-login').disabled = false;
+            }
+        }
+
+        // --- DATA FETCHING & RENDERING ---
+        async function loadData() {
+            if (!sb) return;
+
+            try {
+                // 1. Fetch Shops (Boutiques)
+                const { data: shopsData, error: shopsErr } = await sb.from('boutique_config').select('*').order('created_at', { ascending: false });
+                if (!shopsErr && shopsData) allShops = shopsData;
+
+                // 2. Fetch Orders (Commandes) for stats and notifications
+                const { data: ordersData, error: ordersErr } = await sb.from('boutique_orders').select('*').order('created_at', { ascending: false });
+                if (!ordersErr && ordersData) allOrders = ordersData;
+
+                renderOverview();
+                renderClients();
+                renderShops();
+                populateTechSelect();
+                generateNotifications();
+
+            } catch (e) {
+                console.error("Erreur chargement données:", e);
+            }
+        }
+
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        }
+
+        function renderOverview() {
+            // Stats Calculations
+            const activeShopsCount = allShops.length;
+            
+            // Unique owners = Clients
+            const uniqueOwners = new Set(allShops.filter(s => s.owner_id).map(s => s.owner_id));
+            const clientsCount = uniqueOwners.size > 0 ? uniqueOwners.size : (activeShopsCount > 0 ? activeShopsCount : 0); // Fallback if owner_id is missing
+
+            // Commission = 5% of total sales (excluding refused)
+            const validOrders = allOrders.filter(o => o.status !== 'Refusé');
+            const totalRevenue = validOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+            const commission = totalRevenue * 0.05;
+
+            document.getElementById('stat-shops').innerText = activeShopsCount;
+            document.getElementById('stat-clients').innerText = clientsCount;
+            document.getElementById('stat-commissions').innerText = formatMoney(commission);
+
+            // Recent Activity Table
+            const activityBody = document.getElementById('recent-activity-body');
+            const recentOrders = allOrders.slice(0, 5); // 5 most recent
+
+            if (recentOrders.length === 0) {
+                activityBody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-xs text-gray-400">Aucune commande récente.</td></tr>`;
+            } else {
+                activityBody.innerHTML = recentOrders.map(order => {
+                    const shopName = getShopNameById(order.shop_id);
+                    let statusBadge = `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-[9px] font-black uppercase">${order.status}</span>`;
+                    if (order.status === 'Livré') statusBadge = `<span class="px-2 py-1 bg-green-100 text-green-700 rounded-md text-[9px] font-black uppercase">Livré</span>`;
+                    if (order.status === 'Refusé') statusBadge = `<span class="px-2 py-1 bg-red-100 text-red-700 rounded-md text-[9px] font-black uppercase">Refusé</span>`;
+
+                    return `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 py-3 text-xs font-bold">${order.id}</td>
+                        <td class="px-4 py-3 text-xs text-gray-600">${shopName}</td>
+                        <td class="px-4 py-3 text-xs font-black">${formatMoney(order.total)}</td>
+                        <td class="px-4 py-3">${statusBadge}</td>
+                    </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderClients() {
+            const tbody = document.getElementById('clients-list-body');
+            
+            // Group shops by owner_id to simulate clients list
+            const clientsMap = {};
+            allShops.forEach(shop => {
+                const oid = shop.owner_id || 'Gérant Inconnu';
+                if(!clientsMap[oid]) clientsMap[oid] = { id: oid, shopCount: 0 };
+                clientsMap[oid].shopCount++;
+            });
+
+            const clientsArray = Object.values(clientsMap);
+
+            if (clientsArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-xs text-gray-400">Aucun gérant inscrit.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = clientsArray.map(client => `
+                <tr class="hover:bg-gray-50 transition group">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-bold">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span class="text-sm font-bold text-gray-900">${client.id.substring(0,8)}...</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-xs font-bold text-gray-500">${client.shopCount} Boutique(s)</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-[9px] font-black uppercase flex items-center w-max gap-1">
+                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Actif
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderShops() {
+            const tbody = document.getElementById('shops-list-body');
+            
+            if (allShops.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-xs text-gray-400">Aucune boutique déployée.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allShops.map(shop => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
+                                ${shop.logo_url ? `<img src="${shop.logo_url}" class="w-full h-full object-cover">` : `<i class="fas fa-store text-gray-400"></i>`}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-900">${shop.name}</h4>
+                                <p class="text-[10px] text-gray-400">${shop.slogan || 'Sans slogan'}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-xs font-semibold text-gray-500">${shop.default_category || 'Général'}</td>
+                    <td class="px-6 py-4 text-xs font-bold text-gray-900">${shop.currency || 'USD'}</td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="openDiscount('${shop.name}')" class="px-3 py-1.5 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-lg text-[10px] font-black uppercase transition tooltip-trigger">
+                            <i class="fas fa-tag"></i> Remise
+                        </button>
+                        <button onclick="jumpToTechSupport('${shop.name}')" class="px-3 py-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-[10px] font-black uppercase transition">
+                            <i class="fas fa-headset"></i> Support
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function populateTechSelect() {
+            const select = document.getElementById('tech-target');
+            select.innerHTML = `<option value="">Sélectionner une boutique...</option>`;
+            allShops.forEach(shop => {
+                select.innerHTML += `<option value="${shop.name}">${shop.name}</option>`;
+            });
+        }
+
+        function generateNotifications() {
+            const list = document.getElementById('notification-list');
+            const count = document.getElementById('notification-count');
+            
+            // Generate alerts for the last 5 orders
+            const recentOrders = allOrders.slice(0, 5);
+            
+            if (recentOrders.length > 0) {
+                count.innerText = recentOrders.length;
+                count.classList.remove('hidden');
+                
+                list.innerHTML = recentOrders.map(order => {
+                    const shopName = getShopNameById(order.shop_id);
+                    return `
+                    <div class="p-3 bg-white rounded-xl border border-gray-100 hover:bg-gray-50 transition cursor-default">
+                        <div class="flex justify-between items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-shopping-cart text-xs"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-bold text-gray-900 truncate">Vente: ${shopName}</p>
+                                <p class="text-[10px] text-gray-500 mt-0.5">Commande ${order.id} d'un montant de ${formatMoney(order.total)}.</p>
+                            </div>
+                        </div>
+                        <p class="text-[8px] text-right uppercase tracking-widest text-gray-400 mt-2">${order.date || 'Récemment'}</p>
+                    </div>
+                    `;
+                }).join('');
+            } else {
+                count.innerText = '0';
+                count.classList.add('hidden');
+            }
+        }
+
+        // --- HELPERS ---
+        function getShopNameById(id) {
+            const shop = allShops.find(s => s.shop_id === id);
+            return shop ? shop.name : 'Boutique Inconnue';
+        }
+
+        // --- NAVIGATION & UI LOGIC ---
         function showSection(id) {
             ['overview', 'clients', 'shops', 'tech'].forEach(s => {
                 document.getElementById('section-' + s).classList.add('hidden');
@@ -154,87 +556,13 @@
             });
             document.getElementById('section-' + id).classList.remove('hidden');
             document.getElementById('nav-' + id).classList.add('active');
+            document.getElementById('section-title').innerText = document.getElementById('nav-' + id).innerText.trim();
         }
 
-        async function loadData() {
-            const shops = await readData("shops");
-            const shopsBody = document.getElementById('shops-list-body');
-            const clientsBody = document.getElementById('clients-list-body');
-            const techSelect = document.getElementById('tech-target');
-
-            shops.forEach(shop => {
-                const name = Array.isArray(shop) ? shop[0] : shop.shopName;
-                const owner = Array.isArray(shop) ? shop[1] : shop.owner;
-
-                shopsBody.innerHTML += `
-                    <tr class="hover:bg-gray-50"><td class="px-6 py-4 font-bold">${name}</td><td class="px-6 py-4 text-sm text-gray-500">${owner}</td>
-                    <td class="px-6 py-4 space-x-2">
-                        <button onclick="openDiscount('${name}')" class="text-yellow-600 font-bold">Discount</button>
-                        <button onclick="showSection('tech')" class="text-blue-600 font-bold">Support Tech</button>
-                    </td></tr>`;
-
-                clientsBody.innerHTML += `
-                    <tr class="hover:bg-gray-50"><td class="px-6 py-4 font-bold">${owner}</td><td class="px-6 py-4 text-sm text-gray-500">${Array.isArray(shop) ? shop[1] : shop.email}</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Actif</span></td></tr>`;
-                
-                techSelect.innerHTML += `<option value="${name}">${name} (${owner})</option>`;
-            });
-
-            if (shops.length > 0) {
-                const firstShop = shops[0];
-                const shopName = Array.isArray(firstShop) ? firstShop[0] : firstShop.shopName || 'Boutique';
-                const clientName = Array.isArray(firstShop) ? firstShop[1] : firstShop.owner || 'Client';
-                addNotification('Vente réalisée', `Votre client ${clientName} a généré une vente dans ${shopName}.`, 'À l’instant');
-            }
-        }
-
-        let target = '';
-        function openDiscount(name) {
-            target = name;
-            document.getElementById('discount-shop-name').innerText = "Cible : " + name;
-            document.getElementById('discount-modal').classList.remove('hidden');
-        }
-
-        function closeDiscountModal() { document.getElementById('discount-modal').classList.add('hidden'); }
-
-        function saveDiscount() {
-            const val = document.getElementById('discount-val').value;
-            alert(`Demande de remise de ${val}% pour ${target} envoyée au gérant.`);
-            closeDiscountModal();
-        }
-
-        function sendTechSupport(e) {
-            e.preventDefault();
-            const t = document.getElementById('tech-target').value;
-            const m = document.getElementById('tech-msg').value;
-            const wa = `*SUPPORT AGENT LEGRANDART*\n\nAgent: ${agentName}\nPartenaire: ${t}\nProblème: ${m}`;
-            window.open(`https://wa.me/243815022325?text=${encodeURIComponent(wa)}`, '_blank');
-        }
-
-        function addNotification(title, message, time) {
-            const list = document.getElementById('notification-list');
-            const count = document.getElementById('notification-count');
-            const item = document.createElement('div');
-            item.className = 'p-4 rounded-2xl border border-gray-200 bg-white';
-            item.innerHTML = `
-                <div class="flex justify-between items-start gap-4">
-                    <div>
-                        <p class="text-sm font-bold text-black">${title}</p>
-                        <p class="text-xs text-gray-500 mt-1">${message}</p>
-                    </div>
-                    <span class="text-[10px] uppercase tracking-widest text-gray-400">${time}</span>
-                </div>
-            `;
-            list.prepend(item);
-            const current = Number(count.innerText) || 0;
-            count.innerText = current + 1;
-            document.getElementById('notification-panel').classList.remove('hidden');
-        }
-
-        function clearNotifications() {
-            document.getElementById('notification-list').innerHTML = '';
-            document.getElementById('notification-count').innerText = '0';
-            document.getElementById('notification-panel').classList.add('hidden');
+        function jumpToTechSupport(shopName) {
+            showSection('tech');
+            const select = document.getElementById('tech-target');
+            if (select) select.value = shopName;
         }
 
         function toggleNotifications() {
@@ -242,37 +570,49 @@
             panel.classList.toggle('hidden');
         }
 
-        function showAccessOverlay() {
-            document.getElementById('access-overlay').classList.remove('hidden');
+        function clearNotifications() {
+            document.getElementById('notification-list').innerHTML = '<p class="text-center text-xs text-gray-400 py-4">Aucune notification.</p>';
+            const count = document.getElementById('notification-count');
+            count.innerText = '0';
+            count.classList.add('hidden');
+            document.getElementById('notification-panel').classList.add('hidden');
         }
 
-        function hideAccessOverlay() {
-            document.getElementById('access-overlay').classList.add('hidden');
+        // --- MODAL DISCOUNT ---
+        let currentDiscountTarget = '';
+        function openDiscount(name) {
+            currentDiscountTarget = name;
+            document.getElementById('discount-shop-name').innerText = name;
+            document.getElementById('discount-val').value = '';
+            document.getElementById('discount-modal').classList.remove('hidden');
         }
 
-        function checkAccessCode(e) {
+        function closeDiscountModal() { 
+            document.getElementById('discount-modal').classList.add('hidden'); 
+        }
+
+        function saveDiscount() {
+            const val = document.getElementById('discount-val').value;
+            if (!val || val <= 0) return alert("Veuillez entrer un pourcentage valide.");
+            
+            // Logique de demande de discount via WhatsApp à l'administration ou au gérant
+            const msg = `*DEMANDE DE REMISE*\n\nBoutique: ${currentDiscountTarget}\nRemise demandée: ${val}%\nAgent: ${document.getElementById('agent-name').innerText}`;
+            window.open(`https://wa.me/243815022325?text=${encodeURIComponent(msg)}`, '_blank');
+            closeDiscountModal();
+        }
+
+        // --- SUPPORT TECHNIQUE ---
+        function sendTechSupport(e) {
             e.preventDefault();
-            const code = document.getElementById('access-code').value.trim();
-            const error = document.getElementById('access-error');
-            if (code === 'admin2026') {
-                localStorage.setItem('agent_access_granted', 'true');
-                hideAccessOverlay();
-                loadData();
-            } else {
-                error.innerText = 'Code incorrect. Utilisez : admin2026';
-            }
-        }
+            const target = document.getElementById('tech-target').value;
+            const msg = document.getElementById('tech-msg').value;
+            if (!target) return alert("Veuillez sélectionner une boutique.");
 
-        function initAgentCommercial() {
-            const auth = localStorage.getItem('agent_access_granted');
-            if (auth === 'true') {
-                loadData();
-            } else {
-                showAccessOverlay();
-            }
+            const wa = `*SUPPORT AGENT LEGRANDART*\n\nAgent: ${document.getElementById('agent-name').innerText}\nBoutique Concernée: ${target}\nProblème: ${msg}`;
+            window.open(`https://wa.me/243815022325?text=${encodeURIComponent(wa)}`, '_blank');
+            
+            document.getElementById('tech-msg').value = '';
         }
-
-        window.onload = initAgentCommercial;
     </script>
 </body>
 </html>
