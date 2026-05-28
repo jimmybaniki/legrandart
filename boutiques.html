@@ -268,6 +268,15 @@
                                         <span id="phone-hero-subtitle" class="text-[10px] text-indigo-400 font-semibold uppercase tracking-wider">Sélectionnez une boutique</span>
                                         <h2 id="phone-hero-title" class="text-lg font-extrabold tracking-tight leading-tight">LeGrandArt</h2>
                                         <p id="phone-hero-desc" class="text-[10.5px] text-slate-300 max-w-[85%]">Explorez nos boutiques partenaires</p>
+                                        <p id="phone-hero-address" class="text-[9px] text-slate-400 max-w-[85%] mt-1 hidden"><i class="fa-solid fa-location-dot mr-1"></i></p>
+
+                                        <!-- Social links on phone simulator home -->
+                                        <div id="phone-social-links" class="flex gap-2.5 mt-2 pt-2 border-t border-white/10 hidden">
+                                            <a id="phone-social-fb" href="#" target="_blank" class="text-white/60 hover:text-white transition"><i class="fa-brands fa-facebook"></i></a>
+                                            <a id="phone-social-ig" href="#" target="_blank" class="text-white/60 hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
+                                            <a id="phone-social-tk" href="#" target="_blank" class="text-white/60 hover:text-white transition"><i class="fa-brands fa-tiktok"></i></a>
+                                            <a id="phone-social-wa" href="#" target="_blank" class="text-white/60 hover:text-white transition"><i class="fa-brands fa-whatsapp"></i></a>
+                                        </div>
                                     </div>
 
                                     <!-- Search & Quick Categories Navigation inside Phone -->
@@ -354,7 +363,7 @@
                                 <!-- SCREEN: CHECKOUT FORM -->
                                 <div id="screen-checkout" class="phone-view hidden px-4 pt-3 space-y-4">
                                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-truck-fast text-indigo-600"></i> Livraison & Paiement
+                                        <i class="fa-solid fa-truck-fast text-indigo-600"></i> Coordonnées & Paiement
                                     </h3>
                                     <form id="checkout-form" onsubmit="handlePlaceOrder(event)" class="space-y-3">
                                         <div>
@@ -362,20 +371,17 @@
                                             <input type="text" id="cust-name" required class="w-full px-2.5 py-1.5 bg-slate-100 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-600">
                                         </div>
                                         <div>
+                                            <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Numéro WhatsApp (Coordonnées)</label>
+                                            <input type="tel" id="cust-whatsapp" required placeholder="+243..." class="w-full px-2.5 py-1.5 bg-slate-100 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-600">
+                                        </div>
+                                        <div>
                                             <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Adresse de livraison</label>
                                             <input type="text" id="cust-address" required class="w-full px-2.5 py-1.5 bg-slate-100 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-600">
                                         </div>
                                         <div>
                                             <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Mode de règlement</label>
-                                            <div class="grid grid-cols-2 gap-1.5 mt-1">
-                                                <label class="border-2 border-indigo-600 bg-indigo-50/50 rounded-lg p-2 flex flex-col items-center justify-center cursor-pointer">
-                                                    <i class="fa-regular fa-credit-card text-xs text-indigo-600"></i>
-                                                    <span class="text-[9px] font-bold mt-1">Carte Bancaire</span>
-                                                </label>
-                                                <label class="border border-slate-200 rounded-lg p-2 flex flex-col items-center justify-center cursor-pointer opacity-70">
-                                                    <i class="fa-brands fa-paypal text-xs text-slate-500"></i>
-                                                    <span class="text-[9px] font-semibold mt-1">PayPal</span>
-                                                </label>
+                                            <div id="payment-options-list" class="grid grid-cols-2 gap-1.5 mt-1">
+                                                <!-- Dynamic based on storeConfig.paymentMethods -->
                                             </div>
                                         </div>
 
@@ -484,7 +490,19 @@
             themeColor: "#4f46e5",
             themeRgb: "79, 70, 229",
             layout: "grid",
-            logoUrl: ""
+            logoUrl: "",
+            paymentMethods: {
+                card: { active: false, info: "" },
+                mpesa: { active: false, info: "" },
+                blive: { active: false, info: "" },
+                airtel: { active: false, info: "" },
+                orange: { active: false, info: "" },
+                afrimoney: { active: false, info: "" },
+                paypal: { active: false, info: "" },
+                delivery: { active: false, info: "" }
+            },
+            contact: { phone: "", address: "" },
+            social: { facebook: "", instagram: "", tiktok: "" }
         };
 
         // Live Clock logic
@@ -648,7 +666,10 @@
                             themeColor: configData.theme_color,
                             themeRgb: configData.theme_rgb,
                             layout: configData.layout,
-                            logoUrl: configData.logo_url || ''
+                            logoUrl: configData.logo_url || '',
+                            paymentMethods: configData.payment_methods || storeConfig.paymentMethods,
+                            contact: configData.contact_info || storeConfig.contact,
+                            social: configData.social_links || storeConfig.social
                         };
                     }
 
@@ -750,6 +771,14 @@
             const pSub = document.getElementById('phone-hero-subtitle');
             if(pSub) pSub.innerText = storeConfig.defaultCategory;
 
+            // Update Phone Address
+            const pAddress = document.getElementById('phone-hero-address');
+            if(pAddress) {
+                const address = storeConfig.contact?.address;
+                pAddress.innerText = address ? `📍 ${address}` : '';
+                pAddress.classList.toggle('hidden', !address);
+            }
+
             const phoneLogo = document.getElementById('phone-hero-logo');
             if(phoneLogo) {
                 if(storeConfig.logoUrl) {
@@ -769,6 +798,30 @@
                 } else {
                     banner.classList.add('hidden');
                 }
+            }
+
+            // Update Social Links on phone simulator
+            const socialBlock = document.getElementById('phone-social-links');
+            if(socialBlock) {
+                let hasSocial = false;
+                const contact = storeConfig.contact || { phone: "", address: "" };
+                const social = storeConfig.social || { facebook: "", instagram: "", tiktok: "" };
+                
+                const fb = document.getElementById('phone-social-fb');
+                const ig = document.getElementById('phone-social-ig');
+                const tk = document.getElementById('phone-social-tk');
+                const wa = document.getElementById('phone-social-wa');
+                
+                if(fb) { fb.href = social.facebook || "#"; fb.classList.toggle('hidden', !social.facebook); if(social.facebook) hasSocial = true; }
+                if(ig) { ig.href = social.instagram || "#"; ig.classList.toggle('hidden', !social.instagram); if(social.instagram) hasSocial = true; }
+                if(tk) { tk.href = social.tiktok || "#"; tk.classList.toggle('hidden', !social.tiktok); if(social.tiktok) hasSocial = true; }
+                if(wa) { 
+                    const waLink = contact.phone ? `https://wa.me/${contact.phone.replace(/\D/g,'')}` : "#";
+                    wa.href = waLink;
+                    wa.classList.toggle('hidden', !contact.phone);
+                    if(contact.phone) hasSocial = true;
+                }
+                socialBlock.classList.toggle('hidden', !hasSocial);
             }
 
             const elementsToStyle = document.querySelectorAll('#phone-simulator .bg-indigo-600, #phone-simulator .bg-indigo-900, #phone-simulator .text-indigo-600, #phone-simulator .border-indigo-600, #phone-simulator .text-indigo-400');
@@ -862,6 +915,7 @@
             else if (screenId === 'checkout') {
                 const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
                 document.getElementById('checkout-total').innerText = formatVal(total);
+                renderPaymentOptions();
             }
         }
 
@@ -996,6 +1050,57 @@
             navigatePhoneTo('detail');
         }
 
+        function renderPaymentOptions() {
+            const container = document.getElementById('payment-options-list');
+            const pm = storeConfig.paymentMethods || {};
+            
+            let html = '';
+            const keys = {
+                card: { icon: 'fa-regular fa-credit-card', label: 'Carte / Virement' },
+                mpesa: { icon: 'fa-solid fa-mobile-screen', label: 'M-Pesa' },
+                blive: { icon: 'fa-solid fa-mobile-screen', label: 'Blive' },
+                airtel: { icon: 'fa-solid fa-mobile-screen', label: 'Airtel' },
+                orange: { icon: 'fa-solid fa-mobile-screen', label: 'Orange' },
+                afrimoney: { icon: 'fa-solid fa-mobile-screen', label: 'AfriMoney' },
+                paypal: { icon: 'fa-brands fa-paypal', label: 'PayPal' },
+                delivery: { icon: 'fa-solid fa-hand-holding-dollar', label: 'Livraison' }
+            };
+
+            let firstFound = false;
+            for (let key in keys) {
+                if (pm[key] && pm[key].active) {
+                    html += `
+                        <label class="payment-method-label border ${!firstFound ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200'} rounded-lg p-2 flex flex-col items-center justify-center cursor-pointer transition">
+                            <input type="radio" name="payment-choice" value="${key}" ${!firstFound ? 'checked' : ''} class="hidden" onchange="selectPaymentMethod(this)">
+                            <i class="${keys[key].icon} text-xs ${!firstFound ? 'text-indigo-600' : 'text-slate-500'}"></i>
+                            <span class="text-[9px] font-bold mt-1">${keys[key].label}</span>
+                        </label>
+                    `;
+                    firstFound = true;
+                }
+            }
+
+            if (!html) {
+                html = '<p class="text-[9px] text-rose-500 font-bold col-span-2">Paiement indisponible.</p>';
+            }
+            container.innerHTML = html;
+        }
+
+        function selectPaymentMethod(radio) {
+            document.querySelectorAll('.payment-method-label').forEach(label => {
+                label.classList.remove('border-indigo-600', 'bg-indigo-50/50');
+                label.classList.add('border-slate-200');
+                label.querySelectorAll('i, span').forEach(el => el.classList.remove('text-indigo-600'));
+            });
+            
+            if (radio.checked) {
+                const parent = radio.closest('label');
+                parent.classList.remove('border-slate-200');
+                parent.classList.add('border-indigo-600', 'bg-indigo-50/50');
+                parent.querySelector('i').classList.add('text-indigo-600');
+            }
+        }
+
         function addProductToCart(product) {
             const existing = cart.find(item => item.product.id === product.id);
             if (existing) {
@@ -1086,7 +1191,10 @@
             if (!activeShopId) return;
 
             const name = document.getElementById('cust-name').value;
+            const whatsapp = document.getElementById('cust-whatsapp').value;
             const address = document.getElementById('cust-address').value;
+            const paymentChoice = document.querySelector('input[name="payment-choice"]:checked')?.value || 'Non spécifié';
+
             const totalVal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
             const orderId = '#BC-' + Math.floor(1000 + Math.random() * 9000);
             

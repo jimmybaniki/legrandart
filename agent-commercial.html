@@ -161,7 +161,7 @@
                                 <th class="px-6 py-3 rounded-l-lg">Boutique</th>
                                 <th class="px-6 py-3">Catégorie</th>
                                 <th class="px-6 py-3">Devise</th>
-                                <th class="px-6 py-3 rounded-r-lg text-right">Actions Agent</th>
+                                <th class="px-6 py-3 rounded-r-lg text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="shops-list-body" class="divide-y divide-gray-50">
@@ -255,6 +255,45 @@
                     </button>
                 </form>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Shop Details -->
+    <div id="shop-details-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeShopDetailsModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                <i class="fas fa-store"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-2" id="details-shop-name">Nom de la Boutique</h3>
+            <p class="text-xs text-gray-500 mb-6" id="details-shop-slogan">Slogan de la boutique</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <p class="text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Contact</p>
+                    <div class="flex items-center gap-3 mb-2" id="details-contact-phone-row">
+                        <i class="fa-brands fa-whatsapp text-green-500"></i>
+                        <a id="details-contact-phone" href="#" target="_blank" class="text-sm text-gray-700 hover:underline">+243...</a>
+                    </div>
+                    <div class="flex items-center gap-3" id="details-contact-address-row">
+                        <i class="fa-solid fa-location-dot text-indigo-500"></i>
+                        <span id="details-contact-address" class="text-sm text-gray-700">Adresse</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Réseaux Sociaux</p>
+                    <div class="flex gap-4" id="details-social-links">
+                        <a id="details-social-fb" href="#" target="_blank" class="text-blue-600 hover:text-blue-800 text-xl hidden"><i class="fa-brands fa-facebook"></i></a>
+                        <a id="details-social-ig" href="#" target="_blank" class="text-pink-600 hover:text-pink-800 text-xl hidden"><i class="fa-brands fa-instagram"></i></a>
+                        <a id="details-social-tk" href="#" target="_blank" class="text-gray-800 hover:text-black text-xl hidden"><i class="fa-brands fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-gray-100">
+                    <p class="text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">ID Propriétaire</p>
+                    <span id="details-owner-id" class="text-xs font-mono text-gray-600"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -612,6 +651,41 @@
             window.open(`https://wa.me/243815022325?text=${encodeURIComponent(wa)}`, '_blank');
             
             document.getElementById('tech-msg').value = '';
+        }
+
+        // --- SHOP DETAILS MODAL ---
+        function openShopDetailsModal(shopId) {
+            const shop = allShops.find(s => s.shop_id === shopId);
+            if (!shop) return;
+
+            document.getElementById('details-shop-name').innerText = shop.name;
+            document.getElementById('details-shop-slogan').innerText = shop.slogan || 'Pas de slogan';
+            document.getElementById('details-owner-id').innerText = shop.owner_id;
+
+            // Contact Info
+            const phone = shop.contact_info?.phone;
+            const address = shop.contact_info?.address;
+            document.getElementById('details-contact-phone').innerText = phone || 'Non renseigné';
+            document.getElementById('details-contact-phone').href = phone ? `https://wa.me/${phone.replace(/\D/g,'')}` : '#';
+            document.getElementById('details-contact-phone-row').classList.toggle('hidden', !phone);
+            document.getElementById('details-contact-address').innerText = address || 'Non renseigné';
+            document.getElementById('details-contact-address-row').classList.toggle('hidden', !address);
+
+            // Social Links
+            const social = shop.social_links || {};
+            const fb = document.getElementById('details-social-fb');
+            const ig = document.getElementById('details-social-ig');
+            const tk = document.getElementById('details-social-tk');
+            if (fb) { fb.href = social.facebook || '#'; fb.classList.toggle('hidden', !social.facebook); }
+            if (ig) { ig.href = social.instagram || '#'; ig.classList.toggle('hidden', !social.instagram); }
+            if (tk) { tk.href = social.tiktok || '#'; tk.classList.toggle('hidden', !social.tiktok); }
+            document.getElementById('details-social-links').classList.toggle('hidden', !(social.facebook || social.instagram || social.tiktok));
+
+            document.getElementById('shop-details-modal').classList.remove('hidden');
+        }
+
+        function closeShopDetailsModal() {
+            document.getElementById('shop-details-modal').classList.add('hidden');
         }
     </script>
 </body>

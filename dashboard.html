@@ -264,6 +264,123 @@
                                 <input type="text" id="config-default-cat" value="Collection Automne" oninput="updateStoreConfig()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                             </div>
                         </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Téléphone / WhatsApp de contact</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-brands fa-whatsapp text-xs"></i></span>
+                                    <input type="text" id="config-contact-phone" placeholder="+243..." oninput="updateStoreConfig()" class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Adresse Physique (Boutique/Showroom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-slate-400"><i class="fa-solid fa-location-dot text-xs"></i></span>
+                                    <input type="text" id="config-contact-address" placeholder="Kinshasa, Gombe..." oninput="updateStoreConfig()" class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 pt-2">
+                             <p class="text-[10px] text-slate-500 uppercase font-black flex items-center gap-1.5"><i class="fa-solid fa-share-nodes"></i> Réseaux Sociaux & Pages externes</p>
+                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-tighter">Facebook</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2.5 top-2 text-blue-600"><i class="fa-brands fa-facebook"></i></span>
+                                        <input type="url" id="config-social-facebook" placeholder="Lien page..." oninput="updateStoreConfig()" class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-tighter">Instagram</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2.5 top-2 text-pink-600"><i class="fa-brands fa-instagram"></i></span>
+                                        <input type="url" id="config-social-instagram" placeholder="Lien compte..." oninput="updateStoreConfig()" class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-tighter">TikTok / Autre</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2.5 top-2 text-slate-900"><i class="fa-brands fa-tiktok"></i></span>
+                                        <input type="url" id="config-social-tiktok" placeholder="Lien..." oninput="updateStoreConfig()" class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Customize Payments -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <span class="bg-indigo-50 text-indigo-600 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-money-bill-transfer"></i></span>
+                            Modes de Paiement Acceptés
+                        </h3>
+                        <p class="text-[10px] text-slate-500 uppercase font-black">Configurez comment vos clients vous payent</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Virement / Carte -->
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-700">💳 Carte / Virement</span>
+                                    <input type="checkbox" id="pay-card-active" onchange="updateStoreConfig()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                </label>
+                                <input type="text" id="pay-card-info" placeholder="Numéro de compte / IBAN" oninput="updateStoreConfig()" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <!-- M-Pesa -->
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-700">📱 M-Pesa</span>
+                                    <input type="checkbox" id="pay-mpesa-active" onchange="updateStoreConfig()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                </label>
+                                <input type="text" id="pay-mpesa-info" placeholder="Numéro Mobile Money" oninput="updateStoreConfig()" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <!-- Blive -->
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-700">📱 Blive</span>
+                                    <input type="checkbox" id="pay-blive-active" onchange="updateStoreConfig()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                </label>
+                                <input type="text" id="pay-blive-info" placeholder="Numéro Mobile Money" oninput="updateStoreConfig()" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <!-- Airtel Money -->
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-700">📱 Airtel Money</span>
+                                    <input type="checkbox" id="pay-airtel-active" onchange="updateStoreConfig()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                </label>
+                                <input type="text" id="pay-airtel-info" placeholder="Numéro Mobile Money" oninput="updateStoreConfig()" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <!-- Orange Money -->
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-700">📱 Orange Money</span>
+                                    <input type="checkbox" id="pay-orange-active" onchange="updateStoreConfig()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                </label>
+                                <input type="text" id="pay-orange-info" placeholder="Numéro Mobile Money" oninput="updateStoreConfig()" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <!-- AfriMoney -->
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-700">📱 AfriMoney</span>
+                                    <input type="checkbox" id="pay-afrimoney-active" onchange="updateStoreConfig()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                </label>
+                                <input type="text" id="pay-afrimoney-info" placeholder="Numéro Mobile Money" oninput="updateStoreConfig()" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <!-- PayPal -->
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-700">💳 PayPal</span>
+                                    <input type="checkbox" id="pay-paypal-active" onchange="updateStoreConfig()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                </label>
+                                <input type="email" id="pay-paypal-info" placeholder="Email PayPal" oninput="updateStoreConfig()" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            </div>
+                            <!-- Paiement à la livraison -->
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-700">🚚 Paiement à la livraison</span>
+                                <input type="checkbox" id="pay-delivery-active" onchange="updateStoreConfig()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Customize Palette & Theme Layout -->
@@ -532,6 +649,14 @@
                                         <span id="phone-hero-subtitle" class="text-[10px] text-indigo-400 font-semibold uppercase tracking-wider">Collections Prêt-à-porter</span>
                                         <h2 id="phone-hero-title" class="text-lg font-extrabold tracking-tight leading-tight">L'Atelier Parisien</h2>
                                         <p id="phone-hero-desc" class="text-[10.5px] text-slate-300 max-w-[85%]">L'élégance minimaliste au quotidien</p>
+
+                                        <!-- Social links on phone simulator home -->
+                                        <div id="phone-social-links" class="flex gap-2.5 mt-2 pt-2 border-t border-white/10 hidden">
+                                            <a id="phone-social-fb" href="#" target="_blank" class="text-white/60 hover:text-white transition"><i class="fa-brands fa-facebook"></i></a>
+                                            <a id="phone-social-ig" href="#" target="_blank" class="text-white/60 hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
+                                            <a id="phone-social-tk" href="#" target="_blank" class="text-white/60 hover:text-white transition"><i class="fa-brands fa-tiktok"></i></a>
+                                            <a id="phone-social-wa" href="#" target="_blank" class="text-white/60 hover:text-white transition"><i class="fa-brands fa-whatsapp"></i></a>
+                                        </div>
                                     </div>
 
                                     <!-- Search & Quick Categories Navigation inside Phone -->
@@ -737,7 +862,19 @@
             themeColor: "#4f46e5",
             themeRgb: "79, 70, 229",
             layout: "grid",
-            logoUrl: ""
+            logoUrl: "",
+            paymentMethods: {
+                card: { active: false, info: "" },
+                mpesa: { active: false, info: "" },
+                blive: { active: false, info: "" },
+                airtel: { active: false, info: "" },
+                orange: { active: false, info: "" },
+                afrimoney: { active: false, info: "" },
+                paypal: { active: false, info: "" },
+                delivery: { active: false, info: "" }
+            },
+            contact: { phone: "", address: "" },
+            social: { facebook: "", instagram: "", tiktok: "" }
         };
 
         const imageMapping = {
@@ -929,7 +1066,10 @@
                             themeColor: configData.theme_color,
                             themeRgb: configData.theme_rgb,
                             layout: configData.layout,
-                            logoUrl: configData.logo_url || ''
+                            logoUrl: configData.logo_url || '',
+                            paymentMethods: configData.payment_methods || storeConfig.paymentMethods,
+                            contact: configData.contact_info || storeConfig.contact,
+                            social: configData.social_links || storeConfig.social
                         };
                     } else {
                         // Create default config linked to user's auth metadata
@@ -943,7 +1083,19 @@
                             themeColor: "#4f46e5",
                             themeRgb: "79, 70, 229",
                             layout: "grid",
-                            logoUrl: ""
+                            logoUrl: "",
+                            paymentMethods: {
+                                card: { active: false, info: "" },
+                                mpesa: { active: false, info: "" },
+                                blive: { active: false, info: "" },
+                                airtel: { active: false, info: "" },
+                                orange: { active: false, info: "" },
+                                afrimoney: { active: false, info: "" },
+                                paypal: { active: false, info: "" },
+                                delivery: { active: false, info: "" }
+                            },
+                            contact: { phone: "", address: "" },
+                            social: { facebook: "", instagram: "", tiktok: "" }
                         };
                         
                         // Insert secure user config entry gracefully (sans logo_url si la colonne n'existe pas encore)
@@ -959,7 +1111,10 @@
                             theme_color: storeConfig.themeColor,
                             theme_rgb: storeConfig.themeRgb,
                             layout: storeConfig.layout,
-                            logo_url: storeConfig.logoUrl
+                            logo_url: storeConfig.logoUrl,
+                            payment_methods: storeConfig.paymentMethods,
+                            contact_info: storeConfig.contact,
+                            social_links: storeConfig.social
                         };
                         const { error: upsertErr } = await sb.from('boutique_config').upsert(payload, { onConflict: 'shop_id' });
                         if(upsertErr) {
@@ -1003,11 +1158,13 @@
                         orders = ordersData.map(o => ({
                             id: o.id,
                             customerName: o.customer_name,
+                            customerWhatsapp: o.customer_whatsapp,
                             deliveryAddress: o.delivery_address,
                             items: o.items,
                             total: Number(o.total),
                             date: o.date,
-                            status: o.status
+                            status: o.status,
+                            paymentMethod: o.payment_method
                         }));
                     } else {
                         orders = [];
@@ -1051,7 +1208,19 @@
                     themeColor: "#4f46e5",
                     themeRgb: "79, 70, 229",
                     layout: "grid",
-                    logoUrl: ""
+                    logoUrl: "",
+                    paymentMethods: {
+                        card: { active: false, info: "" },
+                        mpesa: { active: false, info: "" },
+                        blive: { active: false, info: "" },
+                        airtel: { active: false, info: "" },
+                        orange: { active: false, info: "" },
+                        afrimoney: { active: false, info: "" },
+                        paypal: { active: false, info: "" },
+                        delivery: { active: false, info: "" }
+                    },
+                    contact: { phone: "", address: "" },
+                    social: { facebook: "", instagram: "", tiktok: "" }
                 };
             }
 
@@ -1098,6 +1267,9 @@
                         theme_rgb: storeConfig.themeRgb,
                         layout: storeConfig.layout,
                         logo_url: storeConfig.logoUrl,
+                        payment_methods: storeConfig.paymentMethods,
+                        contact_info: storeConfig.contact,
+                        social_links: storeConfig.social,
                         updated_at: new Date().toISOString()
                     };
 
@@ -1189,7 +1361,19 @@
                     themeColor: "#4f46e5",
                     themeRgb: "79, 70, 229",
                     layout: "grid",
-                    logoUrl: ""
+                    logoUrl: "",
+                    paymentMethods: {
+                        card: { active: false, info: "" },
+                        mpesa: { active: false, info: "" },
+                        blive: { active: false, info: "" },
+                        airtel: { active: false, info: "" },
+                        orange: { active: false, info: "" },
+                        afrimoney: { active: false, info: "" },
+                        paypal: { active: false, info: "" },
+                        delivery: { active: false, info: "" }
+                    },
+                    contact: { phone: "", address: "" },
+                    social: { facebook: "", instagram: "", tiktok: "" }
                 };
 
                 products = [
@@ -1321,6 +1505,52 @@
                 btnList.style.color = !isGrid ? storeConfig.themeColor : '';
                 btnList.style.borderWidth = !isGrid ? '2px' : '1px';
             }
+            
+            // Contact & Social UI Sync
+            const contact = storeConfig.contact || { phone: "", address: "" };
+            const social = storeConfig.social || { facebook: "", instagram: "", tiktok: "" };
+            
+            if(document.getElementById('config-contact-phone')) document.getElementById('config-contact-phone').value = contact.phone || "";
+            if(document.getElementById('config-contact-address')) document.getElementById('config-contact-address').value = contact.address || "";
+            if(document.getElementById('config-social-facebook')) document.getElementById('config-social-facebook').value = social.facebook || "";
+            if(document.getElementById('config-social-instagram')) document.getElementById('config-social-instagram').value = social.instagram || "";
+            if(document.getElementById('config-social-tiktok')) document.getElementById('config-social-tiktok').value = social.tiktok || "";
+
+            // Phone Simulator Socials
+            const socialBlock = document.getElementById('phone-social-links');
+            if(socialBlock) {
+                let hasSocial = false;
+                const fb = document.getElementById('phone-social-fb');
+                const ig = document.getElementById('phone-social-ig');
+                const tk = document.getElementById('phone-social-tk');
+                const wa = document.getElementById('phone-social-wa');
+                
+                if(fb) { fb.href = social.facebook || "#"; fb.classList.toggle('hidden', !social.facebook); if(social.facebook) hasSocial = true; }
+                if(ig) { ig.href = social.instagram || "#"; ig.classList.toggle('hidden', !social.instagram); if(social.instagram) hasSocial = true; }
+                if(tk) { tk.href = social.tiktok || "#"; tk.classList.toggle('hidden', !social.tiktok); if(social.tiktok) hasSocial = true; }
+                if(wa) { 
+                    const waLink = contact.phone ? `https://wa.me/${contact.phone.replace(/\D/g,'')}` : "#";
+                    wa.href = waLink;
+                    wa.classList.toggle('hidden', !contact.phone);
+                    if(contact.phone) hasSocial = true;
+                }
+                socialBlock.classList.toggle('hidden', !hasSocial);
+            }
+
+            // Payment methods sync to UI inputs
+            const pm = storeConfig.paymentMethods || {};
+            const keys = ['card', 'mpesa', 'blive', 'airtel', 'orange', 'afrimoney', 'paypal', 'delivery'];
+            keys.forEach(key => {
+                const activeCheck = document.getElementById(`pay-${key}-active`);
+                const infoInput = document.getElementById(`pay-${key}-info`);
+                
+                if(activeCheck) {
+                    activeCheck.checked = pm[key] ? pm[key].active : false;
+                }
+                if(infoInput) {
+                    infoInput.value = (pm[key] ? pm[key].info : "") || "";
+                }
+            });
         }
 
         // Live Config Input Event handler
@@ -1330,6 +1560,28 @@
             storeConfig.banner = document.getElementById('config-banner-text').value || "";
             storeConfig.exchangeRate = parseFloat(document.getElementById('config-exchange-rate').value) || 2800;
             storeConfig.defaultCategory = document.getElementById('config-default-cat').value || "Produits";
+            
+            storeConfig.contact = {
+                phone: document.getElementById('config-contact-phone').value || "",
+                address: document.getElementById('config-contact-address').value || ""
+            };
+            
+            storeConfig.social = {
+                facebook: document.getElementById('config-social-facebook').value || "",
+                instagram: document.getElementById('config-social-instagram').value || "",
+                tiktok: document.getElementById('config-social-tiktok').value || ""
+            };
+
+            storeConfig.paymentMethods = {
+                card: { active: document.getElementById('pay-card-active').checked, info: document.getElementById('pay-card-info').value },
+                mpesa: { active: document.getElementById('pay-mpesa-active').checked, info: document.getElementById('pay-mpesa-info').value },
+                blive: { active: document.getElementById('pay-blive-active').checked, info: document.getElementById('pay-blive-info').value },
+                airtel: { active: document.getElementById('pay-airtel-active').checked, info: document.getElementById('pay-airtel-info').value },
+                orange: { active: document.getElementById('pay-orange-active').checked, info: document.getElementById('pay-orange-info').value },
+                afrimoney: { active: document.getElementById('pay-afrimoney-active').checked, info: document.getElementById('pay-afrimoney-info').value },
+                paypal: { active: document.getElementById('pay-paypal-active').checked, info: document.getElementById('pay-paypal-info').value },
+                delivery: { active: document.getElementById('pay-delivery-active').checked, info: "" }
+            };
             
             saveConfig();
             applyStoreConfig();
@@ -2061,7 +2313,9 @@
 
                         <div class="space-y-1">
                             <p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-user text-[10px] text-slate-400 mr-1"></i> Client: <span class="font-semibold text-slate-600">${order.customerName}</span></p>
+                            <p class="text-xs text-slate-800 font-bold"><i class="fa-brands fa-whatsapp text-[10px] text-emerald-500 mr-1.5"></i> WhatsApp: <span class="font-semibold text-slate-600">${order.customerWhatsapp || 'Non renseigné'}</span></p>
                             <p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-location-dot text-[10px] text-slate-400 mr-1.5"></i> Adresse: <span class="font-semibold text-slate-600">${order.deliveryAddress}</span></p>
+                            <p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-wallet text-[10px] text-indigo-400 mr-1.5"></i> Paiement: <span class="font-black text-indigo-600 uppercase tracking-tighter">${order.paymentMethod || 'Non spécifié'}</span></p>
                         </div>
 
                         <div class="bg-white rounded-lg p-2.5 border border-slate-150 space-y-1">
