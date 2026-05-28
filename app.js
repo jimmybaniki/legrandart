@@ -111,8 +111,8 @@ async function saveToDataStore(payload) {
 function loginAsManager(shopName) {
     // Simule une connexion en tant que gérant d'une boutique spécifique
     localStorage.setItem('lg_active_managed_shop', shopName);
-    // Redirection vers le template de boutique (ex: aza-kai.html si c'est Aza & Kai)
-    window.location.href = shopName.toLowerCase().includes('aza') ? 'aza-kai-admin.html' : 'dashboard.html';
+    // Redirection vers le tableau de bord générique pour toutes les boutiques gérées
+    window.location.href = 'dashboard.html';
 }
 
 function registerProfile(profile) {
