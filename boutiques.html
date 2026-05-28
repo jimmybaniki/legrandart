@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutiques Partenaires - LeGrandArt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0b; color: #f0f0f0; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .shop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            border-color: #eab308;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <header class="bg-black/90 backdrop-blur-xl border-b border-white/5 py-6 px-6 sticky top-0 z-50">
+        <div class="max-w-[1400px] mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex flex-col leading-none">
+                <span class="text-2xl font-black text-white">LeGrand<span class="text-yellow-500">Art</span></span>
+                <span class="text-[8px] uppercase tracking-[0.4em] text-emerald-500 font-black mt-1">Écosystème Créatif</span>
+            </a>
+            <nav class="flex items-center gap-6">
+                <a href="index.html" class="text-gray-400 hover:text-white transition uppercase text-[10px] font-black tracking-widest">Accueil</a>
+                <a href="boutiques.html" class="text-yellow-500 hover:text-white transition uppercase text-[10px] font-black tracking-widest">Boutiques</a>
+                <a href="espace-pro.html" class="text-gray-400 hover:text-white transition uppercase text-[10px] font-black tracking-widest">Espace Pro</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-[1400px] mx-auto px-6 py-16">
+        <section class="mb-12 text-center">
+            <h1 class="text-4xl md:text-6xl font-black text-white leading-tight">Découvrez nos <span class="text-yellow-500 italic">Boutiques</span>.</h1>
+            <p class="text-gray-300 mt-4 text-lg max-w-2xl mx-auto">Parcourez les créations uniques de nos partenaires et soutenez l'artisanat local et panafricain.</p>
+        </section>
+
+        <section id="dynamic-shops" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Les cartes des boutiques seront chargées ici par app.js -->
+            <p class="text-gray-400 text-center col-span-full">Chargement des boutiques...</p>
+        </section>
+    </main>
+
+    <footer class="bg-[#050505] border-t border-white/5 pt-12 pb-8 px-6 mt-16">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div>
+                    <a href="index.html" class="flex flex-col leading-none">
+                        <span class="text-2xl font-black text-white">LeGrand<span class="text-yellow-500">Art</span></span>
+                        <span class="text-[8px] uppercase tracking-[0.4em] text-emerald-500 font-black mt-1">Écosystème Créatif</span>
+                    </a>
+                    <p class="text-gray-400 text-sm leading-relaxed max-w-xs mt-6">
+                        La première plateforme éthique dédiée à l'excellence artistique panafricaine.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-black uppercase text-xs tracking-[0.2em] mb-6">Navigation</h4>
+                    <ul class="space-y-3 text-sm font-bold">
+                        <li><a href="index.html" class="text-gray-500 hover:text-yellow-500 transition-colors uppercase tracking-widest text-[10px]">Accueil</a></li>
+                        <li><a href="gallerie.html" class="text-gray-500 hover:text-yellow-500 transition-colors uppercase tracking-widest text-[10px]">Galerie</a></li>
+                        <li><a href="concours.html" class="text-gray-500 hover:text-emerald-500 transition-colors uppercase tracking-widest text-[10px]">Concours</a></li>
+                        <li><a href="espace-pro.html" class="text-gray-500 hover:text-yellow-500 transition-colors uppercase tracking-widest text-[10px]">Espace Pro</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-black uppercase text-xs tracking-[0.2em] mb-6">Contact</h4>
+                    <div class="space-y-4">
+                        <a href="https://wa.me/243815022325" class="flex items-center space-x-3 group">
+                            <div class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-black transition-all">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <span class="text-gray-400 group-hover:text-white text-xs font-black tracking-widest">+243 815 022 325</span>
+                        </a>
+                        <a href="mailto:elietwikala@legrandart.org" class="flex items-center space-x-3 group">
+                            <div class="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-black transition-all">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <span class="text-gray-400 group-hover:text-white text-xs font-black tracking-widest">elietwikala@legrandart.org</span>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-black uppercase text-xs tracking-[0.2em] mb-6">Suivez-nous</h4>
+                    <div class="flex space-x-3">
+                        <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-white/5 text-center text-gray-600 text-[9px] uppercase tracking-[0.3em]">
+                &copy; 2026 LEGRANDART - TOUS DROITS RÉSERVÉS
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -339,12 +339,14 @@
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
                         <h3 class="text-base font-bold text-slate-900 flex items-center justify-between">
                             <span class="flex items-center gap-2">
-                                <span class="bg-emerald-50 text-emerald-600 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-plus"></i></span>
-                                Ajouter un Nouveau Produit
+                                <span id="prod-form-icon-bg" class="bg-emerald-50 text-emerald-600 p-1.5 rounded-lg text-xs"><i id="prod-form-icon" class="fa-solid fa-plus"></i></span>
+                                <span id="prod-form-title">Ajouter un Nouveau Produit</span>
                             </span>
+                            <button id="btn-cancel-edit" onclick="resetProductForm()" class="hidden text-[10px] font-bold text-rose-500 hover:text-rose-600 uppercase tracking-tight">Annuler la modification</button>
                         </h3>
                         
                         <form id="add-product-form" onsubmit="handleAddNewProduct(event)" class="space-y-4">
+                            <input type="hidden" id="edit-prod-id">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-500 mb-1">Nom du Produit</label>
@@ -435,8 +437,8 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full bg-emerald-600 text-white hover:bg-emerald-700 font-bold py-2.5 rounded-lg text-xs transition duration-200 flex items-center justify-center gap-2 shadow-md shadow-emerald-100">
-                                <i class="fa-solid fa-plus-circle"></i> Enregistrer & Publier
+                            <button type="submit" id="prod-submit-btn" class="w-full bg-emerald-600 text-white hover:bg-emerald-700 font-bold py-2.5 rounded-lg text-xs transition duration-200 flex items-center justify-center gap-2 shadow-md shadow-emerald-100">
+                                <i class="fa-solid fa-plus-circle"></i> <span id="prod-submit-text">Enregistrer & Publier</span>
                             </button>
                         </form>
                     </div>
@@ -959,10 +961,11 @@
                             layout: storeConfig.layout,
                             logo_url: storeConfig.logoUrl
                         };
-                        const { error: upsertErr } = await sb.from('boutique_config').upsert(payload);
+                        const { error: upsertErr } = await sb.from('boutique_config').upsert(payload, { onConflict: 'shop_id' });
                         if(upsertErr) {
+                            console.error("Erreur création config initiale:", upsertErr);
                             delete payload.logo_url;
-                            await sb.from('boutique_config').upsert(payload);
+                            await sb.from('boutique_config').upsert(payload, { onConflict: 'shop_id' });
                         }
                     }
 
@@ -1098,12 +1101,13 @@
                         updated_at: new Date().toISOString()
                     };
 
-                    const { error } = await sb.from('boutique_config').upsert(payload);
+                    const { error } = await sb.from('boutique_config').upsert(payload, { onConflict: 'shop_id' });
                     if (error) {
+                        console.error("Erreur de sauvegarde config Cloud:", error);
                         // Tolérance d'erreur si la colonne logo_url n'existe pas côté backend
                         delete payload.logo_url;
-                        const { error: retryError } = await sb.from('boutique_config').upsert(payload);
-                        if (retryError) console.error("Erreur Cloud:", retryError);
+                        const { error: retryError } = await sb.from('boutique_config').upsert(payload, { onConflict: 'shop_id' });
+                        if (retryError) showNotification("⚠️ Erreur base de données (Config)");
                     }
                 } catch (e) {
                     console.error("Erreur de sauvegarde config Cloud:", e);
@@ -1120,7 +1124,7 @@
                     if (isDelete) {
                         await sb.from('boutique_products').delete().eq('id', product.id);
                     } else {
-                        await sb.from('boutique_products').upsert({
+                        const { error } = await sb.from('boutique_products').upsert({
                             id: product.id,
                             shop_id: shopId,
                             owner_id: currentUser.id,
@@ -1133,6 +1137,7 @@
                             img_key: product.imgKey,
                             img_url: product.imgUrl
                         });
+                        if (error) console.error("Erreur produit Cloud:", error);
                     }
                 } catch (e) {
                     console.error("Erreur d'envoi produit Cloud:", e);
@@ -1149,7 +1154,7 @@
                     if (isDelete) {
                         await sb.from('boutique_orders').delete().eq('shop_id', shopId);
                     } else {
-                        await sb.from('boutique_orders').upsert({
+                    const { error } = await sb.from('boutique_orders').upsert({
                             id: order.id,
                             shop_id: shopId,
                             owner_id: currentUser.id, // Linked owner
@@ -1160,6 +1165,7 @@
                             date: order.date,
                             status: order.status
                         });
+                    if (error) console.error("Erreur commande Cloud:", error);
                     }
                 } catch (e) {
                     console.error("Erreur d'envoi commande Cloud:", e);
@@ -1456,10 +1462,69 @@
             }
         }
 
+        // Reset form to Add mode
+        function resetProductForm() {
+            document.getElementById('add-product-form').reset();
+            document.getElementById('edit-prod-id').value = '';
+            document.getElementById('prod-form-title').innerText = "Ajouter un Nouveau Produit";
+            document.getElementById('prod-submit-text').innerText = "Enregistrer & Publier";
+            document.getElementById('prod-form-icon').className = "fa-solid fa-plus";
+            document.getElementById('prod-form-icon-bg').className = "bg-emerald-50 text-emerald-600 p-1.5 rounded-lg text-xs";
+            document.getElementById('prod-submit-btn').className = "w-full bg-emerald-600 text-white hover:bg-emerald-700 font-bold py-2.5 rounded-lg text-xs transition duration-200 flex items-center justify-center gap-2 shadow-md shadow-emerald-100";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            
+            clearFileSelection();
+            document.querySelectorAll('input[name="prod-img"]').forEach(r => {
+                r.closest('label').className = "relative border-2 border-transparent cursor-pointer rounded-lg overflow-hidden h-14 group";
+                const overlay = r.closest('label').querySelector('.absolute');
+                if(overlay) overlay.className = "absolute inset-0 bg-transparent group-hover:bg-black/20 flex items-center justify-center text-white text-xs";
+            });
+            const firstRadio = document.querySelector('input[name="prod-img"]');
+            if(firstRadio) {
+                firstRadio.checked = true;
+                firstRadio.closest('label').className = "relative border-2 border-indigo-500 cursor-pointer rounded-lg overflow-hidden h-14 group";
+            }
+        }
+
+        // Open Edit Mode
+        function openEditProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            // Scroll to form
+            document.getElementById('products-tab').scrollIntoView({ behavior: 'smooth' });
+
+            // Set form values
+            document.getElementById('edit-prod-id').value = product.id;
+            document.getElementById('prod-name').value = product.name;
+            document.getElementById('prod-category').value = product.category;
+            document.getElementById('prod-price').value = product.price;
+            document.getElementById('prod-old-price').value = product.oldPrice || '';
+            document.getElementById('prod-stock').value = product.stock;
+            document.getElementById('prod-desc').value = product.description;
+
+            // UI Changes
+            document.getElementById('prod-form-title').innerText = "Modifier le Produit";
+            document.getElementById('prod-submit-text').innerText = "Mettre à jour le Produit";
+            document.getElementById('prod-form-icon').className = "fa-solid fa-pen-to-square";
+            document.getElementById('prod-form-icon-bg').className = "bg-indigo-50 text-indigo-600 p-1.5 rounded-lg text-xs";
+            document.getElementById('prod-submit-btn').className = "w-full bg-indigo-600 text-white hover:bg-indigo-700 font-bold py-2.5 rounded-lg text-xs transition duration-200 flex items-center justify-center gap-2 shadow-md shadow-indigo-100";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+
+            // Select correct image radio or clear selection if custom
+            document.querySelectorAll('input[name="prod-img"]').forEach(r => {
+                r.checked = (r.value === product.imgKey);
+                r.dispatchEvent(new Event('change'));
+            });
+            
+            clearFileSelection();
+        }
+
         // New product save
         async function handleAddNewProduct(e) {
             e.preventDefault();
 
+            const editId = document.getElementById('edit-prod-id').value;
             const name = document.getElementById('prod-name').value;
             const category = document.getElementById('prod-category').value;
             const price = parseFloat(document.getElementById('prod-price').value);
@@ -1468,38 +1533,41 @@
             const stock = parseInt(document.getElementById('prod-stock').value);
             const desc = document.getElementById('prod-desc').value;
             
-            let imgUrl = '';
-            let imgKey = 'custom';
+            // Default to existing values if editing
+            let existingProd = editId ? products.find(p => p.id === editId) : null;
+            let imgUrl = existingProd ? existingProd.imgUrl : '';
+            let imgKey = existingProd ? existingProd.imgKey : 'custom';
+            
             const fileInput = document.getElementById('prod-file-input');
             const shopId = getShopId();
 
             if (fileInput.files && fileInput.files[0]) {
-                const btn = e.target.querySelector('button[type="submit"]');
-                const originalText = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i> Upload en cours...`;
+                const submitBtn = document.getElementById('prod-submit-btn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i> Upload...`;
                 
                 imgUrl = await uploadProductImage(fileInput.files[0], shopId);
                 
                 if (!imgUrl) {
-                    alert("Erreur lors de l'importation de l'image. Assurez-vous d'avoir créé le bucket public 'product-images' sur votre console.");
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
+                    alert("Erreur lors de l'importation de l'image.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
                     return;
                 }
+                imgKey = 'custom';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
             } else {
                 const selectedRadio = document.querySelector('input[name="prod-img"]:checked');
                 if (selectedRadio) {
                     imgKey = selectedRadio.value;
                     imgUrl = imageMapping[imgKey];
-                } else {
-                    alert("Veuillez sélectionner une image ou en importer une.");
-                    return;
                 }
             }
 
-            const newProduct = {
-                id: 'p-' + Date.now(),
+            const productData = {
+                id: editId || 'p-' + Date.now(),
                 name,
                 category,
                 price,
@@ -1510,24 +1578,22 @@
                 imgUrl
             };
 
-            products.unshift(newProduct);
-            await saveProduct(newProduct);
+            if (editId) {
+                const idx = products.findIndex(p => p.id === editId);
+                if (idx > -1) products[idx] = productData;
+            } else {
+                products.unshift(productData);
+            }
+
+            await saveProduct(productData);
             
             renderAdminProducts();
             renderPhoneProducts();
             updateDashboard();
 
-            // Reset Form fields
-            document.getElementById('add-product-form').reset();
-            clearFileSelection();
-            document.querySelectorAll('input[name="prod-img"]').forEach(r => {
-                r.closest('label').className = "relative border-2 border-transparent cursor-pointer rounded-lg overflow-hidden h-14 group";
-            });
-            const firstLabel = document.querySelector('input[name="prod-img"]').closest('label');
-            firstLabel.className = "relative border-2 border-indigo-500 cursor-pointer rounded-lg overflow-hidden h-14 group";
-            document.querySelector('input[name="prod-img"]').checked = true;
-
-            showNotification(`"${name}" publié avec succès !`);
+            const msg = editId ? `"${name}" mis à jour !` : `"${name}" publié avec succès !`;
+            showNotification(msg);
+            resetProductForm();
         }
 
         // Remove Product
@@ -1579,6 +1645,9 @@
                             <span class="text-xs font-bold text-slate-900">${formatVal(product.price)}</span>
                             <span class="text-[10px] ${product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'} font-semibold">Stock: ${product.stock}</span>
                         </div>
+                        <button onclick="openEditProduct('${product.id}')" class="text-slate-400 hover:text-indigo-600 h-8 w-8 rounded-lg hover:bg-indigo-50 flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-pen-to-square text-sm"></i>
+                        </button>
                         <button onclick="deleteProduct('${product.id}')" class="text-slate-400 hover:text-rose-600 h-8 w-8 rounded-lg hover:bg-rose-50 flex items-center justify-center transition-colors">
                             <i class="fa-solid fa-trash-can text-sm"></i>
                         </button>

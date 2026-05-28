@@ -1,6 +1,9 @@
 // Gestion des données en stockage local
 // Les profils, boutiques et œuvres sont sauvegardés dans le navigateur
 
+const SUPABASE_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fYpLwujskWmD2rQRsxD5TQ_qgAG6Bm_';
+
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypuG5CjVBMTTo1uWHX8a8vPKjkaOiVEGIauGlFykncCMJMxxDoDG6IbgAyVTctTmeX/exec";
 
 // FONCTIONS DE SYNCHRONISATION BDD
@@ -207,6 +210,33 @@ async function loadShops() {
     if (!container) return;
 
     let shops = getLocalShops();
+    
+    // 1. Tentative de chargement depuis Supabase (Boutiques réelles du Dashboard)
+    if (window.supabase) {
+        try {
+            const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            const { data: cloudShops, error } = await sb
+                .from('boutique_config')
+                .select('*')
+                .order('updated_at', { ascending: false });
+
+            if (!error && cloudShops && cloudShops.length > 0) {
+                const formattedShops = cloudShops.map(s => ({
+                    owner: s.name,
+                    shopName: s.name,
+                    description: s.slogan,
+                    tags: s.default_category || 'Boutique Cloud',
+                    image: s.logo_url || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=800',
+                    // On redirige vers le dashboard ou une vue boutique (à créer)
+                    href: `dashboard.html?preview=${s.shop_id}` 
+                }));
+                shops = formattedShops;
+            }
+        } catch (e) {
+            console.error("Erreur chargement Supabase:", e);
+        }
+    }
+
     const defaultShops = [
         {
             owner: 'Studio Lumière',
