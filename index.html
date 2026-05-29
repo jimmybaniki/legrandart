@@ -978,7 +978,15 @@
 
         function playVideo(containerId, thumbUrl) {
             const container = document.getElementById(containerId);
-            container.innerHTML = `<div style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:2.5rem;"><iframe src="https://geo.dailymotion.com/player.html?video=kZ1qIW1IoWsp7nF837a&autoplay=1" style="width:100%; height:100%; position:absolute; left:0px; top:0px; border:none;" allowfullscreen allow="autoplay"></iframe></div>`;
+            const originalContent = container.innerHTML; // On sauvegarde l'aperçu original
+            
+            // Ajout de controls=0 et mute=0 pour garantir l'audio activé
+            container.innerHTML = `<div style="position:relative;width:100%;height:100%;overflow:hidden;border-radius:2.5rem;"><iframe src="https://geo.dailymotion.com/player.html?video=kZ1qIW1IoWsp7nF837a&autoplay=1&mute=0&controls=0" style="width:100%; height:100%; position:absolute; left:0px; top:0px; border:none;" allowfullscreen allow="autoplay"></iframe></div>`;
+            
+            // On remet l'image et le bouton Play après 1 minute et 38 secondes (98000ms)
+            setTimeout(() => {
+                container.innerHTML = originalContent;
+            }, 98000);
         }
 
         window.onload = () => {
