@@ -3,6 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T00CMP9WFH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-T00CMP9WFH');
+    </script>
     <title>LeGrandArt - Espace Client & Boutiques</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -127,6 +135,9 @@
         <!-- App Header -->
         <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex lg:flex-nowrap flex-wrap gap-4 items-center justify-between shadow-sm">
             <div class="flex items-center gap-2 md:gap-3">
+                <a href="index.html" class="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors mr-1" title="Retour à l'accueil">
+                    <i class="fa-solid fa-house text-sm"></i>
+                </a>
                 <div class="bg-yellow-500 text-black p-2.5 rounded-xl shadow-md shadow-yellow-100">
                     <i class="fa-solid fa-users text-xl"></i>
                 </div>
