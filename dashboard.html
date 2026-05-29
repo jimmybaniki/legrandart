@@ -2300,6 +2300,17 @@
                 badge.classList.add('hidden');
             }
 
+            const pmLabels = {
+                card: 'Carte / Virement',
+                mpesa: 'M-Pesa',
+                blive: 'Blive',
+                airtel: 'Airtel',
+                orange: 'Orange',
+                afrimoney: 'AfriMoney',
+                paypal: 'PayPal',
+                delivery: 'Paiement à la livraison'
+            };
+
             container.innerHTML = orders.map(order => {
                 let statusColor = "bg-amber-100 text-amber-700 border-amber-200";
                 if(order.status === 'Livré') statusColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
@@ -2326,7 +2337,7 @@
                             <p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-user text-[10px] text-slate-400 mr-1"></i> Client: <span class="font-semibold text-slate-600">${order.customerName}</span></p>
                             <p class="text-xs text-slate-800 font-bold"><i class="fa-brands fa-whatsapp text-[10px] text-emerald-500 mr-1.5"></i> WhatsApp: <span class="font-semibold text-slate-600">${order.customerWhatsapp || 'Non renseigné'}</span></p>
                             <p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-location-dot text-[10px] text-slate-400 mr-1.5"></i> Adresse: <span class="font-semibold text-slate-600">${order.deliveryAddress}</span></p>
-                            <p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-wallet text-[10px] text-indigo-400 mr-1.5"></i> Paiement: <span class="font-black text-indigo-600 uppercase tracking-tighter">${order.paymentMethod || 'Non spécifié'}</span></p>
+                            <p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-wallet text-[10px] text-indigo-400 mr-1.5"></i> Paiement: <span class="font-black text-indigo-600 uppercase tracking-tighter">${pmLabels[order.paymentMethod] || order.paymentMethod || 'Non spécifié'}</span></p>
                         </div>
 
                         <div class="bg-white rounded-lg p-2.5 border border-slate-150 space-y-1">
