@@ -119,11 +119,11 @@
                     </button>
                 </form>
 
-                <!-- Guest Fallback / Demo Option -->
+                <!-- Guest Fallback Option -->
                 <div class="border-t border-slate-100 pt-3 flex flex-col gap-2">
                     <p class="text-[10px] text-center text-slate-400">Pas encore de compte ?</p>
                     <button onclick="accessAsGuest()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-user-secret"></i> Continuer sans compte
+                        <i class="fa-solid fa-user-secret"></i> Explorer sans compte
                     </button>
                 </div>
             </div>
@@ -153,7 +153,7 @@
                 <!-- User account identity -->
                 <div id="user-profile-badge" class="hidden sm:flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
                     <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
-                    <span id="user-email-display" class="font-semibold text-slate-700">client@legrandart.com</span>
+                    <span id="user-email-display" class="font-semibold text-slate-700">visiteur@legrandart.com</span>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-rose-600 transition pl-1" title="Déconnexion">
                         <i class="fa-solid fa-power-off"></i>
                     </button>
@@ -625,9 +625,9 @@
             currentUser = null;
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('user-profile-badge').classList.remove('hidden');
-            document.getElementById('user-email-display').innerText = "client.invite@demo.com";
+            document.getElementById('user-email-display').innerText = "visiteur@legrandart.com";
             
-            showNotification("Accès invité activé.");
+            showNotification("Accès visiteur activé.");
             loadAllData();
         }
 
@@ -877,23 +877,33 @@
             if (!isFullscreen) {
                 // Expand to Fullscreen
                 phone.classList.remove('w-[340px]', 'h-[670px]', 'rounded-[50px]', 'border-[8px]', 'shadow-phone', 'relative');
-                phone.classList.add('fixed', 'inset-0', 'w-full', 'h-full', 'z-[100]', 'bg-slate-900', 'rounded-none', 'border-none');
+                phone.classList.add('fixed', 'inset-0', 'w-full', 'h-full', 'z-[100]', 'bg-slate-950', 'flex', 'justify-center', 'items-center', 'rounded-none', 'border-none');
                 
                 innerScreen.classList.remove('rounded-[38px]');
-                innerScreen.classList.add('rounded-none');
+                innerScreen.classList.add('rounded-none', 'max-w-[550px]', 'w-full', 'h-full', 'mx-auto', 'shadow-2xl');
                 
                 if(notch) notch.classList.add('opacity-0');
+                
+                // Hide the main portal header (LeGrand Art Espace Client...)
+                const mainHeader = document.querySelector('header');
+                if(mainHeader) mainHeader.classList.add('hidden');
+
                 icon.classList.replace('fa-expand', 'fa-compress');
                 document.body.style.overflow = 'hidden';
             } else {
                 // Revert to Normal
                 phone.classList.add('w-[340px]', 'h-[670px]', 'rounded-[50px]', 'border-[8px]', 'shadow-phone', 'relative');
-                phone.classList.remove('fixed', 'inset-0', 'w-full', 'h-full', 'z-[100]', 'bg-slate-900', 'rounded-none', 'border-none');
+                phone.classList.remove('fixed', 'inset-0', 'w-full', 'h-full', 'z-[100]', 'bg-slate-950', 'flex', 'justify-center', 'items-center', 'rounded-none', 'border-none');
                 
                 innerScreen.classList.add('rounded-[38px]');
-                innerScreen.classList.remove('rounded-none');
+                innerScreen.classList.remove('rounded-none', 'max-w-[550px]', 'w-full', 'h-full', 'mx-auto', 'shadow-2xl');
                 
                 if(notch) notch.classList.remove('opacity-0');
+
+                // Restore the main portal header
+                const mainHeader = document.querySelector('header');
+                if(mainHeader) mainHeader.classList.remove('hidden');
+
                 icon.classList.replace('fa-compress', 'fa-expand');
                 document.body.style.overflow = '';
             }
@@ -1210,7 +1220,7 @@
             const orderId = '#BC-' + Math.floor(1000 + Math.random() * 9000);
             
             const ownerId = allShops.find(s => s.shop_id === activeShopId)?.owner_id || null;
-            const customerEmail = currentUser ? currentUser.email : 'invite@demo.com';
+            const customerEmail = currentUser ? currentUser.email : 'visiteur@legrandart.com';
 
             const newOrder = {
                 id: orderId,
