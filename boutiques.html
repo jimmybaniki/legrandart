@@ -438,6 +438,11 @@
                                             <input type="text" id="cust-address" required class="w-full px-2.5 py-1.5 bg-slate-100 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-600">
                                         </div>
                                         <div>
+                                            <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Code Promo / Agent Commercial</label>
+                                            <input type="text" id="cust-promo-code" oninput="checkPromoCode()" placeholder="Ex: AGENT01" class="w-full px-2.5 py-1.5 bg-slate-100 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-600 uppercase">
+                                            <p id="promo-status-msg" class="text-[9px] mt-1 font-bold"></p>
+                                        </div>
+                                        <div>
                                             <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Mode de règlement</label>
                                             <div id="payment-options-list" class="grid grid-cols-2 gap-1.5 mt-1">
                                                 <!-- Dynamic based on storeConfig.paymentMethods -->
@@ -446,6 +451,10 @@
 
                                         <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-2.5 mt-3">
                                             <span class="text-[10px] text-indigo-700 block font-semibold mb-1">Résumé de la transaction</span>
+                                            <div id="checkout-discount-row" class="hidden flex justify-between text-[10px] text-emerald-600 mb-1">
+                                                <span>Remise Code Agent (5%)</span>
+                                                <span id="checkout-discount-val">-0.00 €</span>
+                                            </div>
                                             <div class="flex justify-between text-[11px] font-bold text-slate-800">
                                                 <span>Montant final à payer</span>
                                                 <span id="checkout-total">0.00 €</span>
@@ -537,6 +546,7 @@
         let allShops = [];
         let activeShopId = null;
         let activeCategoryFilter = 'tous';
+        let appliedDiscount = 0; // 0.05 for 5%
 
         // Data arrays
         let products = [];
@@ -764,6 +774,12 @@
         async function enterShop(shopId) {
             activeShopId = shopId;
             cart = []; // Empty cart when switching shops
+            appliedDiscount = 0;
+            if(document.getElementById('cust-promo-code')) {
+                document.getElementById('cust-promo-code').value = '';
+                document.getElementById('promo-status-msg').innerText = '';
+            }
+
             updatePhoneCartBadge();
             navigatePhoneTo('home');
             showNotification(`Connexion à la boutique...`);
@@ -998,8 +1014,7 @@
             
             if (screenId === 'cart') renderPhoneCart();
             else if (screenId === 'checkout') {
-                const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-                document.getElementById('checkout-total').innerText = formatVal(total);
+                updateCheckoutTotals();
                 renderPaymentOptions();
             }
         }
@@ -1278,9 +1293,12 @@
             const name = document.getElementById('cust-name').value;
             const whatsapp = document.getElementById('cust-whatsapp').value;
             const address = document.getElementById('cust-address').value;
+            const promoCode = document.getElementById('cust-promo-code').value.trim().toUpperCase();
             const paymentChoice = document.querySelector('input[name="payment-choice"]:checked')?.value || 'Non spécifié';
 
-            const totalVal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+            const totalVal = subtotal * (1 - appliedDiscount);
+
             const orderId = '#BC-' + Math.floor(1000 + Math.random() * 9000);
             
             const ownerId = allShops.find(s => s.shop_id === activeShopId)?.owner_id || null;
@@ -1304,15 +1322,21 @@
                         shop_id: activeShopId,
                         owner_id: ownerId,
                         customer_name: name,
+                        customer_whatsapp: whatsapp,
                         customer_email: customerEmail,
                         delivery_address: address,
+                        payment_method: paymentChoice,
                         items: cart,
+                        promo_code: promoCode,
                         total: totalVal,
                         date: newOrder.date,
                         status: 'En attente'
                     });
 
                     if (error) throw error;
+
+                    lastPlacedOrder = newOrder;
+                    lastPlacedOrder.customerWhatsapp = whatsapp;
 
                     // MISE À JOUR DES STOCKS DANS LE CLOUD
                     for (let item of cart) {
@@ -1333,7 +1357,7 @@
                     // Fetch the fresh history to update Client View
                     loadAllData(false);
                 } catch (e) {
-                    console.error("Erreur commande Cloud:", e);
+                    console.error("Détails de l'erreur Supabase:", e);
                     alert("Erreur lors de l'envoi de la commande. Veuillez réessayer.");
                     return;
                 }
@@ -1347,6 +1371,36 @@
             
             navigatePhoneTo('success');
             showNotification(`Commande envoyée au gérant avec succès !`);
+        }
+
+        // Promo Code Verification
+        function checkPromoCode() {
+            const code = document.getElementById('cust-promo-code').value.trim().toUpperCase();
+            const statusMsg = document.getElementById('promo-status-msg');
+            
+            // Logique de validation : tout code commençant par 'AGENT' ou 'LGA' applique 5%
+            if (code.length >= 4 && (code.startsWith('AGENT') || code.startsWith('LGA'))) {
+                appliedDiscount = 0.05;
+                statusMsg.innerText = "✅ Code valide : Remise de 5% appliquée !";
+                statusMsg.className = "text-[9px] text-emerald-600 font-bold mt-1";
+            } else {
+                appliedDiscount = 0;
+                statusMsg.innerText = code === "" ? "" : "❌ Code non reconnu pour remise";
+                statusMsg.className = "text-[9px] text-rose-500 font-bold mt-1";
+            }
+            updateCheckoutTotals();
+        }
+
+        function updateCheckoutTotals() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+            const discountAmt = subtotal * appliedDiscount;
+            const finalTotal = subtotal - discountAmt;
+            
+            const discountRow = document.getElementById('checkout-discount-row');
+            discountRow.classList.toggle('hidden', appliedDiscount === 0);
+            if (appliedDiscount > 0) document.getElementById('checkout-discount-val').innerText = "-" + formatVal(discountAmt);
+            
+            document.getElementById('checkout-total').innerText = formatVal(finalTotal);
         }
 
         function trackOrder() {

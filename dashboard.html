@@ -478,7 +478,11 @@
                         
                         <form id="add-product-form" onsubmit="handleAddNewProduct(event)" class="space-y-4">
                             <input type="hidden" id="edit-prod-id">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Code Produit (SKU)</label>
+                                    <input type="text" id="prod-code" placeholder="Auto si vide" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-500 mb-1">Nom du Produit</label>
                                     <input type="text" id="prod-name" placeholder="ex: Sac en Cuir Vintage" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
@@ -1167,6 +1171,7 @@
                     if (!productsError && productsData) {
                         products = productsData.map(p => ({
                             id: p.id,
+                            code: p.code || '',
                             name: p.name,
                             category: p.category,
                             price: Number(p.price),
@@ -1195,6 +1200,7 @@
                             deliveryAddress: o.delivery_address,
                             items: o.items,
                             total: Number(o.total),
+                            promoCode: o.promo_code || '',
                             date: o.date,
                             status: o.status,
                             paymentMethod: o.payment_method
@@ -1344,6 +1350,7 @@
                     } else {
                         const { error } = await sb.from('boutique_products').upsert({
                             id: product.id,
+                            code: product.code,
                             shop_id: shopId,
                             owner_id: currentUser.id,
                             name: product.name,
@@ -1826,6 +1833,7 @@
         function resetProductForm() {
             document.getElementById('add-product-form').reset();
             document.getElementById('edit-prod-id').value = '';
+            document.getElementById('prod-code').value = '';
             document.getElementById('prod-form-title').innerText = "Ajouter un Nouveau Produit";
             document.getElementById('prod-submit-text').innerText = "Enregistrer & Publier";
             document.getElementById('prod-form-icon').className = "fa-solid fa-plus";
@@ -1856,6 +1864,7 @@
 
             // Set form values
             document.getElementById('edit-prod-id').value = product.id;
+            document.getElementById('prod-code').value = product.code || '';
             document.getElementById('prod-name').value = product.name;
             document.getElementById('prod-category').value = product.category;
             document.getElementById('prod-price').value = product.price;
@@ -1885,6 +1894,14 @@
             e.preventDefault();
 
             const editId = document.getElementById('edit-prod-id').value;
+            let code = document.getElementById('prod-code').value.trim();
+            
+            // Génération aléatoire si le champ est vide
+            if (!code) {
+                code = 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                document.getElementById('prod-code').value = code;
+            }
+
             const name = document.getElementById('prod-name').value;
             const category = document.getElementById('prod-category').value;
             const price = parseFloat(document.getElementById('prod-price').value);
@@ -1928,6 +1945,7 @@
 
             const productData = {
                 id: editId || 'p-' + Date.now(),
+                code,
                 name,
                 category,
                 price,
@@ -2016,7 +2034,10 @@
                     <div class="flex items-center gap-3">
                         <img src="${product.imgUrl}" class="h-12 w-12 rounded-lg object-cover border border-slate-200" alt="">
                         <div class="flex flex-col">
-                            <span class="text-xs font-semibold text-slate-900">${product.name}</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-semibold text-slate-900">${product.name}</span>
+                                ${product.code ? `<span class="text-[9px] font-mono bg-slate-100 text-slate-500 px-1 rounded border border-slate-200">${product.code}</span>` : ''}
+                            </div>
                             <span class="text-[10px] text-slate-400 bg-slate-200/50 px-1.5 py-0.5 rounded-full self-start mt-0.5">${product.category}</span>
                             ${product.stock > 0 && product.stock < 5 ? 
                                 `<span class="text-[9px] font-black text-amber-600 uppercase tracking-tighter mt-1 animate-pulse">
@@ -2191,6 +2212,8 @@
                     stockBadge.className = "text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md";
                     stockBadge.innerText = `Disponible (En Stock: ${product.stock})`;
                 }
+                stockBadge.className = "text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md";
+                stockBadge.innerText = `Disponible (En Stock: ${product.stock})`;
                 document.getElementById('detail-add-btn').disabled = false;
                 document.getElementById('detail-add-btn').style.opacity = '1';
                 document.getElementById('detail-add-btn').onclick = () => addProductToCart(product);
@@ -2483,6 +2506,7 @@
                             <p class="text-xs text-slate-800 font-bold"><i class="fa-brands fa-whatsapp text-[10px] text-emerald-500 mr-1.5"></i> WhatsApp: <span class="font-semibold text-slate-600">${order.customerWhatsapp || 'Non renseigné'}</span></p>
                             <p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-location-dot text-[10px] text-slate-400 mr-1.5"></i> Adresse: <span class="font-semibold text-slate-600">${order.deliveryAddress}</span></p>
                             <p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-wallet text-[10px] text-indigo-400 mr-1.5"></i> Paiement: <span class="font-black text-indigo-600 uppercase tracking-tighter">${pmLabels[order.paymentMethod] || order.paymentMethod || 'Non spécifié'}</span></p>
+                            ${order.promoCode ? `<p class="text-xs text-slate-800 font-bold"><i class="fa-solid fa-tag text-[10px] text-amber-500 mr-1.5"></i> Code Agent: <span class="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-mono uppercase">${order.promoCode}</span></p>` : ''}
                         </div>
 
                         <div class="bg-white rounded-lg p-2.5 border border-slate-150 space-y-1">

@@ -42,13 +42,14 @@
     <!-- Sidebar -->
     <aside class="sidebar flex flex-col p-6 text-white shrink-0">
         <div class="mb-10 px-2">
-            <a href="#" class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></a>
+            <a href="index.html" class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></a>
             <p class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Agent Commercial</p>
         </div>
         <nav class="flex-1 space-y-2">
             <a href="#" onclick="showSection('overview')" class="nav-link active" id="nav-overview"><i class="fas fa-chart-line w-5"></i> Vue d'ensemble</a>
             <a href="#" onclick="showSection('clients')" class="nav-link" id="nav-clients"><i class="fas fa-users w-5"></i> Mes Clients (Gérants)</a>
             <a href="#" onclick="showSection('shops')" class="nav-link" id="nav-shops"><i class="fas fa-store w-5"></i> Boutiques Gérées</a>
+            <a href="#" onclick="showSection('tools')" class="nav-link" id="nav-tools"><i class="fas fa-plus-circle w-5"></i> Outils & Création</a>
             <a href="#" onclick="showSection('tech')" class="nav-link" id="nav-tech"><i class="fas fa-tools w-5"></i> Support Technique</a>
         </nav>
         <div class="mt-auto border-t border-white/10 pt-6">
@@ -65,7 +66,12 @@
     <main class="flex-1 flex flex-col overflow-y-auto relative">
         <!-- Top Toolbar -->
         <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-20">
-            <h2 class="font-bold text-lg" id="section-title">Tableau de bord Agent</h2>
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors" title="Retour à l'accueil">
+                    <i class="fa-solid fa-house text-sm"></i>
+                </a>
+                <h2 class="font-bold text-lg" id="section-title">Tableau de bord Agent</h2>
+            </div>
             <div class="flex items-center gap-4">
                 <button onclick="toggleNotifications()" class="relative text-gray-500 hover:text-black transition">
                     <i class="fas fa-bell text-xl"></i>
@@ -96,7 +102,7 @@
         <div class="p-8 space-y-8">
             <!-- VUE D'ENSEMBLE -->
             <div id="section-overview" class="space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="glass-card p-6 border-l-4 border-l-black">
                         <p class="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Gérants (Clients)</p>
                         <h3 id="stat-clients" class="text-4xl font-black text-black">0</h3>
@@ -112,6 +118,14 @@
                         <h3 id="stat-commissions" class="text-4xl font-black text-green-600">0.00 $</h3>
                         <p class="text-xs text-green-600/70 mt-2 font-semibold">Basé sur le total des ventes réseau</p>
                     </div>
+                    <div class="glass-card p-6 border-l-4 border-l-amber-500 bg-amber-50/30">
+                        <p class="text-amber-700 text-[10px] font-black uppercase tracking-widest mb-1">Mon Code Promo Agent</p>
+                        <div class="flex gap-2 mt-2">
+                            <input type="text" id="agent-promo-code" placeholder="Ex: AGENT01" class="flex-1 p-2 bg-white border border-amber-200 rounded-lg text-sm font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                            <button onclick="saveAgentPromoCode()" class="bg-amber-500 text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-amber-600 transition shadow-sm">OK</button>
+                        </div>
+                        <p class="text-[9px] text-amber-600/70 mt-2 font-semibold italic">Utilisé pour identifier vos ventes.</p>
+                    </div>
                 </div>
 
                 <div class="glass-card p-6">
@@ -123,6 +137,7 @@
                                     <th class="px-4 py-3 rounded-tl-lg">ID Commande</th>
                                     <th class="px-4 py-3">Boutique</th>
                                     <th class="px-4 py-3">Montant</th>
+                                    <th class="px-4 py-3">Code Agent</th>
                                     <th class="px-4 py-3 rounded-tr-lg">Statut</th>
                                 </tr>
                             </thead>
@@ -176,6 +191,58 @@
                             <!-- Rempli en JS -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- OUTILS & CRÉATION -->
+            <div id="section-tools" class="hidden space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- CREATE MANAGER & SHOP -->
+                    <div class="glass-card p-8 border-t-4 border-t-yellow-400">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center"><i class="fas fa-store"></i></div>
+                            <h3 class="text-xl font-black uppercase">Créer Gérant & Boutique</h3>
+                        </div>
+                        <form onsubmit="handleCreateManagerAndShop(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[9px] font-black uppercase text-gray-400 ml-1">Email du Gérant</label>
+                                    <input type="email" id="new-manager-email" required placeholder="manager@exemple.com" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-black outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[9px] font-black uppercase text-gray-400 ml-1">Mot de passe provisoire</label>
+                                    <input type="password" id="new-manager-pass" required placeholder="••••••••" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-black outline-none" />
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black uppercase text-gray-400 ml-1">Numéro WhatsApp du Gérant</label>
+                                <input type="tel" id="new-manager-phone" required placeholder="+243..." class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-black outline-none" />
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black uppercase text-gray-400 ml-1">Nom de la Boutique</label>
+                                <input type="text" id="new-manager-shop-name" required placeholder="Nom de l'enseigne" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-black outline-none" />
+                            </div>
+                            <button type="submit" id="btn-create-mgr" class="w-full bg-black text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-800 transition shadow-lg">
+                                Déployer la Boutique
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- CREATE CLIENT -->
+                    <div class="glass-card p-8 border-t-4 border-t-blue-500">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fas fa-user-plus"></i></div>
+                            <h3 class="text-xl font-black uppercase">Créer un Compte Client</h3>
+                        </div>
+                        <form onsubmit="handleCreateClient(event)" class="space-y-4">
+                            <input type="email" id="new-client-email" required placeholder="Email du client" class="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm outline-none" />
+                            <input type="password" id="new-client-pass" required placeholder="Mot de passe provisoire" class="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm outline-none" />
+                            <input type="tel" id="new-client-phone" required placeholder="Numéro WhatsApp du client" class="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm outline-none" />
+                            <button type="submit" id="btn-create-cli" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition shadow-lg">
+                                Enregistrer le Client
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -404,6 +471,132 @@
             }
         }
 
+        // --- AGENT ACTIONS ---
+
+        async function saveAgentPromoCode() {
+            if (!currentUser) return;
+            const code = document.getElementById('agent-promo-code').value.trim().toUpperCase();
+            if (!code) return alert("Veuillez entrer un code valide.");
+
+            // Sauvegarde locale de sécurité immédiate
+            localStorage.setItem(`agent_promo_${currentUser.id}`, code);
+
+            try {
+                const { error } = await sb.from('agent_profiles').upsert({
+                    id: currentUser.id,
+                    email: currentUser.email,
+                    promo_code: code,
+                    updated_at: new Date().toISOString()
+                });
+                if (error) throw error;
+                alert("Votre code promo est maintenant actif sur le réseau !");
+            } catch (err) {
+                console.error("Erreur Cloud Agent Profile (Table manquante ?):", err.message);
+                alert("Code enregistré localement ! Note : La table 'agent_profiles' n'est pas encore créée dans votre SQL Editor Supabase.");
+            }
+        }
+
+        async function loadAgentProfile() {
+            if (!currentUser) return;
+
+            // Charger le fallback local en premier pour un affichage immédiat
+            const localCode = localStorage.getItem(`agent_promo_${currentUser.id}`);
+            if (localCode) document.getElementById('agent-promo-code').value = localCode;
+
+            try {
+                const { data } = await sb.from('agent_profiles').select('promo_code').eq('id', currentUser.id).single();
+                if (data && data.promo_code) {
+                    document.getElementById('agent-promo-code').value = data.promo_code;
+                }
+            } catch (e) {}
+        }
+
+        // Helper to sign up a user without logging out the agent
+        async function createAccountSilent(email, password, metadata) {
+            const tempSb = supabase.createClient(CLOUD_URL, CLOUD_KEY, { auth: { persistSession: false } });
+            return await tempSb.auth.signUp({ email, password, options: { data: metadata } });
+        }
+
+        async function handleCreateManagerAndShop(e) {
+            e.preventDefault();
+            const email = document.getElementById('new-manager-email').value;
+            const password = document.getElementById('new-manager-pass').value;
+            const shopName = document.getElementById('new-manager-shop-name').value;
+            const phone = document.getElementById('new-manager-phone').value;
+            const btn = document.getElementById('btn-create-mgr');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Déploiement...`;
+
+            try {
+                // 1. Créer le compte Auth
+                const { data: authData, error: authErr } = await createAccountSilent(email, password, { role: 'gerant' });
+                if (authErr) throw authErr;
+
+                // 2. Créer la configuration de la boutique
+                const managerId = authData.user.id;
+                const shopId = 'shop_' + managerId.slice(0, 12);
+                
+                const { error: configErr } = await sb.from('boutique_config').insert({
+                    shop_id: shopId,
+                    owner_id: managerId,
+                    name: shopName,
+                    slogan: "Bienvenue dans ma boutique LeGrandArt",
+                    default_category: "Général",
+                    currency: "USD",
+                    exchange_rate: 2800,
+                    theme_color: "#4f46e5",
+                    theme_rgb: "79, 70, 229",
+                    layout: "grid",
+                    contact_info: { phone: phone, address: "" }
+                });
+                if (configErr) throw configErr;
+
+                alert(`Félicitations ! Le gérant ${email} a été créé et sa boutique "${shopName}" est en ligne.`);
+                
+                // Envoi des identifiants par WhatsApp
+                const msg = encodeURIComponent(`Bonjour ! Votre boutique "${shopName}" a été créée sur LeGrandArt.\n\nVoici vos identifiants :\n📧 Email : ${email}\n🔑 Mot de passe : ${password}\n\nAccédez à votre espace ici : https://legrandart.org/dashboard.html`);
+                const waLink = `https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`;
+                
+                if (confirm("Voulez-vous envoyer les identifiants par WhatsApp au gérant ?")) {
+                    window.open(waLink, '_blank');
+                }
+
+                e.target.reset();
+                loadData();
+            } catch (err) { alert("Erreur de création: " + err.message); }
+            finally { btn.disabled = false; btn.innerText = "Déployer la Boutique"; }
+        }
+
+        async function handleCreateClient(e) {
+            e.preventDefault();
+            const email = document.getElementById('new-client-email').value;
+            const password = document.getElementById('new-client-pass').value;
+            const phone = document.getElementById('new-client-phone').value;
+            const btn = document.getElementById('btn-create-cli');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Création...`;
+
+            try {
+                const { error: authErr } = await createAccountSilent(email, password, { role: 'client' });
+                if (authErr) throw authErr;
+
+                alert(`Compte client créé avec succès pour ${email}.`);
+
+                // Envoi des identifiants par WhatsApp
+                const msg = encodeURIComponent(`Bonjour ! Votre compte client a été créé sur LeGrandArt.\n\nVoici vos identifiants :\n📧 Email : ${email}\n🔑 Mot de passe : ${password}\n\nExplorez les boutiques ici : https://legrandart.org/boutiques.html`);
+                const waLink = `https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`;
+                
+                if (confirm("Voulez-vous envoyer les identifiants par WhatsApp au client ?")) {
+                    window.open(waLink, '_blank');
+                }
+
+                e.target.reset();
+            } catch (err) { alert("Erreur: " + err.message); }
+            finally { btn.disabled = false; btn.innerText = "Enregistrer le Client"; }
+        }
+
         // --- DATA FETCHING & RENDERING ---
         async function loadData() {
             if (!sb) return;
@@ -422,6 +615,7 @@
                 renderShops();
                 populateTechSelect();
                 generateNotifications();
+                loadAgentProfile();
 
             } catch (e) {
                 console.error("Erreur chargement données:", e);
@@ -467,6 +661,7 @@
                         <td class="px-4 py-3 text-xs font-bold">${order.id}</td>
                         <td class="px-4 py-3 text-xs text-gray-600">${shopName}</td>
                         <td class="px-4 py-3 text-xs font-black">${formatMoney(order.total)}</td>
+                        <td class="px-4 py-3 text-[10px] font-mono text-amber-600 uppercase">${order.promo_code || '-'}</td>
                         <td class="px-4 py-3">${statusBadge}</td>
                     </tr>
                     `;
@@ -597,13 +792,13 @@
 
         // --- NAVIGATION & UI LOGIC ---
         function showSection(id) {
-            ['overview', 'clients', 'shops', 'tech'].forEach(s => {
+            ['overview', 'clients', 'shops', 'tech', 'tools'].forEach(s => {
                 document.getElementById('section-' + s).classList.add('hidden');
-                document.getElementById('nav-' + s).classList.remove('active');
+                if(document.getElementById('nav-' + s)) document.getElementById('nav-' + s).classList.remove('active');
             });
             document.getElementById('section-' + id).classList.remove('hidden');
             document.getElementById('nav-' + id).classList.add('active');
-            document.getElementById('section-title').innerText = document.getElementById('nav-' + id).innerText.trim();
+            document.getElementById('section-title').innerText = id === 'tools' ? "Outils & Création" : document.getElementById('nav-' + id).innerText.trim();
         }
 
         function jumpToTechSupport(shopName) {
