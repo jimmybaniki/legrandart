@@ -119,11 +119,11 @@
                     </button>
                 </form>
 
-                <!-- Guest Fallback Option -->
+                <!-- Guest Fallback / Demo Option -->
                 <div class="border-t border-slate-100 pt-3 flex flex-col gap-2">
                     <p class="text-[10px] text-center text-slate-400">Pas encore de compte ?</p>
                     <button onclick="accessAsGuest()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-user-secret"></i> Explorer sans compte
+                        <i class="fa-solid fa-user-secret"></i> Continuer sans compte
                     </button>
                 </div>
             </div>
@@ -133,7 +133,7 @@
     <!-- MAIN APP CONTENT (Protected) -->
     <div id="app-main-content" class="h-full flex flex-col">
         <!-- App Header -->
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex lg:flex-nowrap flex-wrap gap-4 items-center justify-between shadow-sm">
+        <header id="main-header" class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex lg:flex-nowrap flex-wrap gap-4 items-center justify-between shadow-sm">
             <div class="flex items-center gap-2 md:gap-3">
                 <a href="index.html" class="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors mr-1" title="Retour à l'accueil">
                     <i class="fa-solid fa-house text-sm"></i>
@@ -153,7 +153,7 @@
                 <!-- User account identity -->
                 <div id="user-profile-badge" class="hidden sm:flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
                     <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
-                    <span id="user-email-display" class="font-semibold text-slate-700">visiteur@legrandart.com</span>
+                    <span id="user-email-display" class="font-semibold text-slate-700">client</span>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-rose-600 transition pl-1" title="Déconnexion">
                         <i class="fa-solid fa-power-off"></i>
                     </button>
@@ -173,10 +173,10 @@
         <main class="flex-1 flex flex-col lg:flex-row min-h-0 lg:overflow-hidden bg-slate-50">
             
             <!-- LEFT PANEL: Shops & History (60% width on lg) -->
-            <section class="w-full lg:w-[58%] xl:w-[62%] lg:shrink-0 p-4 lg:p-6 lg:overflow-y-scroll custom-scrollbar flex flex-col gap-6 relative">
+            <section id="left-panel" class="w-full lg:w-[58%] xl:w-[62%] lg:shrink-0 p-4 lg:p-6 lg:overflow-y-scroll custom-scrollbar flex flex-col gap-6 relative">
 
                 <!-- Hub Controls -->
-                <div class="bg-slate-50/95 backdrop-blur-md p-1 rounded-xl flex gap-1 self-stretch overflow-x-auto hide-scrollbar sticky top-[73px] lg:top-[-24px] lg:-mx-6 lg:px-6 lg:py-4 lg:rounded-none z-20 shadow-sm border-b border-slate-200/60">
+                <div id="hub-navigation" class="bg-slate-50/95 backdrop-blur-md p-1 rounded-xl flex gap-1 self-stretch overflow-x-auto hide-scrollbar sticky top-[73px] lg:top-[-24px] lg:-mx-6 lg:px-6 lg:py-4 lg:rounded-none z-20 shadow-sm border-b border-slate-200/60">
                     <button onclick="switchClientTab('shops-tab')" id="btn-shops-tab" class="client-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200 whitespace-nowrap">
                         <i class="fa-solid fa-store text-yellow-600"></i> Boutiques Partenaires
                     </button>
@@ -192,6 +192,12 @@
                             <span class="bg-yellow-50 text-yellow-600 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-shop"></i></span>
                             Sélectionner une boutique à visiter
                         </h3>
+                        <div class="relative mb-4">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            <input type="text" id="shop-search-input" onkeyup="filterShopsExplorer()" placeholder="Rechercher une boutique..." class="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition">
+                        </div>
+
+
                         <div id="shops-explorer-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <p class="text-slate-400 text-xs text-center py-10 col-span-2 italic">Chargement des boutiques disponibles...</p>
                         </div>
@@ -216,7 +222,7 @@
             <section class="w-full lg:w-[42%] xl:w-[38%] lg:shrink-0 p-4 lg:p-6 bg-slate-100 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200 relative">
                 
                 <!-- FULLSCREEN BUTTON -->
-                <div class="absolute top-4 right-4 z-20">
+                <div id="fullscreen-btn-wrap" class="absolute top-4 right-4 z-20">
                     <button onclick="toggleFullscreenPhone()" class="bg-white p-3 rounded-full shadow-md text-slate-600 hover:text-indigo-600 border border-slate-200 transition tooltip-trigger" title="Mode plein écran">
                         <i class="fa-solid fa-expand text-lg" id="fullscreen-icon"></i>
                     </button>
@@ -245,6 +251,48 @@
                         <!-- Smartphone Screen View -->
                         <div id="phone-inner-screen" class="w-full h-full bg-white rounded-[38px] overflow-hidden flex flex-col relative select-none transition-all duration-300">
                             
+                            <!-- Bouton Paramètres (Uniquement visible en plein écran) -->
+                            <button id="fullscreen-settings-btn" onclick="toggleFullscreenMenu()" class="hidden absolute top-14 right-4 z-[45] bg-white/90 backdrop-blur p-2.5 rounded-xl shadow-lg border border-slate-200 text-slate-700 active:scale-95 transition-all">
+                                <i class="fa-solid fa-gear"></i>
+                            </button>
+
+                            <!-- Overlay Menu de navigation rapide en plein écran -->
+                            <div id="fullscreen-menu-overlay" class="hidden absolute inset-0 z-[60] bg-slate-900/95 backdrop-blur-xl p-8 flex flex-col gap-6 text-white overflow-y-auto phone-scrollbar">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex flex-col">
+                                        <span class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></span>
+                                        <span class="text-[9px] uppercase tracking-[0.3em] text-emerald-400 font-bold">Espace Client</span>
+                                    </div>
+                                    <button onclick="toggleFullscreenMenu()" class="text-2xl text-slate-400 hover:text-white">&times;</button>
+                                </div>
+                                
+                                <p class="text-xs text-slate-300">Explorez les boutiques et suivez vos commandes</p>
+
+                                <div class="bg-white/5 p-5 rounded-2xl border border-white/10 space-y-4">
+                                    <div class="flex items-center gap-3">
+                                         <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                         <span id="menu-user-email" class="text-xs font-semibold text-slate-200">Connectez-vous</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Statut Base</span>
+                                        <span id="menu-cloud-status" class="text-xs font-semibold text-amber-500 flex items-center gap-1.5">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span> Hors ligne
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-3">
+                                    <button onclick="switchClientTab('shops-tab'); toggleFullscreenMenu();" class="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/10 hover:bg-white/10 transition text-left">
+                                        <i class="fa-solid fa-store text-yellow-500"></i>
+                                        <span class="text-sm font-bold uppercase tracking-wider">Boutiques Partenaires</span>
+                                    </button>
+                                    <button onclick="switchClientTab('history-tab'); toggleFullscreenMenu();" class="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/10 hover:bg-white/10 transition text-left">
+                                        <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i>
+                                        <span class="text-sm font-bold uppercase tracking-wider">Historique d'Achats</span>
+                                    </button>
+                                </div>
+                            </div>
+
                             <!-- Smartphone Native Status Bar -->
                             <div class="bg-white/95 backdrop-blur px-5 pt-3 pb-1.5 flex justify-between items-center text-[10px] font-bold text-slate-900 z-40 select-none">
                                 <span id="phone-time" class="tracking-wide">09:41</span>
@@ -538,6 +586,8 @@
                 useSupabase = true;
                 badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span> Connecté`;
                 badge.className = "text-xs font-semibold text-emerald-600 flex items-center justify-end gap-1";
+                if(document.getElementById('menu-cloud-status')) document.getElementById('menu-cloud-status').innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Connecté`;
+                if(document.getElementById('menu-cloud-status')) document.getElementById('menu-cloud-status').className = "text-xs font-semibold text-emerald-500 flex items-center gap-1.5";
                 
                 sb.auth.onAuthStateChange((event, session) => {
                     if (session) {
@@ -545,6 +595,7 @@
                         document.getElementById('auth-screen').classList.add('hidden');
                         document.getElementById('user-profile-badge').classList.remove('hidden');
                         document.getElementById('user-email-display').innerText = currentUser.email;
+                        if(document.getElementById('menu-user-email')) document.getElementById('menu-user-email').innerText = currentUser.email;
                         
                         // Prefill the checkout name/email lightly
                         const custNameInput = document.getElementById('cust-name');
@@ -562,6 +613,8 @@
                 useSupabase = false;
                 badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500"></span> Erreur Cloud`;
                 badge.className = "text-xs font-semibold text-rose-600 flex items-center justify-end gap-1";
+                if(document.getElementById('menu-cloud-status')) document.getElementById('menu-cloud-status').innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span> Erreur Cloud`;
+                if(document.getElementById('menu-cloud-status')) document.getElementById('menu-cloud-status').className = "text-xs font-semibold text-rose-500 flex items-center gap-1.5";
                 document.getElementById('auth-screen').classList.remove('hidden');
             }
         }
@@ -625,9 +678,10 @@
             currentUser = null;
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('user-profile-badge').classList.remove('hidden');
-            document.getElementById('user-email-display').innerText = "visiteur@legrandart.com";
+            document.getElementById('user-email-display').innerText = "client";
             
-            showNotification("Accès visiteur activé.");
+            if(document.getElementById('menu-user-email')) document.getElementById('menu-user-email').innerText = "client";
+            showNotification("Accès invité activé.");
             loadAllData();
         }
 
@@ -636,6 +690,7 @@
             currentUser = null;
             document.getElementById('auth-screen').classList.remove('hidden');
             document.getElementById('user-profile-badge').classList.add('hidden');
+            if(document.getElementById('menu-user-email')) document.getElementById('menu-user-email').innerText = "Connectez-vous";
         }
 
         // --- DATA FETCHING (CLIENT SIDE) ---
@@ -718,6 +773,17 @@
             await loadAllData(true);
         }
 
+        function filterShopsExplorer() {
+            const query = document.getElementById('shop-search-input').value.toLowerCase();
+            const container = document.getElementById('shops-explorer-container');
+            const filteredShops = allShops.filter(s => 
+                s.name.toLowerCase().includes(query) || 
+                (s.slogan || '').toLowerCase().includes(query) ||
+                (s.default_category || '').toLowerCase().includes(query)
+            );
+            renderShopsExplorer(filteredShops);
+        }
+
         // --- RENDERERS ---
 
         function renderShopsExplorer() {
@@ -726,7 +792,10 @@
                 container.innerHTML = `<p class="text-slate-400 text-xs text-center py-10 col-span-2">Aucune boutique disponible.</p>`;
                 return;
             }
-            container.innerHTML = allShops.map(s => `
+
+            const shopsToRender = arguments.length > 0 ? arguments[0] : allShops;
+
+            container.innerHTML = shopsToRender.map(s => `
                 <div onclick="enterShop('${s.shop_id}')" class="bg-white p-4 rounded-2xl border ${activeShopId === s.shop_id ? 'border-indigo-500 shadow-md ring-2 ring-indigo-100' : 'border-slate-100 shadow-sm'} hover:border-indigo-400 transition cursor-pointer flex items-center gap-4">
                     <div class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 border border-slate-200">
                         ${s.logo_url ? `<img src="${s.logo_url}" class="h-full w-full object-cover">` : `<i class="fa-solid fa-store text-slate-300"></i>`}
@@ -872,41 +941,85 @@
             const notch = document.getElementById('phone-notch');
             const icon = document.getElementById('fullscreen-icon');
             
+            const siteHeader = document.getElementById('main-header');
+            const settingsBtn = document.getElementById('fullscreen-settings-btn');
+            const hubNav = document.getElementById('hub-navigation');
+
             const isFullscreen = phone.classList.contains('fixed');
 
             if (!isFullscreen) {
                 // Expand to Fullscreen
+                if(siteHeader) siteHeader.classList.add('hidden');
+                if(hubNav) hubNav.classList.add('hidden');
                 phone.classList.remove('w-[340px]', 'h-[670px]', 'rounded-[50px]', 'border-[8px]', 'shadow-phone', 'relative');
-                phone.classList.add('fixed', 'inset-0', 'w-full', 'h-full', 'z-[100]', 'bg-slate-950', 'flex', 'justify-center', 'items-center', 'rounded-none', 'border-none');
+                phone.classList.add('fixed', 'inset-0', 'w-full', 'h-full', 'z-[100]', 'bg-slate-900', 'rounded-none', 'border-none');
                 
                 innerScreen.classList.remove('rounded-[38px]');
-                innerScreen.classList.add('rounded-none', 'max-w-[550px]', 'w-full', 'h-full', 'mx-auto', 'shadow-2xl');
+                innerScreen.classList.add('rounded-none');
                 
-                if(notch) notch.classList.add('opacity-0');
-                
-                // Hide the main portal header (LeGrand Art Espace Client...)
-                const mainHeader = document.querySelector('header');
-                if(mainHeader) mainHeader.classList.add('hidden');
+                if(settingsBtn) settingsBtn.classList.remove('hidden');
 
+                if(notch) notch.classList.add('opacity-0');
                 icon.classList.replace('fa-expand', 'fa-compress');
                 document.body.style.overflow = 'hidden';
             } else {
                 // Revert to Normal
                 phone.classList.add('w-[340px]', 'h-[670px]', 'rounded-[50px]', 'border-[8px]', 'shadow-phone', 'relative');
-                phone.classList.remove('fixed', 'inset-0', 'w-full', 'h-full', 'z-[100]', 'bg-slate-950', 'flex', 'justify-center', 'items-center', 'rounded-none', 'border-none');
+                phone.classList.remove('fixed', 'inset-0', 'w-full', 'h-full', 'z-[100]', 'bg-slate-900', 'rounded-none', 'border-none');
                 
                 innerScreen.classList.add('rounded-[38px]');
-                innerScreen.classList.remove('rounded-none', 'max-w-[550px]', 'w-full', 'h-full', 'mx-auto', 'shadow-2xl');
+                innerScreen.classList.remove('rounded-none');
                 
+                if(settingsBtn) settingsBtn.classList.add('hidden');
+                if(siteHeader) siteHeader.classList.remove('hidden');
+                if(hubNav) hubNav.classList.remove('hidden');
+                closeFullscreenMenu();
+
                 if(notch) notch.classList.remove('opacity-0');
-
-                // Restore the main portal header
-                const mainHeader = document.querySelector('header');
-                if(mainHeader) mainHeader.classList.remove('hidden');
-
                 icon.classList.replace('fa-compress', 'fa-expand');
                 document.body.style.overflow = '';
             }
+        }
+
+        function toggleFullscreenMenu() {
+            const menu = document.getElementById('fullscreen-menu-overlay');
+            if(menu) menu.classList.toggle('hidden');
+            if(menu && !menu.classList.contains('hidden')) {
+                switchFSMenuView('home');
+            }
+        }
+
+        function closeFullscreenMenu() {
+            const menu = document.getElementById('fullscreen-menu-overlay');
+            if(menu) menu.classList.add('hidden');
+        }
+
+        function switchFSMenuView(view) {
+            document.getElementById('fs-menu-home').classList.toggle('hidden', view !== 'home');
+            document.getElementById('fs-menu-shops').classList.toggle('hidden', view !== 'shops');
+            if(view === 'shops') renderFSShopsList();
+        }
+
+        function renderFSShopsList(filtered = null) {
+            const container = document.getElementById('fs-shops-list-container');
+            const shops = filtered || allShops;
+            container.innerHTML = shops.map(s => `
+                <div onclick="enterShop('${s.shop_id}'); toggleFullscreenMenu();" class="bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-yellow-500/50 transition cursor-pointer flex items-center gap-4">
+                    <div class="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden shrink-0 border border-white/10">
+                        ${s.logo_url ? `<img src="${s.logo_url}" class="h-full w-full object-cover">` : `<i class="fa-solid fa-store text-slate-500"></i>`}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-bold text-white truncate">${s.name}</h4>
+                        <p class="text-[10px] text-slate-400 truncate">${s.default_category || 'Boutique Partenaire'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterFSShops() {
+            const query = document.getElementById('fs-shop-search').value.toLowerCase();
+            const filtered = allShops.filter(s => s.name.toLowerCase().includes(query) || (s.slogan || '').toLowerCase().includes(query));
+            renderFSShopsList(filtered);
         }
 
         // --- SMARTPHONE SIMULATOR LOGIC ---
@@ -1220,7 +1333,7 @@
             const orderId = '#BC-' + Math.floor(1000 + Math.random() * 9000);
             
             const ownerId = allShops.find(s => s.shop_id === activeShopId)?.owner_id || null;
-            const customerEmail = currentUser ? currentUser.email : 'visiteur@legrandart.com';
+            const customerEmail = currentUser ? currentUser.email : 'client';
 
             const newOrder = {
                 id: orderId,

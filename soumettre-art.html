@@ -89,6 +89,11 @@
     </main>
 
     <script>
+        // Sécurité : Redirection immédiate si non connecté
+        if (!localStorage.getItem('lg_user_name')) {
+            window.location.href = 'index.html?openLogin=true';
+        }
+
         const DATA_KEY = 'lg_artworks';
 
         document.getElementById('art-form').addEventListener('submit', function(event) {

@@ -990,6 +990,11 @@
         }
 
         window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('openLogin') === 'true') {
+                showLoginPortal();
+            }
+
             const sessionUser = localStorage.getItem('lg_user_name');
             if (sessionUser) {
                 // Update navigation on desktop
