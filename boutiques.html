@@ -466,6 +466,9 @@
                                     <div class="h-16 w-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl animate-bounce shadow-md">
                                         <i class="fa-solid fa-circle-check"></i>
                                     </div>
+                                    <button onclick="trackOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-xl transition duration-200 mb-2">
+                                        <i class="fa-brands fa-whatsapp mr-1"></i> Suivre ma commande
+                                    </button>
                                     <div class="space-y-1">
                                         <h4 class="text-sm font-extrabold text-slate-900">Merci pour votre commande !</h4>
                                         <p class="text-[11px] text-slate-400">Votre achat a été enregistré et transmis au gérant de la boutique.</p>
@@ -539,6 +542,7 @@
         let products = [];
         let cart = [];
         
+        let lastPlacedOrder = null; // To store the last order for tracking
         let storeConfig = {
             name: "LeGrandArt",
             slogan: "Explorez nos boutiques partenaires",
@@ -1343,6 +1347,38 @@
             
             navigatePhoneTo('success');
             showNotification(`Commande envoyée au gérant avec succès !`);
+        }
+
+        function trackOrder() {
+            if (!lastPlacedOrder) {
+                openPhoneToast("Aucune commande récente à suivre.");
+                return;
+            }
+
+            const orderId = lastPlacedOrder.id;
+            const customerWhatsapp = lastPlacedOrder.customerWhatsapp;
+            const shopWhatsapp = storeConfig.contact.phone;
+
+            let whatsappLink = '';
+            const message = encodeURIComponent(`Bonjour, je souhaite suivre ma commande ${orderId}.`);
+
+            if (shopWhatsapp) {
+                whatsappLink = `https://wa.me/${shopWhatsapp.replace(/\D/g, '')}?text=${message}`;
+            } else if (customerWhatsapp) {
+                // Fallback: if shop has no WhatsApp, customer can still send from their WhatsApp
+                whatsappLink = `https://wa.me/?text=${message}`;
+            }
+
+            if (whatsappLink) {
+                window.open(whatsappLink, '_blank');
+            } else {
+                let fallbackMessage = "Pour suivre votre commande, veuillez contacter la boutique via :";
+                let contactOptions = [];
+                if (storeConfig.contact.phone) contactOptions.push(`Téléphone: ${storeConfig.contact.phone}`);
+                if (storeConfig.social.facebook) contactOptions.push(`Facebook: ${storeConfig.social.facebook}`);
+                if (storeConfig.social.instagram) contactOptions.push(`Instagram: ${storeConfig.social.instagram}`);
+                openPhoneToast(contactOptions.length > 0 ? `${fallbackMessage} ${contactOptions.join(', ')}` : "Aucun moyen de contact disponible pour le suivi de commande.");
+            }
         }
 
         // --- NOTIFICATIONS ---
