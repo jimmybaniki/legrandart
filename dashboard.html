@@ -218,6 +218,9 @@
                     <button onclick="switchAdminTab('products-tab')" id="btn-products-tab" class="admin-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent whitespace-nowrap">
                         <i class="fa-solid fa-boxes-stacked"></i> Gestion Produits
                     </button>
+                    <button onclick="switchAdminTab('stock-history-tab')" id="btn-stock-history-tab" class="admin-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent whitespace-nowrap">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Historique Stock
+                    </button>
                     <button onclick="switchAdminTab('orders-tab')" id="btn-orders-tab" class="admin-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent relative whitespace-nowrap">
                         <i class="fa-solid fa-receipt"></i> Commandes
                         <span id="orders-badge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center animate-bounce">0</span>
@@ -580,6 +583,17 @@
                     </div>
                 </div>
 
+                <!-- TAB: STOCK HISTORY -->
+                <div id="stock-history-tab" class="admin-tab-content hidden space-y-4">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <span class="bg-indigo-50 text-indigo-600 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                            Flux de Stock & Mouvements
+                        </h3>
+                        <div id="stock-history-container" class="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar pr-1"></div>
+                    </div>
+                </div>
+
                 <!-- TAB 3: LIVE ORDERS TRACKER -->
                 <div id="orders-tab" class="admin-tab-content hidden space-y-4">
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
@@ -862,6 +876,10 @@
         let products = [];
         let cart = [];
         let orders = [];
+        let stockMovements = [];
+
+        let orderSubscription = null; // To hold the Supabase real-time subscription for orders
+        let productSubscription = null; // To hold the Supabase real-time subscription for products
         
         let storeConfig = {
             name: "L'Atelier Parisien",
@@ -920,6 +938,7 @@
                 sb.auth.onAuthStateChange((event, session) => {
                     if (session) {
                         currentUser = session.user;
+                        // Ensure that loadAllData is called after currentUser is set and authenticated
                         document.getElementById('auth-screen').classList.add('hidden');
                         document.getElementById('user-profile-badge').classList.remove('hidden');
                         document.getElementById('user-email-display').innerText = currentUser.email;
@@ -1019,6 +1038,9 @@
                 await sb.auth.signOut();
             }
             currentUser = null;
+            // Unsubscribe from real-time channels when logging out
+            if (orderSubscription) orderSubscription.unsubscribe();
+            if (productSubscription) productSubscription.unsubscribe();
             document.getElementById('auth-screen').classList.remove('hidden');
             document.getElementById('user-profile-badge').classList.add('hidden');
             showNotification("Déconnecté avec succès.");
@@ -1181,6 +1203,15 @@
                         orders = [];
                     }
 
+                    // 4. Fetch stock history
+                    const { data: stockData } = await sb
+                        .from('boutique_stock_history')
+                        .select('*')
+                        .eq('shop_id', shopId)
+                        .order('created_at', { ascending: false });
+                    
+                    if (stockData) stockMovements = stockData;
+
                     showNotification("Boutique chargée depuis le Cloud !");
                 } catch (e) {
                     console.error(e);
@@ -1196,6 +1227,7 @@
             renderPhoneProducts();
             updateDashboard();
             renderOrders();
+            subscribeToShopChanges(shopId); // Subscribe to real-time changes after initial load
             updatePhoneCartBadge();
         }
 
@@ -1254,6 +1286,9 @@
             } else {
                 orders = [];
             }
+
+            const localStock = localStorage.getItem(`bc_stock_${shopId}`);
+            if (localStock) stockMovements = JSON.parse(localStock);
         }
 
         // SAVE DATA SYSTEM
@@ -1356,6 +1391,28 @@
             }
         }
 
+        async function logStockMovement(prodId, prodName, change, reason) {
+            const shopId = getShopId();
+            const entry = {
+                id: 'm-' + Date.now(),
+                shop_id: shopId,
+                product_id: prodId,
+                product_name: prodName,
+                change: change,
+                reason: reason,
+                date: new Date().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            };
+            
+            stockMovements.unshift(entry);
+            localStorage.setItem(`bc_stock_${shopId}`, JSON.stringify(stockMovements));
+
+            if (useSupabase && currentUser) {
+                await sb.from('boutique_stock_history').insert(entry);
+            }
+            
+            renderStockHistory();
+        }
+
         // Factory reset function
         async function resetToDefaults() {
             if (confirm("Voulez-vous vraiment réinitialiser ? Toutes les données de votre boutique seront écrasées par les valeurs d'origine.")) {
@@ -1394,10 +1451,12 @@
 
                 cart = [];
                 orders = [];
+                stockMovements = [];
 
                 localStorage.removeItem(`bc_config_${shopId}`);
                 localStorage.removeItem(`bc_products_${shopId}`);
                 localStorage.removeItem(`bc_orders_${shopId}`);
+                localStorage.removeItem(`bc_stock_${shopId}`);
 
                 if (useSupabase && currentUser) {
                     try {
@@ -1418,6 +1477,44 @@
                 loadAllData();
                 showNotification("Boutique restaurée avec succès !");
             }
+        }
+
+        // Supabase Realtime Subscriptions
+        function subscribeToShopChanges(shopId) {
+            if (!useSupabase || !sb || !shopId) return;
+
+            // Unsubscribe from previous channels if they exist to prevent duplicate listeners
+            if (orderSubscription) {
+                sb.removeChannel(orderSubscription);
+                orderSubscription = null;
+            }
+            if (productSubscription) {
+                sb.removeChannel(productSubscription);
+                productSubscription = null;
+            }
+
+            // Subscribe to orders changes for the current shop
+            orderSubscription = sb.channel(`shop_orders_${shopId}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'boutique_orders', filter: `shop_id=eq.${shopId}` }, payload => {
+                    console.log('Realtime order change received!', payload);
+                    loadAllData(); // Reload all data to reflect changes
+                }).subscribe();
+
+            // Subscribe to products changes for the current shop
+            productSubscription = sb.channel(`shop_products_${shopId}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'boutique_products', filter: `shop_id=eq.${shopId}` }, payload => {
+                    console.log('Realtime product change received!', payload);
+
+                    // Alerte rupture de stock en temps réel (si mis à jour par un client externe)
+                    if (payload.eventType === 'UPDATE' && payload.new && payload.new.stock === 0) {
+                        const existing = products.find(p => p.id === payload.new.id);
+                        if (existing && existing.stock > 0) {
+                            triggerOutOfStockAlert(payload.new);
+                        }
+                    }
+
+                    loadAllData(); // Reload all data to reflect changes
+                }).subscribe();
         }
 
         // Currency Formatting helper
@@ -1846,6 +1943,7 @@
                 if (idx > -1) products[idx] = productData;
             } else {
                 products.unshift(productData);
+                logStockMovement(productData.id, productData.name, productData.stock, "Stock Initial (Création)");
             }
 
             await saveProduct(productData);
@@ -1857,6 +1955,25 @@
             const msg = editId ? `"${name}" mis à jour !` : `"${name}" publié avec succès !`;
             showNotification(msg);
             resetProductForm();
+        }
+
+        // Quick Stock Add
+        async function handleQuickStockAdd(id) {
+            const qtyInput = document.getElementById(`quick-stock-${id}`);
+            const qty = parseInt(qtyInput.value);
+            if (isNaN(qty) || qty <= 0) return;
+
+            const product = products.find(p => p.id === id);
+            if (product) {
+                product.stock += qty;
+                await saveProduct(product);
+                await logStockMovement(product.id, product.name, qty, "Approvisionnement Manuel");
+                
+                renderAdminProducts();
+                renderPhoneProducts();
+                showNotification(`Stock mis à jour pour "${product.name}" (+${qty})`);
+                qtyInput.value = 1;
+            }
         }
 
         // Remove Product
@@ -1895,19 +2012,32 @@
             }
 
             container.innerHTML = products.map(product => `
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between gap-3 hover:border-slate-300 transition-colors">
+                <div class="${product.stock > 0 && product.stock < 5 ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'} p-3 rounded-xl border flex items-center justify-between gap-3 hover:border-slate-300 transition-colors">
                     <div class="flex items-center gap-3">
                         <img src="${product.imgUrl}" class="h-12 w-12 rounded-lg object-cover border border-slate-200" alt="">
                         <div class="flex flex-col">
                             <span class="text-xs font-semibold text-slate-900">${product.name}</span>
                             <span class="text-[10px] text-slate-400 bg-slate-200/50 px-1.5 py-0.5 rounded-full self-start mt-0.5">${product.category}</span>
+                            ${product.stock > 0 && product.stock < 5 ? 
+                                `<span class="text-[9px] font-black text-amber-600 uppercase tracking-tighter mt-1 animate-pulse">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Stock Critique
+                                </span>` : ''}
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="flex flex-col text-right">
                             <span class="text-xs font-bold text-slate-900">${formatVal(product.price)}</span>
-                            <span class="text-[10px] ${product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'} font-semibold">Stock: ${product.stock}</span>
+                            <span class="text-[10px] ${product.stock == 0 ? 'text-rose-600' : (product.stock < 5 ? 'text-amber-600' : 'text-emerald-600')} font-semibold">Stock: ${product.stock}</span>
                         </div>
+
+                        <!-- Quick Stock Increment -->
+                        <div class="flex items-center bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                            <input type="number" id="quick-stock-${product.id}" value="1" min="1" class="w-8 px-1 py-1 text-[10px] text-center border-r border-slate-200 focus:outline-none">
+                            <button onclick="handleQuickStockAdd('${product.id}')" class="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-colors" title="Ajouter du stock">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                            </button>
+                        </div>
+
                         <button onclick="openEditProduct('${product.id}')" class="text-slate-400 hover:text-indigo-600 h-8 w-8 rounded-lg hover:bg-indigo-50 flex items-center justify-center transition-colors">
                             <i class="fa-solid fa-pen-to-square text-sm"></i>
                         </button>
@@ -1984,11 +2114,13 @@
 
             container.innerHTML = filtered.map(product => {
                 const discount = product.oldPrice ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100) : 0;
+                const isLowStock = product.stock > 0 && product.stock < 5;
                 
                 if (isGrid) {
                     return `
                         <div onclick="openProductDetail('${product.id}')" class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm flex flex-col justify-between group active:scale-95 transition-transform duration-200 cursor-pointer relative">
                             ${discount > 0 ? `<span class="absolute top-1.5 left-1.5 bg-rose-600 text-white font-extrabold text-[8px] px-1.5 py-0.5 rounded-md z-10">-${discount}%</span>` : ''}
+                            ${isLowStock ? `<span class="absolute top-1.5 right-1.5 bg-amber-500 text-white font-extrabold text-[8px] px-1.5 py-0.5 rounded-md z-10 animate-pulse">STOCK BAS</span>` : ''}
                             <div class="h-28 w-full bg-slate-50 overflow-hidden relative">
                                 <img src="${product.imgUrl}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" alt="">
                             </div>
@@ -2007,6 +2139,7 @@
                     return `
                         <div onclick="openProductDetail('${product.id}')" class="bg-white rounded-2xl border border-slate-100 p-2.5 shadow-sm flex gap-3 group active:scale-95 transition-transform duration-200 cursor-pointer relative">
                             ${discount > 0 ? `<span class="absolute top-1.5 left-1.5 bg-rose-600 text-white font-extrabold text-[8px] px-1.5 py-0.5 rounded-md z-10">-${discount}%</span>` : ''}
+                            ${isLowStock ? `<span class="absolute top-1.5 right-1.5 bg-amber-500 text-white font-extrabold text-[8px] px-1.5 py-0.5 rounded-md z-10 animate-pulse">STOCK BAS</span>` : ''}
                             <div class="h-16 w-16 rounded-xl bg-slate-50 overflow-hidden shrink-0">
                                 <img src="${product.imgUrl}" class="h-full w-full object-cover" alt="">
                             </div>
@@ -2051,8 +2184,13 @@
             
             const stockBadge = document.getElementById('detail-stock');
             if (product.stock > 0) {
-                stockBadge.className = "text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md";
-                stockBadge.innerText = `Disponible (En Stock: ${product.stock})`;
+                if (product.stock < 5) {
+                    stockBadge.className = "text-[10px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200 animate-pulse";
+                    stockBadge.innerText = `⚠️ Stock Faible : ${product.stock} restant(s)`;
+                } else {
+                    stockBadge.className = "text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md";
+                    stockBadge.innerText = `Disponible (En Stock: ${product.stock})`;
+                }
                 document.getElementById('detail-add-btn').disabled = false;
                 document.getElementById('detail-add-btn').style.opacity = '1';
                 document.getElementById('detail-add-btn').onclick = () => addProductToCart(product);
@@ -2249,8 +2387,14 @@
             for (let cartItem of cart) {
                 const original = products.find(p => p.id === cartItem.product.id);
                 if (original) {
+                    logStockMovement(original.id, original.name, -cartItem.quantity, `Vente (Cmd ${orderId})`);
+                    const oldStock = original.stock;
                     original.stock = Math.max(0, original.stock - cartItem.quantity);
                     await saveProduct(original);
+
+                    if (oldStock > 0 && original.stock === 0) {
+                        triggerOutOfStockAlert(original);
+                    }
                 }
             }
 
@@ -2264,6 +2408,7 @@
             renderPhoneProducts();
             updateDashboard();
             renderOrders();
+            renderStockHistory();
 
             document.getElementById('success-order-id').innerText = orderId;
             document.getElementById('success-order-total').innerText = formatVal(totalVal);
@@ -2358,6 +2503,29 @@
             }).join('');
         }
 
+        // Render Stock History list
+        function renderStockHistory() {
+            const container = document.getElementById('stock-history-container');
+            if (!container) return;
+            
+            if (stockMovements.length === 0) {
+                container.innerHTML = `<p class="text-center py-10 text-slate-400 text-xs italic">Aucun mouvement de stock enregistré.</p>`;
+                return;
+            }
+
+            container.innerHTML = stockMovements.map(m => `
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex items-center justify-between text-xs">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-700">${m.product_name}</span>
+                        <span class="text-[10px] text-slate-400">${m.date} - ${m.reason}</span>
+                    </div>
+                    <div class="font-mono font-black ${m.change > 0 ? 'text-emerald-600' : 'text-rose-600'}">
+                        ${m.change > 0 ? '+' : ''}${m.change}
+                    </div>
+                </div>
+            `).join('');
+        }
+
         // Order state transitions on backend dropdown
         async function updateOrderStatus(id, newStatus) {
             const order = orders.find(o => o.id === id);
@@ -2410,8 +2578,29 @@
             showNotification(`🎉 Nouvelle commande reçue d'un montant de ${formatVal(order.total)} !`);
         }
 
+        // Alert for out of stock
+        function triggerOutOfStockAlert(product) {
+            showNotification(`⚠️ RUPTURE DE STOCK : "${product.name}" est épuisé !`, true);
+            
+            // Audio feedback (warning tone)
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(330, audioCtx.currentTime); 
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start();
+                setTimeout(() => osc.frequency.setValueAtTime(220, audioCtx.currentTime), 150);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+                osc.stop(audioCtx.currentTime + 0.8);
+            } catch(e) {}
+        }
+
         // Slide up notification banner
-        function showNotification(msg) {
+        function showNotification(msg, isAlert = false) {
             let container = document.getElementById('dashboard-toast');
             if(!container) {
                 container = document.createElement('div');
@@ -2419,7 +2608,9 @@
                 container.className = "fixed bottom-5 left-5 bg-slate-950 text-white text-xs px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300";
                 document.body.appendChild(container);
             }
-            container.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i> <span class="font-medium">${msg}</span>`;
+
+            const icon = isAlert ? 'fa-triangle-exclamation text-rose-500' : 'fa-circle-check text-emerald-500';
+            container.innerHTML = `<i class="fa-solid ${icon}"></i> <span class="font-medium">${msg}</span>`;
             
             setTimeout(() => {
                 container.classList.remove('translate-y-24', 'opacity-0');
@@ -2448,10 +2639,13 @@
             const totalRevenue = orders
                 .filter(o => o.status !== 'Refusé')
                 .reduce((sum, o) => sum + o.total, 0);
+
+            const lowStockCount = products.filter(p => p.stock > 0 && p.stock < 5).length;
             
             document.getElementById('dashboard-sales').innerText = formatVal(totalRevenue);
             document.getElementById('dashboard-orders-count').innerText = orders.length;
-            document.getElementById('dashboard-products-count').innerText = products.length;
+            document.getElementById('dashboard-products-count').innerHTML = products.length + 
+                (lowStockCount > 0 ? ` <span class="text-[10px] text-amber-500 font-black animate-pulse" title="${lowStockCount} produits en stock critique">(⚠️ ${lowStockCount})</span>` : '');
 
             const avg = orders.length > 0 ? (totalRevenue / orders.length) : 0;
             document.getElementById('dashboard-avg-cart').innerText = formatVal(avg);
