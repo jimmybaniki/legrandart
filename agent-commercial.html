@@ -310,7 +310,12 @@
             </div>
             
             <div class="p-8 space-y-6">
-                <form id="auth-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <div id="authTabs" class="flex gap-4 mb-6 border-b border-gray-100">
+                    <button onclick="toggleAuthMode('login')" id="loginTabBtn" class="flex-1 pb-3 border-b-2 border-black text-black font-black text-[10px] uppercase tracking-widest transition-all">Connexion</button>
+                    <button onclick="toggleAuthMode('signup')" id="signupTabBtn" class="flex-1 pb-3 border-b-2 border-transparent text-gray-400 font-black text-[10px] uppercase tracking-widest transition-all">Inscription</button>
+                </div>
+
+                <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-black uppercase text-gray-500 mb-1.5 tracking-widest">Email Agent</label>
                         <div class="relative">
@@ -326,7 +331,7 @@
                         </div>
                     </div>
                     <button type="submit" id="btn-login" class="w-full bg-black hover:bg-gray-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
-                        Connexion
+                        Accéder au Tableau de Bord
                     </button>
                 </form>
 
@@ -392,10 +397,12 @@
         async function verifierAccesAgent() {
             const { data: { user } } = await sb.auth.getUser();
             
-            // On ne redirige que si un utilisateur est déjà connecté avec le mauvais email
-            if (user && user.email !== 'banikimukishijimmy@gmail.com') {
-                await sb.auth.signOut();
-                window.location.href = 'boutiques.html';
+            if (user) {
+                const role = user.user_metadata?.role;
+                if (role !== 'agent' && user.email !== 'banikimukishijimmy@gmail.com') {
+                    await sb.auth.signOut();
+                    window.location.href = 'index.html';
+                }
             }
         }
 
@@ -429,8 +436,17 @@
             }
         }
 
+        let authMode = 'login';
+        function toggleAuthMode(mode) {
+            authMode = mode;
+            const isLogin = mode === 'login';
+            document.getElementById('loginTabBtn').className = isLogin ? "flex-1 pb-3 border-b-2 border-black text-black font-black text-[10px] uppercase tracking-widest transition-all" : "flex-1 pb-3 border-b-2 border-transparent text-gray-400 font-black text-[10px] uppercase tracking-widest transition-all";
+            document.getElementById('signupTabBtn').className = !isLogin ? "flex-1 pb-3 border-b-2 border-black text-black font-black text-[10px] uppercase tracking-widest transition-all" : "flex-1 pb-3 border-b-2 border-transparent text-gray-400 font-black text-[10px] uppercase tracking-widest transition-all";
+            document.getElementById('btn-login').innerText = isLogin ? "Accéder au Tableau de Bord" : "Créer mon compte Agent";
+        }
+
         // --- AUTHENTICATION ---
-        async function handleLogin(e) {
+        async function handleAuth(e) {
             e.preventDefault();
             if (!sb) return alert("Système Cloud indisponible.");
             
@@ -438,16 +454,27 @@
             const password = document.getElementById('agent-password').value;
             const btn = document.getElementById('btn-login');
             
-            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Connexion...`;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Traitement...`;
             btn.disabled = true;
 
             try {
-                const { data, error } = await sb.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-                // Le listener onAuthStateChange va prendre le relais
+                if (authMode === 'login') {
+                    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                } else {
+                    const { data, error } = await sb.auth.signUp({ 
+                        email, 
+                        password,
+                        options: { data: { role: 'agent' } }
+                    });
+                    if (error) throw error;
+                    alert("Demande d'inscription envoyée ! Vérifiez vos e-mails pour confirmer votre compte.");
+                    toggleAuthMode('login');
+                }
             } catch (err) {
                 alert("Erreur de connexion : " + err.message);
-                btn.innerHTML = `Connexion`;
+            } finally {
+                btn.innerHTML = authMode === 'login' ? "Accéder au Tableau de Bord" : "Créer mon compte Agent";
                 btn.disabled = false;
             }
         }
