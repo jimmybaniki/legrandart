@@ -5,6 +5,7 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
 
@@ -626,9 +627,21 @@
 
     <script>
         const WHATSAPP_PHONE = "243815022325";
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7xZ_zf2IPfM96HsoiP3JVGtFyBEWw1iGgDOavlacJ92MUUgZOWdBCFNSRwOExbeoX/exec";
+        const SUPABASE_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_fYpLwujskWmD2rQRsxD5TQ_qgAG6Bm_';
+        let sb = null;
         let vantaEffect;
         let authMode = 'login';
+
+        function initSupabase() {
+            if (!sb && window.supabase) {
+                sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initSupabase();
+        });
 
         // Custom notification toaster UI
         function showNotification(msg, isError = false) {
@@ -721,12 +734,9 @@
             const btnText = document.getElementById('authBtnText');
             const status = document.getElementById('authStatus');
             
-            const payload = {
-                action: authMode,
-                email: document.getElementById('auth-email').value,
-                password: document.getElementById('auth-pass').value,
-                name: document.getElementById('auth-name').value || "Artiste"
-            };
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-pass').value;
+            const name = document.getElementById('auth-name').value || "Artiste";
 
             btn.disabled = true;
             loader.style.display = 'block';
@@ -734,26 +744,27 @@
             status.classList.add('hidden');
             
             try {
-                const res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json();
+                initSupabase();
+                if (!sb) throw new Error('Supabase non initialisé');
 
-                if (result.status === "success") {
-                    if(payload.action === 'signup') {
-                        showAuthStatus("Compte créé ! Connectez-vous.", "bg-yellow-500/20 text-yellow-500 border border-yellow-500/30");
-                        toggleAuthMode('login');
-                    } else {
-                        localStorage.setItem('lg_user_name', result.user.name);
-                        location.reload();
-                    }
+                if (authMode === 'signup') {
+                    const { data, error } = await sb.auth.signUp({
+                        email,
+                        password,
+                        options: { data: { name } }
+                    });
+                    if (error) throw error;
+                    showAuthStatus("Compte créé ! Connectez-vous.", "bg-yellow-500/20 text-yellow-500 border border-yellow-500/30");
+                    toggleAuthMode('login');
                 } else {
-                    showAuthStatus(result.message || "Accès refusé", "bg-red-500/20 text-red-400 border border-red-500/30");
+                    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    const user = data?.user;
+                    localStorage.setItem('lg_user_name', user?.user_metadata?.name || user?.email || email);
+                    location.reload();
                 }
-            } catch(err) { 
-                showAuthStatus("Problème de connexion au serveur", "bg-orange-500/20 text-orange-400 border border-orange-500/30");
+            } catch(err) {
+                showAuthStatus(err.message || "Problème de connexion au serveur", "bg-orange-500/20 text-orange-400 border border-orange-500/30");
             } finally {
                 btn.disabled = false;
                 loader.style.display = 'none';

@@ -1,59 +1,15 @@
-// Gestion des données en stockage local
-// Les profils, boutiques et œuvres sont sauvegardés dans le navigateur
+// Gestion des données via Supabase (cloud-first)
+// Les profils, boutiques et œuvres sont enregistrés dans la même instance Supabase.
+// localStorage n'est conservé que comme cache d'interface ou fallback non principal.
 
 const SUPABASE_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_fYpLwujskWmD2rQRsxD5TQ_qgAG6Bm_';
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypuG5CjVBMTTo1uWHX8a8vPKjkaOiVEGIauGlFykncCMJMxxDoDG6IbgAyVTctTmeX/exec";
+let sb = null;
 
-// FONCTIONS DE SYNCHRONISATION BDD
-async function readData(sheetName) {
-    try {
-        const response = await fetch(`${SCRIPT_URL}?sheetName=${sheetName}`);
-        return await response.json();
-    } catch (e) {
-        console.error("Erreur lecture BDD:", e);
-        return [];
-    }
-}
-
-async function addEntry(sheetName, rowValues) {
-    const payload = {
-        action: "write",
-        sheetName: sheetName,
-        values: rowValues
-    };
-
-    try {
-        await fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify(payload)
-        });
-        return true;
-    } catch (e) {
-        console.error("Erreur écriture BDD:", e);
-        return false;
-    }
-}
-
-async function deleteEntry(sheetName, rowIndex) {
-    const payload = {
-        action: "delete",
-        sheetName: sheetName,
-        rowIndex: rowIndex // L'index de la ligne à supprimer (base 1, incluant l'en-tête)
-    };
-
-    try {
-        await fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify(payload)
-        });
-        return true;
-    } catch (e) {
-        console.error("Erreur suppression BDD:", e);
-        return false;
+function initSupabase() {
+    if (window.supabase && !sb) {
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
 }
 
@@ -95,19 +51,6 @@ function saveProfileWithMode(profile) {
     registerProfile(profile);
 }
 
-async function saveToDataStore(payload) {
-    // Enregistrement silencieux vers Google Sheets
-    try {
-        await fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify(payload)
-        });
-    } catch (e) {
-        console.error("Erreur de sauvegarde distante:", e);
-    }
-}
-
 function loginAsManager(shopName) {
     // Simule une connexion en tant que gérant d'une boutique spécifique
     localStorage.setItem('lg_active_managed_shop', shopName);
@@ -141,29 +84,62 @@ function registerProfile(profile) {
         };
         addArtwork(newArtwork);
     }
-    saveToDataStore({ action: 'signup', profile });
 }
 
 function addShop(shop) {
+    initSupabase();
+    if (sb) {
+        const payload = {
+            shop_id: shop.id?.toString() || `shop_${Date.now()}`,
+            owner_id: shop.email || shop.owner || null,
+            name: shop.shopName || shop.owner,
+            slogan: shop.description,
+            default_category: shop.tags || 'Boutique partenaire',
+            logo_url: shop.image,
+            contact_info: {
+                phone: '',
+                address: `${shop.city || ''}${shop.city && shop.country ? ', ' : ''}${shop.country || ''}`
+            },
+            social_links: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        sb.from('boutique_config').upsert(payload, { onConflict: 'shop_id' }).then(({ error }) => {
+            if (error) console.error('Erreur Supabase addShop:', error);
+        });
+    }
+
     const shops = getLocalShops();
     shops.unshift(shop);
     localStorage.setItem('lg_shops', JSON.stringify(shops));
-    // Envoi vers Google Sheets pour persistance éternelle
-    addEntry("shops", [
-        shop.shopName, 
-        shop.owner, 
-        shop.email, 
-        shop.country, 
-        shop.city, 
-        shop.tags
-    ]);
 }
 
 function addArtwork(artwork) {
+    initSupabase();
+    if (sb) {
+        const payload = {
+            id: artwork.id,
+            shop_id: artwork.shopId || `artist_${(artwork.artist || 'unknown').replace(/\s+/g, '_').toLowerCase()}`,
+            owner_id: artwork.artist || null,
+            name: artwork.title,
+            category: 'Art',
+            price: 0,
+            old_price: null,
+            stock: 1,
+            description: artwork.description,
+            img_key: artwork.imgKey || null,
+            img_url: artwork.image,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        sb.from('boutique_products').upsert(payload).then(({ error }) => {
+            if (error) console.error('Erreur Supabase addArtwork:', error);
+        });
+    }
+
     const artworks = getLocalWorks();
     artworks.unshift(artwork);
     localStorage.setItem('lg_artworks', JSON.stringify(artworks));
-    saveToDataStore({ action: 'add_artwork', data: artwork });
 }
 
 async function loadEvents() {
@@ -171,34 +147,36 @@ async function loadEvents() {
     if (!container) return;
 
     try {
-        const res = await fetch(`${SCRIPT_URL}?action=get_events`);
-        const events = await res.json();
-        
-        // Filtre uniquement les événements approuvés
-        const approvedEvents = events.filter(e => e.status === 'approved');
+        initSupabase();
+        if (sb) {
+            const { data: events = [], error } = await sb
+                .from('events')
+                .select('*')
+                .eq('status', 'approved')
+                .order('date', { ascending: true });
 
-        if (approvedEvents.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-center py-20 uppercase text-xs font-black tracking-widest">Aucun événement approuvé pour le moment.</p>';
-            return;
+            if (!error && events.length > 0) {
+                container.innerHTML = events.map(event => `
+                    <div class="glass-card p-8 rounded-[2.5rem] border border-white/5 hover:border-yellow-500/30 transition-all group">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <span class="text-yellow-500 text-[10px] font-black uppercase tracking-widest block mb-2">${event.date}</span>
+                                <h3 class="text-2xl font-black text-white uppercase">${event.title}</h3>
+                            </div>
+                            <div class="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">Confirmé</div>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">${event.description}</p>
+                        <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                            <span class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-yellow-500"></i> ${event.location}</span>
+                            <span class="flex items-center gap-2"><i class="fas fa-user text-emerald-500"></i> Par ${event.organizer}</span>
+                        </div>
+                    </div>
+                `).join('');
+                return;
+            }
         }
 
-        container.innerHTML = approvedEvents.map(event => `
-            <div class="glass-card p-8 rounded-[2.5rem] border border-white/5 hover:border-yellow-500/30 transition-all group">
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <span class="text-yellow-500 text-[10px] font-black uppercase tracking-widest block mb-2">${event.date}</span>
-                        <h3 class="text-2xl font-black text-white uppercase">${event.title}</h3>
-                    </div>
-                    <div class="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">Confirmé</div>
-                </div>
-                <p class="text-gray-400 text-sm leading-relaxed mb-6">${event.description}</p>
-                <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-500">
-                    <span class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-yellow-500"></i> ${event.location}</span>
-                    <span class="flex items-center gap-2"><i class="fas fa-user text-emerald-500"></i> Par ${event.organizer}</span>
-                </div>
-            </div>
-        `).join('');
-
+        container.innerHTML = '<p class="text-gray-400 text-center py-20 uppercase text-xs font-black tracking-widest">Aucun événement approuvé pour le moment.</p>';
     } catch (e) {
         console.error("Erreur lors du chargement des événements:", e);
         container.innerHTML = '<p class="text-red-500 text-center py-20 uppercase text-[10px] font-black">Erreur de chargement des événements</p>';
@@ -212,9 +190,9 @@ async function loadShops() {
     let shops = getLocalShops();
     
     // 1. Tentative de chargement depuis Supabase (Boutiques réelles du Dashboard)
-    if (window.supabase) {
+    initSupabase();
+    if (sb) {
         try {
-            const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             const { data: cloudShops, error } = await sb
                 .from('boutique_config')
                 .select('*')
@@ -263,12 +241,6 @@ async function loadShops() {
             href: 'New folder/afrikrea.html'
         }
     ];
-
-    // Tentative de récupération depuis Google Sheets pour mise à jour
-    const remoteShops = await readData("shops");
-    if (remoteShops && remoteShops.length > 0) {
-        shops = remoteShops;
-    }
 
     container.innerHTML = '';
     const allShops = [...shops, ...defaultShops];
@@ -458,7 +430,6 @@ function editShop(shopId) {
         shop.description = newDesc;
         shop.tags = newTags;
         localStorage.setItem('lg_shops', JSON.stringify(shops));
-        saveToDataStore({ action: 'shop_updated', shop });
         showMyShops();
     }
 }
@@ -477,7 +448,6 @@ function editArtwork(artId) {
         artwork.description = newDesc;
         artwork.image = newImage;
         localStorage.setItem('lg_artworks', JSON.stringify(artworks));
-        saveToDataStore({ action: 'artwork_updated', artwork });
         showMyArtworks();
     }
 }
@@ -487,7 +457,6 @@ function deleteShop(shopId) {
     let shops = getLocalShops();
     shops = shops.filter(s => s.id != shopId);
     localStorage.setItem('lg_shops', JSON.stringify(shops));
-    saveToDataStore({ action: 'shop_deleted', shopId });
     showMyShops();
 }
 
@@ -496,7 +465,6 @@ function deleteArtwork(artId) {
     let artworks = getLocalWorks();
     artworks = artworks.filter(a => a.id != artId);
     localStorage.setItem('lg_artworks', JSON.stringify(artworks));
-    saveToDataStore({ action: 'artwork_deleted', artId });
     showMyArtworks();
 }
 
@@ -517,6 +485,7 @@ function initSelectionMode() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    initSupabase();
     if (document.getElementById('dynamic-shops')) {
         loadShops();
     }

@@ -120,13 +120,6 @@
                     </button>
                 </form>
 
-                <!-- Guest Fallback / Demo Option -->
-                <div class="border-t border-slate-100 pt-3 flex flex-col gap-2">
-                    <p class="text-[10px] text-center text-slate-400">Pas encore connecté à votre espace ?</p>
-                    <button onclick="accessAsGuest()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-user-secret"></i> Continuer en Mode Démo (Local)
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -164,7 +157,7 @@
                 <div class="flex flex-col text-right">
                     <span class="text-[10px] text-slate-400 font-bold uppercase">Statut Base</span>
                     <span id="cloud-status-badge" class="text-xs font-semibold text-amber-600 flex items-center justify-end gap-1">
-                        <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span> Mode Local (Secours)
+                        <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span> Connexion Supabase...
                     </span>
                 </div>
                 <button onclick="resetToDefaults()" class="text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 md:px-3 md:py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5">
@@ -868,8 +861,8 @@
 
     <script>
         // HARDCODED CLOUD CREDENTIALS
-        const CLOUD_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
-        const CLOUD_KEY = 'sb_publishable_fYpLwujskWmD2rQRsxD5TQ_qgAG6Bm_';
+        const CLOUD_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co'; // Nouvelle URL Supabase
+        const CLOUD_KEY = 'sb_publishable_fYpLwujskWmD2rQRsxD5TQ_qgAG6Bm_'; // Nouvelle clé Supabase
 
         // Cloud Client State
         let sb = null;
@@ -1026,17 +1019,6 @@
             }
         }
 
-        // Guest / Demo Access bypass handler
-        function accessAsGuest() {
-            currentUser = null;
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('user-profile-badge').classList.remove('hidden');
-            document.getElementById('user-email-display').innerText = "gérant-demonstration@legrandart.com";
-            
-            showNotification("Accès invité démo activé.");
-            loadAllData();
-        }
-
         // Handle Log out trigger
         async function handleLogout() {
             if (useSupabase) {
@@ -1080,7 +1062,7 @@
             initCloud();
         }
 
-        // LOAD DATA SYSTEM (Cloud -> LocalStorage fallback)
+        // LOAD DATA SYSTEM (Cloud only)
         async function loadAllData() {
             const shopId = getShopId();
 
@@ -1222,11 +1204,10 @@
                     showNotification("Boutique chargée depuis le Cloud !");
                 } catch (e) {
                     console.error(e);
-                    showNotification("Échec Cloud. Chargement local de secours.");
-                    loadLocalStorageData();
+                    showNotification("Échec Cloud. Impossible de charger les données du Cloud.");
                 }
             } else {
-                loadLocalStorageData();
+                showNotification("Cloud non disponible. Aucun accès aux données.");
             }
 
             applyStoreConfig();
@@ -1238,72 +1219,9 @@
             updatePhoneCartBadge();
         }
 
-        // Local Storage Fallback loading
-        function loadLocalStorageData() {
-            const shopId = getShopId();
-            
-            // Configuration
-            const localConfig = localStorage.getItem(`bc_config_${shopId}`);
-            if (localConfig) {
-                storeConfig = JSON.parse(localConfig);
-                if(storeConfig.logoUrl === undefined) storeConfig.logoUrl = "";
-            } else {
-                storeConfig = {
-                    name: "L'Atelier Parisien",
-                    slogan: "L'élégance minimaliste au quotidien",
-                    banner: "Profitez de -10% avec le code : HELLO10 ✨",
-                    currency: "USD",
-                    exchangeRate: 2800,
-                    defaultCategory: "Collection Automne",
-                    themeColor: "#4f46e5",
-                    themeRgb: "79, 70, 229",
-                    layout: "grid",
-                    logoUrl: "",
-                    paymentMethods: {
-                        card: { active: false, info: "" },
-                        mpesa: { active: false, info: "" },
-                        blive: { active: false, info: "" },
-                        airtel: { active: false, info: "" },
-                        orange: { active: false, info: "" },
-                        afrimoney: { active: false, info: "" },
-                        paypal: { active: false, info: "" },
-                        delivery: { active: false, info: "" }
-                    },
-                    contact: { phone: "", address: "" },
-                    social: { facebook: "", instagram: "", tiktok: "" }
-                };
-            }
-
-            // Products
-            const localProds = localStorage.getItem(`bc_products_${shopId}`);
-            if (localProds) {
-                products = JSON.parse(localProds);
-            } else {
-                // Default initial dataset
-                products = [
-                    { id: 'p1', name: 'Montre Nomade Classique', category: 'Mode', price: 129.00, oldPrice: 179.00, stock: 15, description: 'Un boîtier épuré en acier chirurgical marié à un bracelet cuir.', imgKey: 'fashion-1', imgUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80' },
-                    { id: 'p2', name: 'Casque Audio ANC', category: 'Tech', price: 199.99, oldPrice: null, stock: 8, description: 'Réduction de bruit active haut de gamme.', imgKey: 'tech-1', imgUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80' }
-                ];
-            }
-
-            // Orders
-            const localOrders = localStorage.getItem(`bc_orders_${shopId}`);
-            if (localOrders) {
-                orders = JSON.parse(localOrders);
-            } else {
-                orders = [];
-            }
-
-            const localStock = localStorage.getItem(`bc_stock_${shopId}`);
-            if (localStock) stockMovements = JSON.parse(localStock);
-        }
-
         // SAVE DATA SYSTEM
         async function saveConfig() {
             const shopId = getShopId();
-
-            // Always save to localStorage
-            localStorage.setItem(`bc_config_${shopId}`, JSON.stringify(storeConfig));
 
             if (useSupabase && currentUser) {
                 try {
@@ -1342,8 +1260,6 @@
 
         async function saveProduct(product, isDelete = false) {
             const shopId = getShopId();
-            localStorage.setItem(`bc_products_${shopId}`, JSON.stringify(products));
-
             if (useSupabase && currentUser) {
                 try {
                     if (isDelete) {
@@ -1373,8 +1289,6 @@
 
         async function saveOrder(order, isDelete = false) {
             const shopId = getShopId();
-            localStorage.setItem(`bc_orders_${shopId}`, JSON.stringify(orders));
-
             if (useSupabase && currentUser) {
                 try {
                     if (isDelete) {
@@ -1412,7 +1326,6 @@
             };
             
             stockMovements.unshift(entry);
-            localStorage.setItem(`bc_stock_${shopId}`, JSON.stringify(stockMovements));
 
             if (useSupabase && currentUser) {
                 await sb.from('boutique_stock_history').insert(entry);
@@ -1460,11 +1373,6 @@
                 cart = [];
                 orders = [];
                 stockMovements = [];
-
-                localStorage.removeItem(`bc_config_${shopId}`);
-                localStorage.removeItem(`bc_products_${shopId}`);
-                localStorage.removeItem(`bc_orders_${shopId}`);
-                localStorage.removeItem(`bc_stock_${shopId}`);
 
                 if (useSupabase && currentUser) {
                     try {

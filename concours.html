@@ -14,11 +14,26 @@
     </script>
     <title>Concours 2026 - LeGrandArt</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // Sécurité : Redirection immédiate si non connecté
         if (!localStorage.getItem('lg_user_name')) {
             window.location.href = 'index.html';
         }
+
+        const SUPABASE_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_fYpLwujskWmD2rQRsxD5TQ_qgAG6Bm_';
+        let sb = null;
+
+        function initSupabase() {
+            if (!sb && window.supabase) {
+                sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initSupabase();
+        });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -380,26 +395,6 @@
 
     <script>
         // URL unique et centralisée pour la base de données
-        const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxG9oNMlXhd8yrIMQ85i10WtesoZPhqYLTGch_rnRADw4Cjj0fQhA5q7Qu15wQEfHpK6Q/exec';
-
-        // Helper pour envoyer des requêtes POST à Google Sheets
-        async function sendToGoogleSheets(action, payload) {
-            try {
-                const response = await fetch(SHEET_API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // Important pour Google Apps Script
-                    headers: {
-                        'Content-Type': 'text/plain' // Évite le preflight OPTIONS que GAS ne gère pas
-                    },
-                    body: JSON.stringify({ action, ...payload })
-                });
-                return { status: 'success' }; 
-            } catch (error) {
-                console.error("Erreur de communication avec Google Sheets:", error);
-                throw error;
-            }
-        }
-
         let lastEntry = null; // Stocke la dernière inscription pour l'envoi d'email
 
         function toggleModal(id) {
@@ -616,22 +611,32 @@
         }
 
         async function saveRegistration(entry) {
+            initSupabase();
+            if (!sb) {
+                console.error('Supabase non initialisé');
+                return;
+            }
+
             const payload = {
                 type: entry.type,
                 name: entry.name,
                 email: entry.email,
                 phone: entry.phone,
                 total: entry.total,
-                ticketType: entry.ticketType || '',
+                ticket_type: entry.ticketType || '',
                 quantity: entry.quantity || '',
-                group: entry.group || '',
+                group_name: entry.group || '',
                 note: entry.note || '',
                 category: entry.category || '',
                 bio: entry.bio || '',
-                piece: entry.piece || ''
+                piece: entry.piece || '',
+                created_at: new Date().toISOString()
+            };
+
+            const { error } = await sb.from('concours_registrations').insert([payload]);
+            if (error) {
+                console.error('Erreur Supabase concours:', error);
             }
-            const result = await sendToGoogleSheets('save', payload);
-            if (result.status === 'error') console.warn('Enregistrement Google Sheets échoué:', result.message);
         }
 
         const registrations = [];
@@ -668,19 +673,19 @@
         async function loadAdminRegistrations() {
             const body = document.getElementById('admin-registrations');
             body.innerHTML = '<tr><td class="p-3 text-gray-400" colspan="6">Chargement des inscriptions...</td></tr>';
-            try { 
-                const response = await fetch(`${SHEET_API_URL}?action=read`);
-                const items = await response.json();
-                if (!Array.isArray(items)) {
-                    body.innerHTML = '<tr><td class="p-3 text-gray-400" colspan="6">Format de données invalide.</td></tr>';
-                    throw new Error('Réponse invalide');
-                }
+            try {
+                initSupabase();
+                if (!sb) throw new Error('Supabase non initialisé');
+
+                const { data: items, error } = await sb.from('concours_registrations').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+
                 registrations.length = 0;
                 items.forEach(item => registrations.push(item));
                 renderAdminRegistrations(registrations);
             } catch (error) {
                 body.innerHTML = '<tr><td class="p-3 text-red-500" colspan="6">Impossible de charger les inscriptions.</td></tr>';
-                console.warn('Erreur admin Google Sheets:', error);
+                console.warn('Erreur admin Supabase:', error);
             }
         }
 
@@ -737,48 +742,60 @@
         }
 
         async function updateRegistration() {
-            const index = document.getElementById('edit-reg-index').value;
-            const oldEmail = document.getElementById('edit-reg-old-email').value;
+            const index = parseInt(document.getElementById('edit-reg-index').value, 10);
+            const id = registrations[index]?.id;
             const name = document.getElementById('edit-reg-name').value;
             const email = document.getElementById('edit-reg-email').value;
             const phone = document.getElementById('edit-reg-phone').value;
             const total = document.getElementById('edit-reg-total').value;
-            const type = registrations[index].type;
 
-            const payload = {
-                rowIndex: parseInt(index) + 2,
-                oldEmail: oldEmail,
-                type: type,
-                name: name,
-                email: email,
-                phone: phone,
-                total: total
-            };
+            if (!id) {
+                alert('Impossible de trouver l’inscription à mettre à jour.');
+                return;
+            }
 
             try {
-                const result = await sendToGoogleSheets('update', payload);
-                if (result.status === 'success') {
-                    alert('Modification envoyée ! (La mise à jour de la liste peut prendre quelques secondes)');
-                    closeEditRegistrationModal();
-                    setTimeout(loadAdminRegistrations, 1500);
-                } else {
-                    alert('Erreur lors de la modification.');
-                }
-            } catch (e) { alert("Erreur de connexion"); }
+                initSupabase();
+                if (!sb) throw new Error('Supabase non initialisé');
+
+                const { error } = await sb.from('concours_registrations').update({
+                    name,
+                    email,
+                    phone,
+                    total,
+                    updated_at: new Date().toISOString()
+                }).eq('id', id);
+
+                if (error) throw error;
+                alert('Modification envoyée ! (La mise à jour de la liste peut prendre quelques secondes)');
+                closeEditRegistrationModal();
+                setTimeout(loadAdminRegistrations, 1500);
+            } catch (e) {
+                console.error(e);
+                alert('Erreur lors de la modification.');
+            }
         }
 
         async function deleteRegistration(email, index) {
             if (!confirm(`Voulez-vous vraiment supprimer l'inscription de ${email} ?`)) return;
+            const id = registrations[index]?.id;
+            if (!id) {
+                alert('Impossible de trouver l’inscription à supprimer.');
+                return;
+            }
 
             try {
-                const result = await sendToGoogleSheets('delete', { rowIndex: parseInt(index) + 2 });
-                if (result.status === 'success') {
-                    alert('Suppression envoyée !');
-                    setTimeout(loadAdminRegistrations, 1500);
-                } else {
-                    alert('Erreur lors de la suppression.');
-                }
-            } catch (e) { alert("Erreur de connexion"); }
+                initSupabase();
+                if (!sb) throw new Error('Supabase non initialisé');
+
+                const { error } = await sb.from('concours_registrations').delete().eq('id', id);
+                if (error) throw error;
+                alert('Suppression envoyée !');
+                setTimeout(loadAdminRegistrations, 1500);
+            } catch (e) {
+                console.error(e);
+                alert('Erreur lors de la suppression.');
+            }
         }
 
         function downloadTicketAsPdf() {

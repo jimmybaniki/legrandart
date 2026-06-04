@@ -505,9 +505,6 @@
             const code = document.getElementById('agent-promo-code').value.trim().toUpperCase();
             if (!code) return alert("Veuillez entrer un code valide.");
 
-            // Sauvegarde locale de sécurité immédiate
-            localStorage.setItem(`agent_promo_${currentUser.id}`, code);
-
             try {
                 const { error } = await sb.from('agent_profiles').upsert({
                     id: currentUser.id,
@@ -519,23 +516,21 @@
                 alert("Votre code promo est maintenant actif sur le réseau !");
             } catch (err) {
                 console.error("Erreur Cloud Agent Profile (Table manquante ?):", err.message);
-                alert("Code enregistré localement ! Note : La table 'agent_profiles' n'est pas encore créée dans votre SQL Editor Supabase.");
+                alert("Erreur de sauvegarde du code promo. Vérifiez la configuration Supabase et la table 'agent_profiles'.");
             }
         }
 
         async function loadAgentProfile() {
             if (!currentUser) return;
 
-            // Charger le fallback local en premier pour un affichage immédiat
-            const localCode = localStorage.getItem(`agent_promo_${currentUser.id}`);
-            if (localCode) document.getElementById('agent-promo-code').value = localCode;
-
             try {
                 const { data } = await sb.from('agent_profiles').select('promo_code').eq('id', currentUser.id).single();
                 if (data && data.promo_code) {
                     document.getElementById('agent-promo-code').value = data.promo_code;
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error('Erreur lecture profil agent Supabase :', e.message || e);
+            }
         }
 
         // Helper to sign up a user without logging out the agent
