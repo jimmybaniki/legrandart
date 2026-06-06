@@ -129,7 +129,7 @@
         <!-- App Header -->
         <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex lg:flex-nowrap flex-wrap gap-4 items-center justify-between shadow-sm">
             <div class="flex items-center gap-2 md:gap-3">
-                <a href="index.html" class="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors mr-1" title="Retour à l'accueil">
+                <a href="index.html?skipRedirect=true" class="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors mr-1" title="Retour à l'accueil">
                     <i class="fa-solid fa-house text-sm"></i>
                 </a>
                 <div class="bg-yellow-500 text-black p-2.5 rounded-xl shadow-md shadow-yellow-100">
@@ -138,6 +138,7 @@
                 <div>
                     <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
                         LeGrand<span class="text-yellow-500">Art</span> <span class="hidden xs:inline text-[10px] uppercase tracking-widest text-emerald-500 font-bold">Manager Cloud</span>
+                        <span id="premium-badge" class="hidden text-[9px] bg-gradient-to-r from-amber-400 to-amber-600 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-sm flex items-center gap-1"><i class="fa-solid fa-crown text-[7px]"></i> Premium</span>
                     </h1>
                     <p class="text-xs text-slate-500">Gérez votre boutique en direct dans le Cloud</p>
                 </div>
@@ -211,6 +212,10 @@
                     </button>
                     <button onclick="switchAdminTab('products-tab')" id="btn-products-tab" class="admin-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent whitespace-nowrap">
                         <i class="fa-solid fa-boxes-stacked"></i> Gestion Produits
+                    </button>
+                    <button onclick="switchAdminTab('events-tab')" id="btn-events-tab" class="admin-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent whitespace-nowrap">
+                        <i class="fa-solid fa-calendar-days text-emerald-600"></i> Événements
+                        <span id="events-count-badge" class="hidden bg-emerald-500 text-white text-[9px] px-1.5 rounded-full ml-1">0</span>
                     </button>
                     <button onclick="switchAdminTab('stock-history-tab')" id="btn-stock-history-tab" class="admin-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent whitespace-nowrap">
                         <i class="fa-solid fa-clock-rotate-left"></i> Historique Stock
@@ -487,7 +492,7 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-500 mb-1">Prix de vente ($)</label>
                                     <div class="relative">
@@ -505,6 +510,10 @@
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-500 mb-1">Stock disponible</label>
                                     <input type="number" id="prod-stock" value="12" min="0" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Qté min. commande</label>
+                                    <input type="number" id="prod-min-qty" value="1" min="1" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                                 </div>
                             </div>
 
@@ -578,6 +587,23 @@
                         <div id="admin-products-container" class="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
                             <!-- Admin products dynamic generation goes here -->
                         </div>
+                    </div>
+                </div>
+
+                <!-- TAB: EVENTS MANAGER -->
+                <div id="events-tab" class="admin-tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Agenda & Événements</h3>
+                                <p class="text-xs text-slate-500">Planifiez des lancements ou des expositions</p>
+                            </div>
+                            <a href="creer.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-100">
+                                <i class="fa-solid fa-calendar-plus"></i> Créer un Événement
+                            </a>
+                        </div>
+                        
+                        <div id="admin-events-list" class="space-y-3"></div>
                     </div>
                 </div>
 
@@ -664,7 +690,11 @@
                                 <div id="screen-home" class="phone-view active space-y-4">
                                     <!-- Phone Header Banner / Hero Section -->
                                     <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-4 pt-5 pb-6 flex flex-col justify-end space-y-1 relative overflow-hidden shadow-inner">
-                                        <div class="absolute right-0 bottom-0 opacity-10 text-7xl translate-y-2 translate-x-2"><i class="fa-solid fa-bag-shopping"></i></div>
+                                        <div id="phone-event-indicator" class="hidden absolute right-4 top-16 z-10 animate-pulse text-yellow-400 flex flex-col items-center">
+                                            <i class="fa-solid fa-calendar-check text-2xl"></i>
+                                            <span class="text-[7px] font-black uppercase">Événement</span>
+                                        </div>
+                                        <div class="absolute right-0 bottom-0 opacity-10 text-7xl translate-y-2 translate-x-2"><i class="fa-solid fa-palette"></i></div>
                                         
                                         <!-- Custom Shop Logo -->
                                         <img id="phone-hero-logo" src="" class="h-12 w-12 rounded-full border-2 border-white/20 mb-2 object-cover hidden shadow-md" alt="Logo">
@@ -874,6 +904,7 @@
         let products = [];
         let cart = [];
         let orders = [];
+        let shopEvents = [];
         let stockMovements = [];
 
         let orderSubscription = null; // To hold the Supabase real-time subscription for orders
@@ -901,7 +932,11 @@
                 delivery: { active: false, info: "" }
             },
             contact: { phone: "", address: "" },
-            social: { facebook: "", instagram: "", tiktok: "" }
+            social: { facebook: "", instagram: "", tiktok: "" },
+            limitProducts: null,
+            limitPriceMax: null,
+            limitOrdersDay: null,
+            limitOrdersMonth: null
         };
 
         const imageMapping = {
@@ -1089,7 +1124,11 @@
                             logoUrl: configData.logo_url || '',
                             paymentMethods: configData.payment_methods || storeConfig.paymentMethods,
                             contact: configData.contact_info || storeConfig.contact,
-                            social: configData.social_links || storeConfig.social
+                            social: configData.social_links || storeConfig.social,
+                            limitProducts: configData.limit_products,
+                            limitPriceMax: configData.limit_price_max,
+                            limitOrdersDay: configData.limit_orders_day,
+                            limitOrdersMonth: configData.limit_orders_month
                         };
                     } else {
                         // Create default config linked to user's auth metadata
@@ -1160,6 +1199,7 @@
                             price: Number(p.price),
                             oldPrice: p.old_price ? Number(p.old_price) : null,
                             stock: Number(p.stock),
+                            minQty: Number(p.min_order_qty || 1),
                             description: p.description,
                             imgKey: p.img_key,
                             imgUrl: p.img_url
@@ -1190,6 +1230,18 @@
                         }));
                     } else {
                         orders = [];
+                    }
+
+                    // 3b. Fetch events securely (matching shop owner)
+                    const { data: eventsData } = await sb
+                        .from('events')
+                        .select('*')
+                        .eq('organizer', storeConfig.name) // Match based on shop name
+                        .order('date', { ascending: true });
+                    
+                    if (eventsData) {
+                        shopEvents = eventsData;
+                        renderAdminEvents();
                     }
 
                     // 4. Fetch stock history
@@ -1275,6 +1327,7 @@
                             price: product.price,
                             old_price: product.oldPrice,
                             stock: product.stock,
+                            min_order_qty: product.minQty,
                             description: product.description,
                             img_key: product.imgKey,
                             img_url: product.imgUrl
@@ -1743,6 +1796,7 @@
             document.getElementById('add-product-form').reset();
             document.getElementById('edit-prod-id').value = '';
             document.getElementById('prod-code').value = '';
+            document.getElementById('prod-min-qty').value = 1;
             document.getElementById('prod-form-title').innerText = "Ajouter un Nouveau Produit";
             document.getElementById('prod-submit-text').innerText = "Enregistrer & Publier";
             document.getElementById('prod-form-icon').className = "fa-solid fa-plus";
@@ -1779,6 +1833,7 @@
             document.getElementById('prod-price').value = product.price;
             document.getElementById('prod-old-price').value = product.oldPrice || '';
             document.getElementById('prod-stock').value = product.stock;
+            document.getElementById('prod-min-qty').value = product.minQty || 1;
             document.getElementById('prod-desc').value = product.description;
 
             // UI Changes
@@ -1803,6 +1858,19 @@
             e.preventDefault();
 
             const editId = document.getElementById('edit-prod-id').value;
+            const price = parseFloat(document.getElementById('prod-price').value);
+
+            // 🔒 VALIDATION DES LIMITES ADMIN
+            if (!editId && storeConfig.limitProducts != null && products.length >= storeConfig.limitProducts) {
+                showNotification(`Quota de produits atteint (${storeConfig.limitProducts}). Contactez l'administration.`, true);
+                return;
+            }
+
+            if (storeConfig.limitPriceMax != null && price > storeConfig.limitPriceMax) {
+                showNotification(`Le prix ne peut pas dépasser la limite de ${storeConfig.limitPriceMax} $.`, true);
+                return;
+            }
+
             let code = document.getElementById('prod-code').value.trim();
             
             // Génération aléatoire si le champ est vide
@@ -1813,10 +1881,10 @@
 
             const name = document.getElementById('prod-name').value;
             const category = document.getElementById('prod-category').value;
-            const price = parseFloat(document.getElementById('prod-price').value);
             const oldPriceVal = document.getElementById('prod-old-price').value;
-            const oldPrice = oldPriceVal ? parseFloat(oldPriceVal) : null;
+            const oldPrice = oldPriceVal ? parseFloat(oldPriceVal) : null; // Ensure oldPrice is null if empty
             const stock = parseInt(document.getElementById('prod-stock').value);
+            const minQty = parseInt(document.getElementById('prod-min-qty').value || 1);
             const desc = document.getElementById('prod-desc').value;
             
             // Default to existing values if editing
@@ -1860,6 +1928,7 @@
                 price,
                 oldPrice,
                 stock,
+                minQty,
                 description: desc,
                 imgKey,
                 imgUrl
@@ -1958,6 +2027,7 @@
                         <div class="flex flex-col text-right">
                             <span class="text-xs font-bold text-slate-900">${formatVal(product.price)}</span>
                             <span class="text-[10px] ${product.stock == 0 ? 'text-rose-600' : (product.stock < 5 ? 'text-amber-600' : 'text-emerald-600')} font-semibold">Stock: ${product.stock}</span>
+                            <span class="text-[9px] text-slate-400 font-medium">Min. cmd: ${product.minQty || 1}</span>
                         </div>
 
                         <!-- Quick Stock Increment -->
@@ -2062,6 +2132,7 @@
                                 <div class="flex items-baseline justify-between pt-0.5">
                                     <span class="text-xs font-bold text-slate-900">${formatVal(product.price)}</span>
                                 </div>
+                                ${product.minQty > 1 ? `<span class="text-[8px] font-black text-amber-600 uppercase">Min: ${product.minQty}</span>` : ''}
                             </div>
                         </div>
                     `;
@@ -2081,6 +2152,7 @@
                                 <div class="flex items-baseline gap-2">
                                     <span class="text-xs font-bold text-slate-900">${formatVal(product.price)}</span>
                                 </div>
+                                ${product.minQty > 1 ? `<span class="text-[8px] font-black text-amber-600 uppercase">Min: ${product.minQty}</span>` : ''}
                             </div>
                         </div>
                     `;
@@ -2120,6 +2192,7 @@
                 } else {
                     stockBadge.className = "text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md";
                     stockBadge.innerText = `Disponible (En Stock: ${product.stock})`;
+                    document.getElementById('detail-add-btn').onclick = () => addProductToCart(product);
                 }
                 stockBadge.className = "text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md";
                 stockBadge.innerText = `Disponible (En Stock: ${product.stock})`;
@@ -2171,6 +2244,7 @@
                                 <div class="flex items-baseline justify-between pt-0.5">
                                     <span class="text-xs font-bold text-slate-900">${formatVal(product.price)}</span>
                                 </div>
+                                ${product.minQty > 1 ? `<span class="text-[8px] font-black text-amber-600 uppercase">Min: ${product.minQty}</span>` : ''}
                             </div>
                         </div>
                     `;
@@ -2189,6 +2263,7 @@
                                 <div class="flex items-baseline gap-2">
                                     <span class="text-xs font-bold text-slate-900">${formatVal(product.price)}</span>
                                 </div>
+                                ${product.minQty > 1 ? `<span class="text-[8px] font-black text-amber-600 uppercase">Min: ${product.minQty}</span>` : ''}
                             </div>
                         </div>
                     `;
@@ -2204,16 +2279,21 @@
         function addProductToCart(product) {
             const existing = cart.find(item => item.product.id === product.id);
             if (existing) {
-                if(existing.quantity < product.stock) {
+                if (existing.quantity < product.stock) {
                     existing.quantity += 1;
                 } else {
                     openPhoneToast("Quantité maximale atteinte (limite stock)");
                     return;
                 }
             } else {
+                const qtyToAdd = product.minQty > 1 ? product.minQty : 1;
+                if (qtyToAdd > product.stock) {
+                    openPhoneToast("Stock insuffisant pour la quantité minimale.");
+                    return;
+                }
                 cart.push({
                     product: product,
-                    quantity: 1
+                    quantity: qtyToAdd
                 });
             }
 
@@ -2275,15 +2355,29 @@
         function changeCartQty(id, delta) {
             const item = cart.find(i => i.product.id === id);
             if(item) {
-                const targetQty = item.quantity + delta;
-                if(targetQty <= 0) {
+                let targetQty = item.quantity + delta;
+                const minOrderQty = item.product.minQty || 1;
+
+                if (targetQty < minOrderQty) {
+                    if (minOrderQty === 1 && targetQty === 0) { // Allow removal if minQty is 1
+                        removeFromCart(id);
+                        return;
+                    }
+                    openPhoneToast(`Quantité minimale pour ce produit: ${minOrderQty}`);
+                    targetQty = minOrderQty; // Set to minQty if trying to go below
+                } else if (targetQty > item.product.stock) {
+                    openPhoneToast("Limite de stock atteinte !");
+                    targetQty = item.product.stock; // Cap at available stock
+                }
+
+                if (targetQty <= 0 && minOrderQty === 1) { // Allow removal if minQty is 1 and target is 0
                     removeFromCart(id);
                 } else if(targetQty <= item.product.stock) {
                     item.quantity = targetQty;
                     renderPhoneCart();
                     updatePhoneCartBadge();
                 } else {
-                    openPhoneToast("Limite de stock atteinte !");
+                    openPhoneToast("Stock maximum atteint !");
                 }
             }
         }
@@ -2459,6 +2553,41 @@
             `).join('');
         }
 
+        // Render Events list in Dashboard
+        function renderAdminEvents() {
+            const container = document.getElementById('admin-events-list');
+            const badge = document.getElementById('events-count-badge');
+            const phoneIndicator = document.getElementById('phone-event-indicator');
+
+            if (!container) return;
+
+            if (shopEvents.length === 0) {
+                badge.classList.add('hidden');
+                if(phoneIndicator) phoneIndicator.classList.add('hidden');
+                container.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs italic">Aucun événement programmé.</p>`;
+                return;
+            }
+
+            badge.innerText = shopEvents.length;
+            badge.classList.remove('hidden');
+            if(phoneIndicator) phoneIndicator.classList.remove('hidden');
+
+            container.innerHTML = shopEvents.map(ev => `
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between hover:border-emerald-200 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900">${ev.title}</h4>
+                            <p class="text-[10px] text-slate-500">${new Date(ev.date).toLocaleDateString()} à ${ev.time} • ${ev.location}</p>
+                        </div>
+                    </div>
+                    <span class="text-[9px] font-black uppercase tracking-tighter px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-100">En ligne</span>
+                </div>
+            `).join('');
+        }
+
         // Order state transitions on backend dropdown
         async function updateOrderStatus(id, newStatus) {
             const order = orders.find(o => o.id === id);
@@ -2577,8 +2706,14 @@
             
             document.getElementById('dashboard-sales').innerText = formatVal(totalRevenue);
             document.getElementById('dashboard-orders-count').innerText = orders.length;
-            document.getElementById('dashboard-products-count').innerHTML = products.length + 
+            const productLimitText = (storeConfig.limitProducts != null) ? ` / ${storeConfig.limitProducts}` : '';
+            document.getElementById('dashboard-products-count').innerHTML = products.length + productLimitText + 
                 (lowStockCount > 0 ? ` <span class="text-[10px] text-amber-500 font-black animate-pulse" title="${lowStockCount} produits en stock critique">(⚠️ ${lowStockCount})</span>` : '');
+
+            const premiumBadge = document.getElementById('premium-badge');
+            if (premiumBadge) {
+                premiumBadge.classList.toggle('hidden', !(storeConfig.limitProducts != null && storeConfig.limitProducts > 100));
+            }
 
             const avg = orders.length > 0 ? (totalRevenue / orders.length) : 0;
             document.getElementById('dashboard-avg-cart').innerText = formatVal(avg);

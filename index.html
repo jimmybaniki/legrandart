@@ -596,7 +596,6 @@
                             class="w-full input-field-auth rounded-2xl pl-14 pr-6 py-4 md:py-5 text-sm text-white">
                     </div>
                 </div>
-
                 <div class="group">
                     <label class="text-[9px] uppercase tracking-[0.3em] text-zinc-600 font-black ml-1 mb-3 block">Email</label>
                     <div class="relative">
@@ -720,7 +719,8 @@
         function toggleAuthMode(mode) {
             authMode = mode;
             const isLogin = mode === 'login';
-            document.getElementById('nameGroup').classList.toggle('hidden', isLogin);
+            const nameGroup = document.getElementById('nameGroup');
+            if (nameGroup) nameGroup.classList.toggle('hidden', isLogin);
             document.getElementById('loginTabBtn').className = isLogin ? "flex-1 pb-4 border-b-2 border-yellow-500 text-white font-black text-[10px] uppercase tracking-widest transition-all" : "flex-1 pb-4 border-b-2 border-transparent text-gray-500 font-black text-[10px] uppercase tracking-widest transition-all";
             document.getElementById('signupTabBtn').className = !isLogin ? "flex-1 pb-4 border-b-2 border-yellow-500 text-white font-black text-[10px] uppercase tracking-widest transition-all" : "flex-1 pb-4 border-b-2 border-transparent text-gray-500 font-black text-[10px] uppercase tracking-widest transition-all";
             document.getElementById('authBtnText').innerText = isLogin ? "DÉBLOQUER L'ACCÈS" : "CRÉER MON COMPTE";
@@ -777,6 +777,12 @@
             status.innerText = msg;
             status.className = `text-[10px] py-3 px-4 rounded-xl font-bold text-center uppercase tracking-wider ${classes}`;
             status.classList.remove('hidden');
+        }
+
+        function accessAsGuest() {
+            const guestData = { name: "Visiteur", role: "client" };
+            localStorage.setItem('lg_user_data', JSON.stringify(guestData));
+            window.location.href = 'boutiques.html';
         }
 
         let currentAd = 0;
@@ -946,17 +952,101 @@
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
+            const skipRedirect = urlParams.get('skipRedirect') === 'true';
+
+            // Redirection automatique pour les profils PRO déjà connectés
+            const userDataString = localStorage.getItem('lg_user_data');
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                
+                if (!skipRedirect) {
+                    if (userData.role === 'artiste') {
+                        window.location.href = 'espace-pro.html';
+                        return;
+                    } else if (userData.role === 'gerant') {
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+                } else if (userData.role === 'artiste' || userData.role === 'gerant') {
+                    // Affichage du message de bienvenue et préparation des formulaires
+                    const bar = document.getElementById('pro-welcome-bar');
+                    if(bar) {
+                        const nameSpan = document.getElementById('pro-welcome-name');
+                        const dashBtn = document.getElementById('pro-dash-btn');
+                        const editNameInput = document.getElementById('edit-name-input');
+                        if (nameSpan) nameSpan.innerText = userData.name;
+                        bar.classList.remove('hidden');
+                        if (editNameInput) editNameInput.value = userData.name;
+                        if (dashBtn) dashBtn.onclick = () => window.location.href = userData.role === 'artiste' ? 'espace-pro.html' : 'dashboard.html';
+                    }
+                }
+            }
+
+            // Logique de modification de profil directe
+            const editProfileForm = document.getElementById('editProfileForm');
+            if (editProfileForm) {
+                editProfileForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const editNameInput = document.getElementById('edit-name-input');
+                    const newName = editNameInput ? editNameInput.value : '';
+                    try {
+                        initSupabase();
+                        const { error } = await sb.auth.updateUser({ data: { name: newName } });
+                        if (error) throw error;
+                        
+                        const userData = JSON.parse(localStorage.getItem('lg_user_data'));
+                        userData.name = newName;
+                        localStorage.setItem('lg_user_data', JSON.stringify(userData));
+                        
+                        showNotification("Identité mise à jour !");
+                        toggleModal('edit-profile-modal');
+                        setTimeout(() => location.reload(), 1000);
+                    } catch (err) {
+                        showNotification(err.message, true);
+                    }
+                };
+            }
+
+            const changePasswordForm = document.getElementById('changePasswordForm');
+            if (changePasswordForm) {
+                changePasswordForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const newPassInput = document.getElementById('new-password-input');
+                    const confirmPassInput = document.getElementById('confirm-password-input');
+                    const newPass = newPassInput ? newPassInput.value : '';
+                    const confirmPass = confirmPassInput ? confirmPassInput.value : '';
+                    if(newPass !== confirmPass) {
+                        showNotification("Les mots de passe ne correspondent pas", true);
+                        return;
+                    }
+                    try {
+                        initSupabase();
+                        const { error } = await sb.auth.updateUser({ password: newPass });
+                        if (error) throw error;
+                        showNotification("Mot de passe mis à jour !");
+                        toggleModal('change-password-modal');
+                    } catch (err) {
+                        showNotification(err.message, true);
+                    }
+                };
+            }
+
             if (urlParams.get('openLogin') === 'true') {
                 showLoginPortal();
             }
 
-            const sessionUser = localStorage.getItem('lg_user_name');
-            if (sessionUser) {
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
                 // Update navigation on desktop
                 const loginArea = document.getElementById('login-area');
                 if (loginArea) {
+                    let dashboardLink = '';
+                    if (userData.role === 'gerant') dashboardLink = 'dashboard.html';
+                    else if (userData.role === 'artiste') dashboardLink = 'espace-pro.html';
+                    else dashboardLink = 'boutiques.html';
+
                     loginArea.innerHTML = `
-                        <a href="dashboard.html" class="text-[10px] font-black uppercase tracking-widest text-emerald-400 border-b border-emerald-400/30 pb-1">Tableau de bord</a>
+                        <a href="${dashboardLink}" class="text-[10px] font-black uppercase tracking-widest text-emerald-400 border-b border-emerald-400/30 pb-1">Tableau de bord</a>
                         <button onclick="logout()" class="premium-icon-btn flex items-center gap-2 px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest text-red-500 border-2 border-red-500/20 hover:border-red-500 hover:bg-red-500/10 transition-all">
                             <i data-feather="log-out" class="w-4 h-4"></i>
                             <span>Sortir</span>
@@ -967,6 +1057,14 @@
                 // Update navigation on mobile
                 const mobileLoginContainer = document.getElementById('mobile-login-container');
                 if (mobileLoginContainer) {
+                    let dashboardLink = '';
+                    if (userData.role === 'gerant') {
+                        dashboardLink = 'dashboard.html';
+                    } else if (userData.role === 'artiste') {
+                        dashboardLink = 'espace-pro.html';
+                    } else {
+                        dashboardLink = 'boutiques.html';
+                    }
                     mobileLoginContainer.innerHTML = `
                         <div class="flex flex-col gap-3">
                             <a href="dashboard.html" class="w-full bg-emerald-500 text-black text-center font-black py-4 rounded-xl uppercase text-xs tracking-[0.15em]">Tableau de bord</a>
@@ -978,51 +1076,88 @@
                     `;
                 }
             }
-            feather.replace();
-
             // Générer le contenu dynamique des catégories
             const container = document.getElementById('streaming-content-container');
-            container.innerHTML = artsCategories.map(cat => `
-                <section>
-                    <div class="flex items-center space-x-6 mb-8 md:mb-12 px-4">
-                        <div class="w-2 h-8 md:h-10 ${cat.color} rounded-full"></div>
-                        <h2 class="text-2xl md:text-4xl font-black text-white tracking-tighter uppercase text-left">${cat.name}</h2>
-                    </div>
-                    <div class="flex space-x-6 md:space-x-10 pb-8 md:pb-12 overflow-x-auto hide-scrollbar snap-x px-4">
-                        ${[1,2,3,4].map(i => {
-                            if (cat.id === "musique" && i === 1) {
-                                const thumb = "https://images.unsplash.com/photo-1576328077645-4b0717208573?auto=format&fit=crop&q=80&w=800&h=1067";
-                                return `
-                                <div class="w-64 md:w-80 flex-shrink-0 snap-start bg-zinc-900 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl group relative">
-                                    <div id="video-container-main" class="relative aspect-[3/4] bg-black flex items-center justify-center overflow-hidden">
-                                        <img src="${thumb}" class="absolute inset-0 w-full h-full object-cover opacity-60">
-                                        <div class="absolute inset-0 art-overlay"></div>
-                                        <button onclick="playVideo('video-container-main', '${thumb}')" class="relative z-10 play-button-overlay w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center">
-                                            <svg class="w-8 h-8 md:w-10 md:h-10 text-black fill-current translate-x-1" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                        </button>
-                                        <div class="absolute bottom-6 md:bottom-10 left-6 md:left-8 right-6 md:right-8 z-10 text-left">
-                                            <span class="text-emerald-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest italic flex items-center">Streaming Vedette</span>
-                                            <h4 class="text-xl md:text-2xl font-black text-white mt-2">Orchestre Symphonique</h4>
-                                        </div>
-                                    </div>
-                                </div>`;
-                            }
-                            const thumb = `${cat.illustration}&sig=${cat.id}${i}`;
-                            return `
-                            <div class="w-64 md:w-80 flex-shrink-0 snap-start bg-zinc-900 border border-white/5 rounded-[2.5rem] overflow-hidden card-hover transition-all duration-700 relative">
-                                <div class="relative aspect-[3/4]">
-                                    <img src="${thumb}" class="w-full h-full object-cover opacity-70">
+            
+            container.innerHTML = artsCategories.map(cat => {
+                let html = `
+                    <section>
+                        <div class="flex items-center space-x-6 mb-8 md:mb-12 px-4">
+                            <div class="w-2 h-8 md:h-10 ${cat.color} rounded-full"></div>
+                            <h2 class="text-2xl md:text-4xl font-black text-white tracking-tighter uppercase text-left">${cat.name}</h2>
+                        </div>
+                        <div class="flex space-x-6 md:space-x-10 pb-8 md:pb-12 overflow-x-auto hide-scrollbar snap-x px-4">
+                `;
+                
+                // Générer 4 créations pour chaque catégorie
+                for (let i = 1; i <= 4; i++) {
+                    const creationId = `${cat.id}-${i}`;
+                    
+                    // Cas spécial pour Musique : la première carte affiche un iframe vidéo
+                    if (cat.id === "musique" && i === 1) {
+                        const thumbUrl = "https://images.unsplash.com/photo-1576328077645-4b0717208573?auto=format&fit=crop&q=80&w=800&h=1067";
+                        html += `
+                            <div class="w-64 md:w-80 flex-shrink-0 snap-start bg-zinc-900 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl group relative">
+                                <div id="video-container-${creationId}" class="relative aspect-[3/4] bg-black flex items-center justify-center overflow-hidden">
+                                    <img src="${thumbUrl}" class="absolute inset-0 w-full h-full object-cover opacity-60">
                                     <div class="absolute inset-0 art-overlay"></div>
-                                    <div class="absolute bottom-6 md:bottom-8 left-6 md:left-8 right-6 md:right-8">
-                                        <h4 class="text-lg md:text-xl font-black text-white mb-3 md:mb-4">Création #${i}</h4>
-                                        <button onclick="openSupportModal('${cat.name}', ${i})" class="w-full mb-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-black text-[9px] md:text-[10px] font-black uppercase tracking-widest py-2.5 md:py-3 rounded-xl border border-emerald-500/20 transition-all">Soutenir</button>
+                                    <button onclick="playVideo('video-container-${creationId}', '${thumbUrl}')" class="relative z-10 play-button-overlay w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-play text-black text-xl"></i>
+                                    </button>
+                                </div>
+                                <div class="p-4 md:p-6 bg-gradient-to-t from-black to-black/50">
+                                    <h3 class="text-white font-black text-sm mb-3 uppercase tracking-wider">Orchestre Symphonique</h3>
+                                    <p class="text-gray-400 text-xs mb-4 leading-relaxed">Streaming vedette</p>
+                                    <button onclick="openSupportModal('${cat.name}', ${i})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black py-2.5 rounded-lg text-[10px] uppercase tracking-widest transition-all">
+                                        Soutenir
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Cartes standards pour tous les autres cas
+                        html += `
+                            <div class="w-64 md:w-80 flex-shrink-0 snap-start bg-zinc-900 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl group card-hover relative">
+                                <div id="video-${creationId}" class="relative aspect-[3/4] bg-gradient-to-br from-gray-900 to-black overflow-hidden">
+                                    <img src="${cat.illustration}" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
+                                    <div class="absolute inset-0 art-overlay"></div>
+                                    
+                                    <!-- Overlay au survol -->
+                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onclick="playVideo('video-${creationId}', '${cat.illustration}')" class="play-button-overlay w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-play text-black text-xl"></i>
+                                        </button>
                                     </div>
                                 </div>
-                            </div>`;
-                        }).join('')}
-                    </div>
-                </section>
-            `).join('');
+                                
+                                <!-- Contenu de la carte -->
+                                <div class="p-4 md:p-6 bg-gradient-to-t from-black to-black/50">
+                                    <div class="flex items-center space-x-2 mb-3">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-yellow-500">Création</span>
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">#${i}</span>
+                                    </div>
+                                    <h3 class="text-white font-black text-sm mb-2 uppercase tracking-wider line-clamp-2">Œuvre Magistrale ${i}</h3>
+                                    <p class="text-gray-400 text-xs mb-4 leading-relaxed">Par un artiste talentueux de la plateforme</p>
+                                    
+                                    <button onclick="openSupportModal('${cat.name}', ${i})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black py-2.5 rounded-lg text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 group-hover:scale-105">
+                                        <i class="fas fa-hand-holding-heart"></i>
+                                        Soutenir
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                html += `
+                        </div>
+                    </section>
+                `;
+                
+                return html;
+            }).join('');
+            
             initSlider();
 
             // Open first accordion by default on mobile
@@ -1030,10 +1165,13 @@
             if (firstAccordion) {
                 firstAccordion.classList.add('active');
             }
+            
+            // Réinitialiser les icônes Feather après la génération
+            feather.replace();
         };
 
         function logout() {
-            localStorage.removeItem('lg_user_name');
+            localStorage.removeItem('lg_user_data');
             location.reload();
         }
 

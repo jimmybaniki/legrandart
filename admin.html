@@ -48,6 +48,7 @@
         .status-active { background: #dcfce7; color: #166534; }
         .status-pending { background: #fef9c3; color: #854d0e; }
         .status-suspended { background: #fee2e2; color: #991b1b; }
+        .status-resolved { background: #e0f2fe; color: #0284c7; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-sm">
@@ -70,10 +71,12 @@
             <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2 mt-4">Main / Kuu</p>
             <a href="#" onclick="showSection('overview')" class="nav-link active" id="nav-overview"><i class="fas fa-chart-pie w-5 text-center"></i> Dashboard</a>
             
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2 mt-6">Management / Usimamizi</p>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2 mt-6">Gestion / Usimamizi</p>
             <a href="#" onclick="showSection('agents')" class="nav-link" id="nav-agents"><i class="fas fa-user-tie w-5 text-center"></i> Commercial Agents</a>
             <a href="#" onclick="showSection('shops')" class="nav-link" id="nav-shops"><i class="fas fa-store w-5 text-center"></i> Global Shops</a>
             <a href="#" onclick="showSection('clients')" class="nav-link" id="nav-clients"><i class="fas fa-users w-5 text-center"></i> Global Clients</a>
+            <a href="#" onclick="showSection('concours')" class="nav-link" id="nav-concours"><i class="fas fa-trophy w-5 text-center"></i> Concours Registrations</a>
+            <a href="#" onclick="showSection('landing')" class="nav-link" id="nav-landing"><i class="fas fa-window-maximize w-5 text-center"></i> Landing Page</a>
             
             <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2 mt-6">System / Mfumo</p>
             <a href="#" onclick="showSection('support')" class="nav-link" id="nav-support"><i class="fas fa-headset w-5 text-center"></i> Tech Support Tickets</a>
@@ -215,7 +218,7 @@
                     <div class="p-4 border-b border-slate-100 bg-slate-50 flex gap-4">
                         <div class="relative flex-1 max-w-md">
                             <i class="fas fa-search absolute left-4 top-3 text-slate-400"></i>
-                            <input type="text" placeholder="Search agents..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none bg-white">
+                            <input type="text" id="agent-search" oninput="filterAgents()" placeholder="Search agents..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none bg-white">
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -238,6 +241,61 @@
                 </div>
             </div>
 
+            <!-- CONCOURS SECTION -->
+            <div id="section-concours" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-black text-lg text-slate-800">Inscriptions Concours 2026</h3>
+                        <p class="text-xs text-slate-500">Gérez les participants et spectateurs du concours Art, Foi & Racines.</p>
+                    </div>
+                    <button onclick="exportConcoursCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg flex items-center gap-2">
+                        <i class="fas fa-file-export"></i> Exporter CSV
+                    </button>
+                </div>
+                <div class="glass-card overflow-hidden">
+                    <div class="overflow-x-auto p-4">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-100 text-gray-500 text-[10px] uppercase font-black tracking-widest">
+                                <tr>
+                                    <th class="px-6 py-3">Type</th>
+                                    <th class="px-6 py-3">Nom / Email</th>
+                                    <th class="px-6 py-3">Catégorie / Ticket</th>
+                                    <th class="px-6 py-3">Total</th>
+                                    <th class="px-6 py-3 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="concours-table-body" class="divide-y divide-gray-50 bg-white">
+                                <tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANDING PAGE CONTENT SECTION -->
+            <div id="section-landing" class="hidden space-y-6 max-w-4xl">
+                <div>
+                    <h3 class="font-black text-lg text-slate-800">Gestion de l'Accueil</h3>
+                    <p class="text-xs text-slate-500">Contrôlez les bannières et les annonces de la page principale.</p>
+                </div>
+                <div class="glass-card p-8 space-y-6">
+                    <div class="space-y-4">
+                        <h4 class="font-black text-sm uppercase border-b border-slate-100 pb-2">Bannière d'Annonce Globale</h4>
+                        <textarea id="config-global-announcement" placeholder="Texte à afficher sur la page d'accueil..." class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none h-24" oninput="savePlatformContent()"></textarea>
+                    </div>
+                    <div class="space-y-4">
+                        <h4 class="font-black text-sm uppercase border-b border-slate-100 pb-2">Featured Video (Dailymotion ID)</h4>
+                        <input type="text" id="config-featured-video-id" placeholder="Ex: kZ1qIW1IoWsp7nF837a" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm font-mono">
+                        <p class="text-[10px] text-slate-400 italic">ID de la vidéo mise en avant dans la section Musique.</p>
+                    </div>
+                    <div class="pt-4">
+                        <button onclick="savePlatformContent()" class="bg-tzblack hover:bg-slate-800 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg w-full">
+                            Mettre à jour l'Accueil
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- SHOPS SECTION -->
             <div id="section-shops" class="hidden space-y-6">
                 <div>
@@ -248,7 +306,7 @@
                 <div class="glass-card overflow-hidden">
                     <div class="p-4 border-b border-slate-100 bg-slate-50 flex gap-4">
                         <select class="px-4 py-2.5 rounded-lg border border-slate-200 text-sm outline-none bg-white font-semibold text-slate-700">
-                            <option value="">All Categories</option>
+                            <option value="">Toutes Catégories</option>
                             <option value="fashion">Fashion</option>
                             <option value="electronics">Electronics</option>
                             <option value="food">Food & Beverage</option>
@@ -256,7 +314,7 @@
                         <div class="relative flex-1">
                             <i class="fas fa-search absolute left-4 top-3 text-slate-400"></i>
                             <input type="text" placeholder="Search by shop name or ID..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-tzgreen outline-none bg-white">
-                        </div>
+                        </div> 
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
@@ -285,7 +343,7 @@
                 </div>
 
                 <div class="glass-card overflow-hidden">
-                    <div class="overflow-x-auto p-2">
+                    <div class="overflow-x-auto p-4">
                         <table class="w-full text-left">
                             <thead class="bg-transparent text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
                                 <tr>
@@ -312,35 +370,7 @@
                 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 space-y-4" id="tickets-container">
-                        <!-- Mock Tickets -->
-                        <div class="glass-card p-6 flex gap-5 items-start border-l-4 border-l-rose-500">
-                            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 text-xl"><i class="fas fa-exclamation-triangle"></i></div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-1">
-                                    <h4 class="font-bold text-slate-800 text-base">Payment Gateway Issue</h4>
-                                    <span class="text-[10px] font-bold text-slate-400">2 hours ago</span>
-                                </div>
-                                <p class="text-xs text-slate-600 mb-3">Reported by Agent: <span class="font-bold">jimmy@mlimanicity.com</span> for Shop: <span class="font-bold">Mlimani Fashion Hub</span>. The mobile money integration seems to be failing on checkout.</p>
-                                <div class="flex gap-2">
-                                    <button class="px-4 py-1.5 bg-tzgreen text-white text-[10px] font-black uppercase rounded hover:bg-green-600 transition">Mark Resolved</button>
-                                    <button class="px-4 py-1.5 bg-slate-100 text-slate-600 text-[10px] font-black uppercase rounded hover:bg-slate-200 transition">Contact Agent</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="glass-card p-6 flex gap-5 items-start border-l-4 border-l-tzyellow">
-                            <div class="w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center shrink-0 text-xl"><i class="fas fa-image"></i></div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-1">
-                                    <h4 class="font-bold text-slate-800 text-base">Logo Upload Failing</h4>
-                                    <span class="text-[10px] font-bold text-slate-400">1 day ago</span>
-                                </div>
-                                <p class="text-xs text-slate-600 mb-3">Reported by Agent: <span class="font-bold">sarah@mlimanicity.com</span> for Shop: <span class="font-bold">Tech Gadgets TZ</span>. Manager unable to change store logo.</p>
-                                <div class="flex gap-2">
-                                    <button class="px-4 py-1.5 bg-tzgreen text-white text-[10px] font-black uppercase rounded hover:bg-green-600 transition">Mark Resolved</button>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Support tickets will be dynamically loaded here -->
                     </div>
 
                     <div class="glass-card p-6 h-fit bg-slate-900 text-white">
@@ -374,13 +404,20 @@
                     <div>
                         <h4 class="font-black text-sm uppercase border-b border-slate-100 pb-2 mb-4">Financial Settings</h4>
                         <div class="grid grid-cols-2 gap-6">
-                            <div>
+                            <div class="space-y-1">
                                 <label class="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Base Agent Commission (%)</label>
-                                <input type="number" value="5" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-tzgreen font-bold">
+                                <input type="number" id="config-agent-commission" value="5" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-tzgreen font-bold" oninput="savePlatformSettings()">
                             </div>
-                            <div>
+                            <div class="space-y-1">
                                 <label class="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Default Exchange Rate (TZS to USD)</label>
-                                <input type="number" value="2800" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-tzgreen font-bold">
+                                <input type="number" id="config-exchange-rate" value="2800" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-tzgreen font-bold" oninput="savePlatformSettings()">
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Catégories les plus recherchées / Top Categories (Séparez par des virgules)</label> 
+                            <div class="relative">
+                                <i class="fas fa-tags absolute left-4 top-3.5 text-slate-400"></i>
+                                <input type="text" id="config-top-categories" placeholder="Mode, Tech, Art, Artisanat..." class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-tzgreen transition font-medium" />
                             </div>
                         </div>
                     </div>
@@ -388,10 +425,10 @@
                     <div>
                         <h4 class="font-black text-sm uppercase border-b border-slate-100 pb-2 mb-4">Security</h4>
                         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
-                            <div>
+                            <div class="space-y-1">
                                 <p class="font-bold text-sm text-slate-800">Require 2FA for Agents</p>
                                 <p class="text-xs text-slate-500">Force commercial agents to use two-factor authentication.</p>
-                            </div>
+                            </div> 
                             <div class="w-12 h-6 bg-tzgreen rounded-full relative cursor-pointer shadow-inner">
                                 <div class="absolute right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
                             </div>
@@ -399,13 +436,144 @@
                     </div>
 
                     <div class="pt-4">
-                        <button class="bg-tzblue hover:bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg w-full">Save Changes</button>
+                        <button onclick="savePlatformSettings()" class="bg-tzblue hover:bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg w-full">Save Changes / Hifadhi Mabadiliko</button>
                     </div>
                 </div>
             </div>
 
         </div>
     </main>
+
+    <!-- Modal: Edit Agent -->
+    <div id="modal-edit-agent" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeEditAgentModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Edit Agent</h3>
+            <p class="text-xs text-slate-500 mb-6">Modify details for agent: <span id="edit-agent-email-display" class="font-bold"></span></p>
+            
+            <form id="form-edit-agent" onsubmit="handleEditAgent(event)" class="space-y-4">
+                <input type="hidden" id="edit-agent-id">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Promo Code</label>
+                    <input type="text" id="edit-agent-promo" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-tzblue" />
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <label class="text-xs font-bold text-slate-700">Commission Active</label>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="edit-agent-commission-active" class="sr-only peer">
+                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                </div>
+                <button type="submit" class="w-full bg-tzblack hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Shop -->
+    <div id="modal-edit-shop" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-lg p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeEditShopModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                <i class="fas fa-store-alt"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Edit Shop Details</h3>
+            <p class="text-xs text-slate-500 mb-6">Modify details for shop: <span id="edit-shop-name-display" class="font-bold"></span></p>
+            
+            <form id="form-edit-shop" onsubmit="handleEditShop(event)" class="space-y-4">
+                <input type="hidden" id="edit-shop-id">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Shop Name</label>
+                    <input type="text" id="edit-shop-name" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Slogan</label>
+                    <input type="text" id="edit-shop-slogan" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Default Category</label>
+                    <input type="text" id="edit-shop-category" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Contact Phone</label>
+                    <input type="text" id="edit-shop-phone" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Contact Address</label>
+                    <input type="text" id="edit-shop-address" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                </div>
+                <button type="submit" class="w-full bg-tzblack hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Client -->
+    <div id="modal-edit-client" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeEditClientModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Edit Client</h3>
+            <p class="text-xs text-slate-500 mb-6">Modify details for client: <span id="edit-client-email-display" class="font-bold"></span></p>
+            
+            <form id="form-edit-client" onsubmit="handleEditClient(event)" class="space-y-4">
+                <input type="hidden" id="edit-client-id">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Client Name</label>
+                    <input type="text" id="edit-client-name" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Client Email</label>
+                    <input type="email" id="edit-client-email" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" disabled />
+                </div>
+                <button type="submit" class="w-full bg-tzblack hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Concours Registration -->
+    <div id="modal-edit-concours" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeEditConcoursModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Edit Concours Entry</h3>
+            <p class="text-xs text-slate-500 mb-6">Modify details for: <span id="edit-concours-name-display" class="font-bold"></span></p>
+            
+            <form id="form-edit-concours" onsubmit="handleEditConcours(event)" class="space-y-4">
+                <input type="hidden" id="edit-concours-id">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Name</label>
+                    <input type="text" id="edit-concours-name" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Email</label>
+                    <input type="email" id="edit-concours-email" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Phone</label>
+                    <input type="text" id="edit-concours-phone" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                </div>
+                <button type="submit" class="w-full bg-tzblack hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- Modal: Create Agent -->
     <div id="modal-agent" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
@@ -434,6 +602,47 @@
                 
                 <button type="submit" id="btn-submit-agent" class="w-full bg-tzblack hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
                     Deploy Agent Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Shop Limits -->
+    <div id="modal-shop-limits" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-lg p-8 relative shadow-2xl">
+            <button onclick="closeShopLimitsModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 flex items-center justify-center text-xl rounded-xl mb-4">
+                <i class="fas fa-sliders-h"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Contrôle des Limites Boutique</h3>
+            <p class="text-xs text-slate-500 mb-6">Définissez les restrictions pour la boutique : <span id="limit-shop-name" class="font-bold"></span></p>
+            
+            <form id="form-shop-limits" onsubmit="handleSaveShopLimits(event)" class="space-y-4">
+                <input type="hidden" id="limit-shop-id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nombre Max Produits</label>
+                        <input type="number" id="limit-products" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold" value="50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Prix Max Autorisé ($)</label>
+                        <input type="number" id="limit-price-max" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold" value="5000">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Commandes / Jour</label>
+                        <input type="number" id="limit-orders-day" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold" value="20">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Commandes / Mois</label>
+                        <input type="number" id="limit-orders-month" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold" value="500">
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2 shadow-lg shadow-slate-900/20">
+                    Enregistrer les Restrictions
                 </button>
             </form>
         </div>
@@ -488,16 +697,21 @@
         // Global Data Stores
         let allShops = [];
         let allOrders = [];
+        let allAgents = [];
+        let concoursData = [];
         let mockAgents = [
-            { id: 'ag_01', email: 'banikimukishijimmy@gmail.com', code: 'AGENT01', shops: 4, revenue: 1250000, status: 'Active' },
-            { id: 'ag_02', email: 'sarah.m@mlimanicity.com', code: 'SM-DAR', shops: 2, revenue: 450000, status: 'Active' },
-            { id: 'ag_03', email: 'john.k@mlimanicity.com', code: 'JK-007', shops: 0, revenue: 0, status: 'Suspended' }
+            { id: 'ag_01', email: 'banikimukishijimmy@gmail.com', code: 'AGENT01', shops: 4, revenue: 1250000, status: 'Active', commission_active: true },
+            { id: 'ag_02', email: 'sarah.m@mlimanicity.com', code: 'SM-DAR', shops: 2, revenue: 450000, status: 'Active', commission_active: true },
+            { id: 'ag_03', email: 'john.k@mlimanicity.com', code: 'JK-007', shops: 0, revenue: 0, status: 'Suspended', commission_active: false }
         ];
         let mockClients = [
             { id: 'cl_01', email: 'customer1@example.com', date: '2023-10-12', orders: 5, status: 'Active' },
             { id: 'cl_02', email: 'mteja.vip@gmail.com', date: '2023-11-05', orders: 12, status: 'Active' },
-            { id: 'cl_03', email: 'test.user@yahoo.com', date: '2023-12-01', orders: 1, status: 'Active' }
+            { id: 'cl_03', email: 'test.user@yahoo.com', date: '2023-12-01', orders: 1, status: 'Active' } // This will be replaced by real data
         ];
+        let allClients = [];
+        let supportTickets = [];
+        let platformSettings = {};
 
         window.onload = async function() {
             initCloud();
@@ -510,7 +724,7 @@
                 updateCloudStatus(true);
                 
                 sb.auth.onAuthStateChange((event, session) => {
-                    if (session) {
+                    if (session && session.user) {
                         // Very basic admin check. In production, check a 'roles' table.
                         if (session.user.email.includes('admin') || session.user.email === 'banikimukishijimmy@gmail.com') {
                             currentUser = session.user;
@@ -544,7 +758,7 @@
         // --- AUTHENTICATION ---
         async function verifyAdminAccess() {
             if(!sb) return;
-            const { data: { user } } = await sb.auth.getUser();
+            const { data: { user } } = await sb.auth.getSession(); // Use getSession to get current user
             if (user && (user.email.includes('admin') || user.email === 'banikimukishijimmy@gmail.com')) {
                 finalizeLogin(user.email);
             } else if (user) {
@@ -564,7 +778,7 @@
             btn.disabled = true;
 
             try {
-                const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                const { error } = await sb.auth.signInWithPassword({ email, password });
                 if (error) throw error;
             } catch (err) {
                 alert("Auth Error: " + err.message);
@@ -593,20 +807,64 @@
 
             try {
                 // Fetch All Shops globally
+                const { data: platformSettingsData, error: psErr } = await sb
+                    .from('boutique_config')
+                    .select('*')
+                    .eq('shop_id', 'platform_settings')
+                    .single();
+                if (!psErr && platformSettingsData) {
+                    platformSettings = {
+                        agentCommission: platformSettingsData.agent_commission || 5,
+                        exchangeRate: platformSettingsData.exchange_rate || 2800,
+                        topCategories: platformSettingsData.default_category || ''
+                    };
+                }
                 const { data: shopsData, error: shopsErr } = await sb.from('boutique_config').select('*').order('created_at', { ascending: false });
                 if (!shopsErr && shopsData) allShops = shopsData;
+                
+                // Populate Top Categories input from global settings
+                const globalSettings = allShops.find(s => s.shop_id === 'platform_global_settings');
+                if (globalSettings && document.getElementById('config-top-categories')) {
+                    document.getElementById('config-top-categories').value = globalSettings.default_category || '';
+                }
+                
+                // Populate Content from platform_content_settings
+                const contentSettings = allShops.find(s => s.shop_id === 'platform_content_settings');
+                if (contentSettings) {
+                    if(document.getElementById('config-global-announcement')) document.getElementById('config-global-announcement').value = contentSettings.slogan || '';
+                    if(document.getElementById('config-featured-video-id')) document.getElementById('config-featured-video-id').value = contentSettings.logo_url || '';
+                }
 
                 // Fetch All Orders globally
                 const { data: ordersData, error: ordersErr } = await sb.from('boutique_orders').select('*').order('created_at', { ascending: false });
                 if (!ordersErr && ordersData) allOrders = ordersData;
 
-                // Note: Fetching all Users/Agents usually requires Admin API (Service Key) in Supabase.
+                // Fetch Concours Data
+                const { data: concData, error: concErr } = await sb.from('concours_registrations').select('*').order('created_at', { ascending: false }); // Assuming 'concours_registrations' table exists
+                if (!concErr && concData) concoursData = concData;
+
+                // Fetch Agent Profiles
+                const { data: agentsData, error: agentsErr } = await sb.from('agent_profiles').select('*').order('created_at', { ascending: false }); // Assuming 'agent_profiles' table exists
+                if (!agentsErr && agentsData) allAgents = agentsData;
+
+                // Fetch Client Profiles (assuming a client_profiles table or filtering auth.users)
+                // For client-side, we cannot list all users directly. We'll use a client_profiles table.
+                const { data: clientsData, error: clientsErr } = await sb.from('client_profiles').select('*').order('created_at', { ascending: false }); // Assuming 'client_profiles' table exists
+                if (!clientsErr && clientsData) allClients = clientsData;
+
+                // Fetch Support Tickets
+                const { data: ticketsData, error: ticketsErr } = await sb.from('support_tickets').select('*').order('created_at', { ascending: false }); // Assuming 'support_tickets' table exists
+                if (!ticketsErr && ticketsData) supportTickets = ticketsData;
+
                 // We will use mock data combined with real shop data to populate the tables for demonstration.
                 
                 renderOverview();
                 renderShopsTable();
                 renderAgentsTable();
                 renderClientsTable();
+                renderConcoursTable();
+                renderSupportTickets();
+                loadPlatformSettings();
 
             } catch (e) {
                 console.error("Error loading global data:", e);
@@ -622,10 +880,10 @@
             const totalRevenue = validOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
             
             document.getElementById('global-revenue').innerText = formatMoney(totalRevenue);
-            document.getElementById('global-shops').innerText = allShops.length;
+            document.getElementById('global-shops').innerText = allShops.filter(s => s.shop_id !== 'platform_global_settings' && s.shop_id !== 'platform_content_settings' && s.shop_id !== 'platform_settings').length;
             
-            // Using mocks for Agents and Clients counts as exact auth counts require backend access
-            document.getElementById('global-agents').innerText = mockAgents.length;
+            // Using real data for Agents and Clients counts
+            document.getElementById('global-agents').innerText = allAgents.length;
             document.getElementById('global-clients').innerText = mockClients.length + 124; // Simulated large number
 
             // Render Recent Global Activity
@@ -660,11 +918,14 @@
             const tbody = document.getElementById('shops-table-body');
             
             if (allShops.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">No shops deployed on the platform yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">Aucune boutique déployée sur la plateforme.</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = allShops.map(shop => `
+            // Filter out system settings row
+            const displayShops = allShops.filter(s => s.shop_id !== 'platform_global_settings');
+
+            tbody.innerHTML = displayShops.map(shop => `
                 <tr class="hover:bg-slate-50 transition group">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
@@ -685,47 +946,103 @@
                     </td>
                     <td class="px-6 py-4">
                         <span class="status-badge status-active">Active</span>
+                        ${shop.is_featured ? `<span class="ml-2 bg-amber-100 text-amber-600 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter"><i class="fas fa-star text-[7px]"></i> TOP</span>` : ''}
                     </td>
                     <td class="px-6 py-4 text-right space-x-1">
-                        <button class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-tzblue hover:text-white transition" title="View Details"><i class="fas fa-eye"></i></button>
-                        <button class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Suspend Shop"><i class="fas fa-ban"></i></button>
+                        <button onclick="toggleShopFeatured('${shop.shop_id}', ${shop.is_featured || false})" class="w-8 h-8 rounded-lg ${shop.is_featured ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500'} hover:bg-amber-500 hover:text-white transition" title="Mettre au Top / Feature Shop">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        <button onclick="openShopLimits('${shop.shop_id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-yellow-500 hover:text-black transition" title="Gérer les Limites"><i class="fas fa-sliders-h"></i></button>
+                        <button onclick="openEditShopModal('${shop.shop_id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-tzblue hover:text-white transition" title="View/Edit Details"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteShop('${shop.shop_id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Supprimer Boutique"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
         }
 
+        async function deleteShop(shopId) {
+            if (!confirm(`Voulez-vous vraiment supprimer cette boutique (ID: ${shopId}) ? Cette action est irréversible.`)) return;
+            try {
+                const { error } = await sb.from('boutique_config').delete().eq('shop_id', shopId);
+                if (error) throw error;
+                // Also clean up products
+                await sb.from('boutique_products').delete().eq('shop_id', shopId);
+                alert("Boutique et ses produits supprimés.");
+                loadGlobalData(); // Reload data to update UI
+            } catch (e) {
+                console.error("Error deleting shop:", e);
+                alert("Erreur lors de la suppression de la boutique.");
+            }
+        }
+
         function renderAgentsTable() {
             const tbody = document.getElementById('agents-table-body');
             
-            // In a real app, you would fetch agents from an `agents` or `user_roles` table.
-            tbody.innerHTML = mockAgents.map(agent => {
-                const sClass = agent.status === 'Active' ? 'status-active' : 'status-suspended';
+            if (allAgents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-xs text-slate-400">Aucun agent commercial enregistré.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allAgents.map(agent => {
+                const sClass = agent.commission_active ? 'status-active' : 'status-suspended';
+                const agentShops = allShops.filter(shop => shop.owner_id === agent.id);
+                const agentRevenue = allOrders
+                    .filter(order => order.promo_code === agent.promo_code && order.status !== 'Refusé')
+                    .reduce((sum, order) => sum + Number(order.total || 0), 0);
+
                 return `
                 <tr class="hover:bg-slate-50 transition">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center font-bold text-xs uppercase">
-                                ${agent.email.charAt(0)}
+                                ${agent.email ? agent.email.charAt(0) : 'N/A'}
                             </div>
                             <span class="text-sm font-bold text-slate-800">${agent.email}</span>
                         </div>
                     </td>
                     <td class="px-6 py-4 text-xs font-mono font-bold text-slate-900">${agent.code}</td>
-                    <td class="px-6 py-4 text-xs font-bold text-slate-600">${agent.shops} Stores</td>
-                    <td class="px-6 py-4 text-xs font-black text-emerald-600">${formatMoney(agent.revenue)}</td>
-                    <td class="px-6 py-4"><span class="status-badge ${sClass}">${agent.status}</span></td>
-                    <td class="px-6 py-4 text-right space-x-1">
-                        <button class="px-3 py-1.5 rounded bg-slate-100 text-[10px] font-bold uppercase text-slate-600 hover:bg-slate-200 transition">Manage</button>
+                    <td class="px-6 py-4 text-xs font-bold text-slate-600">${agentShops.length} Boutiques</td>
+                    <td class="px-6 py-4 text-xs font-black text-emerald-600">${formatMoney(agentRevenue)}</td>
+                    <td class="px-6 py-4"><span class="status-badge ${sClass}">${agent.commission_active ? 'Active' : 'Inactive'}</span></td>
+                    <td class="px-6 py-4 text-right space-x-1 flex items-center justify-end gap-3">
+                        <div class="flex flex-col items-end">
+                            <span class="text-[8px] font-black uppercase text-slate-400">Commission</span>
+                            <label class="relative inline-flex items-center cursor-pointer" title="Activer/Désactiver la commission">
+                                <input type="checkbox" value="" class="sr-only peer" ${agent.commission_active ? 'checked' : ''} onchange="toggleAgentCommission('${agent.id}', this.checked)">
+                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                        </div>
+                        <button onclick="openEditAgentModal('${agent.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-blue-500 hover:text-white transition" title="Edit Agent"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteAgent('${agent.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Delete Agent"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
                 `;
             }).join('');
         }
 
+        function filterAgents() {
+            const query = document.getElementById('agent-search').value.toLowerCase();
+            const filteredAgents = allAgents.filter(agent => 
+                agent.email.toLowerCase().includes(query) ||
+                (agent.promo_code || '').toLowerCase().includes(query)
+            );
+            renderAgentsTable(filteredAgents);
+        }
+
         function renderClientsTable() {
             const tbody = document.getElementById('clients-table-body');
             
-            tbody.innerHTML = mockClients.map(client => `
+            if (allClients.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-xs text-slate-400">Aucun client enregistré.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allClients.map(client => {
+                const clientOrders = allOrders.filter(order => order.customer_email === client.email);
+                const totalSpent = clientOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+                const registrationDate = new Date(client.created_at).toLocaleDateString();
+
+                return `
                 <tr class="hover:bg-slate-50 transition">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
@@ -733,16 +1050,82 @@
                             <span class="text-sm font-semibold text-slate-800">${client.email}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-xs text-slate-500">${client.date}</td>
-                    <td class="px-6 py-4 text-xs font-bold text-slate-600">${client.orders} Orders</td>
-                    <td class="px-6 py-4"><span class="status-badge status-active">Verified</span></td>
+                    <td class="px-6 py-4 text-xs text-slate-500">${registrationDate}</td>
+                    <td class="px-6 py-4 text-xs font-bold text-slate-600">${clientOrders.length} Commandes (${formatMoney(totalSpent)})</td>
+                    <td class="px-6 py-4"><span class="status-badge status-active">Actif</span></td>
+                    <td class="px-6 py-4 text-right space-x-1">
+                        <button onclick="openEditClientModal('${client.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-purple-500 hover:text-white transition" title="Edit Client"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteClient('${client.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Delete Client"><i class="fas fa-trash"></i></button>
+                    </td>
                 </tr>
             `).join('');
         }
 
+        function renderConcoursTable() {
+            const tbody = document.getElementById('concours-table-body');
+            if (concoursData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">Aucune inscription au concours.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = concoursData.map(entry => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-3 text-xs font-bold text-slate-800">${entry.type}</td>
+                    <td class="px-6 py-3">
+                        <p class="text-xs font-semibold text-slate-800">${entry.name}</p>
+                        <p class="text-[10px] text-slate-500">${entry.email}</p>
+                    </td>
+                    <td class="px-6 py-3 text-xs text-slate-600">${entry.category || entry.ticket_type}</td>
+                    <td class="px-6 py-3 text-xs font-black text-emerald-600">${entry.total}</td>
+                    <td class="px-6 py-3 text-right space-x-1">
+                        <button onclick="openEditConcoursModal('${entry.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-emerald-500 hover:text-white transition" title="Edit Entry"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteConcoursRegistration('${entry.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Delete Entry"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderSupportTickets() {
+            const container = document.getElementById('tickets-container');
+            if (supportTickets.length === 0) {
+                container.innerHTML = `<div class="glass-card p-6 text-center text-xs text-slate-400">Aucun ticket de support en cours.</div>`;
+                return;
+            }
+
+            container.innerHTML = supportTickets.map(ticket => {
+                let statusClass = 'border-l-rose-500';
+                let statusText = 'Pending';
+                if (ticket.status === 'resolved') {
+                    statusClass = 'border-l-emerald-500';
+                    statusText = 'Resolved';
+                } else if (ticket.status === 'in_progress') {
+                    statusClass = 'border-l-yellow-500';
+                    statusText = 'In Progress';
+                }
+                const createdAt = new Date(ticket.created_at).toLocaleString();
+
+                return `
+                <div class="glass-card p-6 flex gap-5 items-start border-l-4 ${statusClass}">
+                    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 text-xl"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-slate-800 text-base">${ticket.issue_description.substring(0, 50)}...</h4>
+                            <span class="text-[10px] font-bold text-slate-400">${createdAt}</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mb-3">Reported by Agent: <span class="font-bold">${ticket.agent_email}</span> for Shop: <span class="font-bold">${ticket.shop_name}</span>.</p>
+                        <div class="flex gap-2">
+                            <button onclick="markTicketResolved('${ticket.id}')" class="px-4 py-1.5 bg-tzgreen text-white text-[10px] font-black uppercase rounded hover:bg-green-600 transition">Mark Resolved</button>
+                            <button onclick="deleteTicket('${ticket.id}')" class="px-4 py-1.5 bg-rose-500 text-white text-[10px] font-black uppercase rounded hover:bg-rose-600 transition">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
         // --- STREAMING_CHUNK:UI Navigation and Interactions ---
         function showSection(id) {
-            const sections = ['overview', 'agents', 'shops', 'clients', 'support', 'settings'];
+            const sections = ['overview', 'agents', 'shops', 'clients', 'concours', 'landing', 'support', 'settings'];
             sections.forEach(s => {
                 document.getElementById('section-' + s).classList.add('hidden');
                 if(document.getElementById('nav-' + s)) document.getElementById('nav-' + s).classList.remove('active');
@@ -754,12 +1137,189 @@
             const titles = {
                 'overview': 'Dashboard Overview',
                 'agents': 'Commercial Agents Management',
+                'concours': 'Concours Registrations',
                 'shops': 'Global Shops Directory',
                 'clients': 'Registered Clients',
+                'landing': 'Landing Page Content Management',
                 'support': 'Support Tickets',
                 'settings': 'Platform Settings'
             };
+
             document.getElementById('section-title').innerText = titles[id];
+        }
+
+        // --- GESTION DU TOP PLATFORME ---
+        async function toggleShopFeatured(shopId, currentStatus) {
+            if (!sb) return;
+            const newStatus = !currentStatus;
+            try {
+                const { error } = await sb.from('boutique_config').update({ is_featured: newStatus }).eq('shop_id', shopId);
+                if (error) throw error;
+                alert(`Boutique ${newStatus ? 'mise en avant' : 'retirée du top'}.`);
+                loadGlobalData();
+            } catch (err) {
+                alert("Erreur: " + err.message);
+            }
+        }
+
+        async function savePlatformContent() {
+            const globalAnnouncement = document.getElementById('config-global-announcement').value;
+            const featuredVideoId = document.getElementById('config-featured-video-id').value;
+            if (!sb) return;
+            
+            try {
+                const { error } = await sb.from('boutique_config').upsert({
+                    shop_id: 'platform_content_settings',
+                    slogan: globalAnnouncement, // Reusing slogan for announcement
+                    logo_url: featuredVideoId, // Reusing logo_url for video ID
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'shop_id' });
+                if (error) throw error;
+                alert("Contenu de la page d'accueil mis à jour !");
+            } catch (e) { alert("Erreur: " + e.message); }
+        }
+
+        async function loadPlatformSettings() {
+            if (!sb) return;
+            try {
+                const { data: settings, error } = await sb
+                    .from('boutique_config')
+                    .select('*')
+                    .eq('shop_id', 'platform_settings')
+                    .single();
+
+                if (!error && settings) {
+                    document.getElementById('config-agent-commission').value = settings.agent_commission || 5;
+                    document.getElementById('config-exchange-rate').value = settings.exchange_rate || 2800;
+                    document.getElementById('config-top-categories').value = settings.default_category || '';
+                }
+            } catch (e) {
+                console.error("Error loading platform settings:", e);
+            }
+        }
+
+        async function savePlatformSettings() {
+            const agentCommission = document.getElementById('config-agent-commission').value;
+            const exchangeRate = document.getElementById('config-exchange-rate').value;
+            const topCategories = document.getElementById('config-top-categories').value;
+            if (!sb) return;
+            
+            try {
+                const { error } = await sb.from('boutique_config').upsert({
+                    shop_id: 'platform_settings',
+                    agent_commission: parseInt(agentCommission),
+                    exchange_rate: parseFloat(exchangeRate),
+                    default_category: topCategories, // Reusing default_category for top categories
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'shop_id' });
+                if (error) throw error;
+                alert("Paramètres globaux enregistrés avec succès !");
+                loadGlobalData(); // Reload to update dashboard stats if needed
+            } catch (e) { alert("Erreur: " + e.message); }
+        }
+
+        async function markTicketResolved(ticketId) {
+            if (!confirm("Marquer ce ticket comme résolu ?")) return;
+            if (!sb) return;
+            try {
+                const { error } = await sb.from('support_tickets').update({ status: 'resolved', resolved_at: new Date().toISOString() }).eq('id', ticketId);
+                if (error) throw error;
+                alert("Ticket marqué comme résolu.");
+                loadGlobalData();
+            } catch (e) {
+                alert("Erreur: " + e.message);
+            }
+        }
+
+        async function deleteTicket(ticketId) {
+            if (!confirm("Supprimer ce ticket de support ?")) return;
+            if (!sb) return;
+            try {
+                const { error } = await sb.from('support_tickets').delete().eq('id', ticketId);
+                if (error) throw error;
+                alert("Ticket supprimé.");
+                loadGlobalData();
+            } catch (e) {
+                alert("Erreur: " + e.message);
+            }
+        }
+
+        async function deleteConcoursRegistration(entryId) {
+            if (!confirm("Supprimer cette inscription au concours ?")) return;
+            if (!sb) return;
+            try {
+                const { error } = await sb.from('concours_registrations').delete().eq('id', entryId);
+                if (error) throw error;
+                alert("Inscription supprimée.");
+                loadGlobalData();
+            } catch (e) {
+                alert("Erreur: " + e.message);
+            }
+        }
+
+        async function deleteClient(clientId) {
+            alert("La suppression d'un compte client d'authentification n'est pas possible directement depuis le client-side pour des raisons de sécurité. Cela nécessiterait une fonction Edge ou un backend.");
+            // In a real application, you would call a Supabase Edge Function here.
+        }
+
+        // --- GESTION DES LIMITES BOUTIQUES ---
+        function openShopLimits(shopId) {
+            const shop = allShops.find(s => s.shop_id === shopId);
+            if (!shop) return;
+
+            document.getElementById('limit-shop-id').value = shopId;
+            document.getElementById('limit-shop-name').innerText = shop.name;
+            
+            // Chargement des limites existantes ou valeurs par défaut
+            document.getElementById('limit-products').value = shop.limit_products || 50;
+            document.getElementById('limit-price-max').value = shop.limit_price_max || 5000;
+            document.getElementById('limit-orders-day').value = shop.limit_orders_day || 20;
+            document.getElementById('limit-orders-month').value = shop.limit_orders_month || 500;
+
+            document.getElementById('modal-shop-limits').classList.remove('hidden');
+        }
+
+        function closeShopLimitsModal() {
+            document.getElementById('modal-shop-limits').classList.add('hidden');
+        }
+
+        async function handleSaveShopLimits(e) {
+            e.preventDefault();
+            const shopId = document.getElementById('limit-shop-id').value;
+            const limits = {
+                limit_products: parseInt(document.getElementById('limit-products').value),
+                limit_price_max: parseFloat(document.getElementById('limit-price-max').value),
+                limit_orders_day: parseInt(document.getElementById('limit-orders-day').value),
+                limit_orders_month: parseInt(document.getElementById('limit-orders-month').value)
+            };
+
+            if (sb) {
+                try {
+                    const { error } = await sb.from('boutique_config').update(limits).eq('shop_id', shopId);
+                    if (error) throw error;
+                    alert("Restrictions mises à jour pour cette boutique.");
+                    closeShopLimitsModal();
+                    loadGlobalData();
+                } catch (err) {
+                    alert("Erreur de sauvegarde: " + err.message);
+                }
+            }
+        }
+
+        // --- GESTION COMMISSIONS AGENTS ---
+        async function toggleAgentCommission(agentId, isActive) {
+            // Mise à jour locale pour retour immédiat
+            const agent = mockAgents.find(a => a.id === agentId);
+            if(agent) agent.commission_active = isActive;
+
+            if (sb) {
+                try {
+                    const { error } = await sb.from('agent_profiles').update({ commission_active: isActive }).eq('id', agentId);
+                    if (error) console.error("Erreur toggle commission:", error);
+                } catch (e) {
+                    console.warn("Erreur base de données commission (Vérifiez les colonnes).");
+                }
+            }
         }
 
         // Create Agent Logic
@@ -788,10 +1348,16 @@
                 if (authErr) throw authErr;
 
                 // Note: Normally we'd insert into `agent_profiles` here.
-                // We'll simulate success for UI updating since we don't know if the table exists.
-                mockAgents.push({
-                    id: 'ag_new', email: email, code: promo, shops: 0, revenue: 0, status: 'Active'
+                // 2. Insert into agent_profiles table
+                const { error: profileErr } = await sb.from('agent_profiles').insert({
+                    id: authData.user.id,
+                    email: email,
+                    promo_code: promo,
+                    commission_active: true,
+                    created_at: new Date().toISOString()
                 });
+                if (profileErr) throw profileErr;
+
                 
                 alert(`Agent ${email} successfully created!`);
                 e.target.reset();

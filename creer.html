@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un Événement</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-calendar-alt text-yellow-500 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-800">LeGrandArt</span>
+                    </div>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:items-center md:space-x-8">
+                    <a href="billeterie.html" class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">Accueil Billetterie</a>
+                    <a href="evenements.html" class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">Événements</a>
+                    <a href="creer.html" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-blue-500 text-sm font-medium">Créer</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">Contact</a>
+                    <button onclick="window.location.href='index.html?openLogin=true'" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium transition duration-300">Connexion</button>
+                </div>
+                <div class="-mr-2 flex items-center md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-plus-circle text-yellow-500 mr-3"></i> Créer votre Événement
+            </h1>
+            <p class="text-gray-600 mb-8">Remplissez le formulaire ci-dessous pour publier votre événement sur notre plateforme.</p>
+
+            <form id="create-event-form" class="space-y-6">
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Titre de l'événement <span class="text-red-500">*</span></label>
+                    <input type="text" name="title" id="title" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700">Description détaillée <span class="text-red-500">*</span></label>
+                    <textarea id="description" name="description" rows="4" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700">Catégorie <span class="text-red-500">*</span></label>
+                        <select id="category" name="category" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                            <option value="">Sélectionnez une catégorie</option>
+                            <option value="music">Musique</option>
+                            <option value="sport">Sport</option>
+                            <option value="art">Art</option>
+                            <option value="food">Gastronomie</option>
+                            <option value="tech">Technologie</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-700">Date <span class="text-red-500">*</span></label>
+                            <input type="date" name="date" id="date" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="time" class="block text-sm font-medium text-gray-700">Heure <span class="text-red-500">*</span></label>
+                            <input type="time" name="time" id="time" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="location" class="block text-sm font-medium text-gray-700">Lieu <span class="text-red-500">*</span></label>
+                        <input type="text" name="location" id="location" required placeholder="Ex: Paris, Salle Pleyel" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-gray-700">Prix (en €)</label>
+                        <input type="number" name="price" id="price" placeholder="0 pour gratuit" min="0" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="image" class="block text-sm font-medium text-gray-700">Image de l'événement</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                        <div class="space-y-1 text-center">
+                            <i class="fas fa-camera text-4xl text-gray-400"></i>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                    <span>Télécharger un fichier</span>
+                                    <input id="file-upload" name="file-upload" type="file" class="sr-only">
+                                </label>
+                                <p class="pl-1">ou glisser-déposer</p>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 10MB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-5">
+                    <button type="submit" id="submit-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-gray-900 bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        <i class="fas fa-paper-plane mr-2"></i> Publier l'événement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 text-yellow-500">LeGrandArt</h3>
+                    <p class="text-gray-400">
+                        La plateforme de référence pour découvrir et organiser des événements uniques et mémorables.
+                    </p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Navigation</h3>
+                    <ul class="space-y-2">
+                        <li><a href="billeterie.html" class="text-gray-400 hover:text-white">Accueil Billetterie</a></li>
+                        <li><a href="evenements.html" class="text-gray-400 hover:text-white">Événements</a></li>
+                        <li><a href="creer.html" class="text-gray-400 hover:text-white">Créer un événement</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">À propos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Catégories</h3>
+                    <ul class="space-y-2">
+                        <li><a href="evenements.html?category=music" class="text-gray-400 hover:text-white">Musique</a></li>
+                        <li><a href="evenements.html?category=sport" class="text-gray-400 hover:text-white">Sport</a></li>
+                        <li><a href="evenements.html?category=art" class="text-gray-400 hover:text-white">Art</a></li>
+                        <li><a href="evenements.html?category=food" class="text-gray-400 hover:text-white">Gastronomie</a></li>
+                        <li><a href="evenements.html?category=tech" class="text-gray-400 hover:text-white">Technologie</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact</h3>
+                    <address class="text-gray-400 not-italic">
+                        <p class="mb-2">18 Avenue Salongo,</p>
+                        <p class="mb-2">Quartier Makelele, Commune de Bandalungwa,</p>
+                        <p class="mb-2">Ville de Kinshasa, Province de Kinshasa, RDC</p>
+                        <p class="mb-2"><i class="fas fa-phone mr-2"></i> +243978415814</p>
+                        <p><i class="fas fa-envelope mr-2"></i> contact@eventplatform.com</p>
+                    </address>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">
+                    &copy; 2025 LeGrandArt. Tous droits réservés.
+                </p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Conditions d'utilisation</a>
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Politique de confidentialité</a>
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Mentions légales</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_fYpLwujskWmD2rQRsxD5TQ_qgAG6Bm_';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.getElementById('create-event-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Publication en cours...';
+
+            const formData = new FormData(e.target);
+            const data = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                category: formData.get('category'),
+                date: formData.get('date'),
+                time: formData.get('time'),
+                location: formData.get('location'),
+                price: parseFloat(formData.get('price')) || 0,
+                status: 'approved',
+                organizer: 'Utilisateur LeGrandArt'
+            };
+
+            try {
+                const { error } = await supabaseClient.from('events').insert([data]);
+                if (error) throw error;
+                alert('Événement créé avec succès !');
+                window.location.href = 'evenements.html';
+            } catch (err) {
+                alert('Erreur: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        };
+    </script>
+</body>
+</html>

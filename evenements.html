@@ -3,127 +3,442 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="favicon.png">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T00CMP9WFH"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-T00CMP9WFH');
-    </script>
-    <title>Événements 2026 - LeGrandArt</title>
+    <title>Événements - LeGrandArt</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0b; color: #f0f0f0; }
-        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        input, textarea { background: rgba(0,0,0,0.4) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
-        input:focus, textarea:focus { border-color: #eab308 !important; outline: none; box-shadow: 0 0 15px rgba(234, 179, 8, 0.2); }
+        /* Définition des couleurs Noir/Jaune/Blanc */
+        .primary-color {
+            background-color: #facc15; /* Jaune (yellow-400) */
+        }
+        .primary-text-color {
+            color: #facc15; /* Jaune */
+        }
+        .primary-border-color {
+            border-color: #facc15; /* Jaune */
+        }
+        .dark-background {
+            background-color: #111827; /* Gris très foncé (Tailwind Gray-900) */
+        }
+        .text-dark {
+            color: #111827; /* Gris très foncé/Noir */
+        }
+
+        /* Styles de la liste d'événements */
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        /* Style des filtres actifs (adapté au jaune) */
+        .category-filter.active {
+            background-color: #facc15;
+            color: #111827;
+        }
+        /* Style de la pagination active */
+        .pagination-active {
+            background-color: #facc15 !important;
+            color: #111827 !important;
+            border-color: #facc15 !important;
+        }
+
+        #loading-spinner {
+            display: none;
+        }
     </style>
 </head>
-<body class="min-h-screen">
-
-    <header class="bg-black/90 backdrop-blur-xl border-b border-white/5 py-6 px-6 sticky top-0 z-50">
-        <div class="max-w-[1400px] mx-auto flex justify-between items-center">
-            <a href="index.html" class="flex flex-col leading-none">
-                <span class="text-2xl font-black text-white">LeGrand<span class="text-yellow-500">Art</span></span>
-                <span class="text-[8px] uppercase tracking-[0.4em] text-emerald-500 font-black mt-1">Événements Culturels</span>
-            </a>
-            <div class="flex items-center gap-6">
-                <button onclick="toggleEventForm()" id="organize-btn" class="bg-yellow-500 hover:bg-white text-black font-black py-3 px-6 rounded-xl uppercase text-[10px] tracking-widest transition-all">
-                    Organiser un événement
-                </button>
-                <a href="index.html" class="text-gray-400 hover:text-white transition uppercase text-[10px] font-black tracking-widest">Retour</a>
+<body class="bg-gray-50 font-sans flex flex-col min-h-screen">
+    <nav class="dark-background shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-calendar-alt primary-text-color text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-white">LeGrandArt</span>
+                    </div>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:items-center md:space-x-8">
+                    <a href="billeterie.html" class="text-gray-300 hover:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:primary-border-color text-sm font-medium">Accueil Billetterie</a>
+                    <a href="evenements.html" class="text-white inline-flex items-center px-1 pt-1 border-b-2 primary-border-color text-sm font-medium">Événements</a>
+                    <a href="creer.html" class="text-gray-300 hover:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:primary-border-color text-sm font-medium">Créer</a>
+                    <a href="#" class="text-gray-300 hover:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:primary-border-color text-sm font-medium">Contact</a>
+                    <button onclick="window.location.href='index.html?openLogin=true'" class="primary-color hover:bg-yellow-500 text-dark px-4 py-2 rounded-md text-sm font-medium transition duration-300">Connexion</button>
+                </div>
+                <div class="-mr-2 flex items-center md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:primary-color" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <main class="max-w-6xl mx-auto px-6 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow">
+        <h1 class="text-3xl font-extrabold text-dark mb-8">Tous nos Événements à Venir à Kinshasa 🇨🇩</h1>
         
-        <!-- SECTION FORMULAIRE (Masquée par défaut) -->
-        <section id="event-form-section" class="hidden mb-24 animate-fade-in">
-            <div class="glass-card p-10 md:p-16 rounded-[3rem] border-yellow-500/20 relative">
-                <button onclick="toggleEventForm()" class="absolute top-8 right-8 text-gray-500 hover:text-white">
-                    <i class="fas fa-times"></i>
+        <div class="mb-12 flex flex-col sm:flex-row gap-4">
+            <input type="text" id="search-input" placeholder="Rechercher par titre ou description..." class="px-4 py-3 rounded-lg border border-gray-300 w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+            <button id="search-button" class="primary-color text-dark hover:bg-yellow-500 px-6 py-3 rounded-lg font-medium transition duration-300">
+                <i class="fas fa-search mr-2"></i> Filtrer la recherche
+            </button>
+        </div>
+        
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-dark mb-6">Filtrer par catégorie</h2>
+            <div class="flex flex-wrap gap-3">
+                <button class="category-filter active px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="all">
+                    <i class="fas fa-list mr-2"></i> Tous
                 </button>
-                <div class="mb-12">
-                    <h2 class="text-4xl font-black text-white uppercase tracking-tighter italic">Proposer un <span class="text-yellow-500">Événement</span></h2>
-                    <p class="text-emerald-500 text-[10px] font-black uppercase tracking-[0.3em] mt-3 flex items-center gap-2">
-                        <i class="fas fa-shield-alt"></i> Soumission pour approbation manager
+                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="music">
+                    <i class="fas fa-music mr-2"></i> Musique
+                </button>
+                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="sport">
+                    <i class="fas fa-running mr-2"></i> Sport
+                </button>
+                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="art">
+                    <i class="fas fa-paint-brush mr-2"></i> Art
+                </button>
+                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="food">
+                    <i class="fas fa-utensils mr-2"></i> Gastronomie
+                </button>
+                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="tech">
+                    <i class="fas fa-laptop-code mr-2"></i> Technologie
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-8 flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-dark">Résultats</h2>
+            <div class="flex items-center">
+                <span class="text-gray-600 mr-2">Trier par :</span>
+                <select id="sort-select" class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                    <option value="date_asc">Date (proches)</option>
+                    <option value="attendees_desc">Popularité</option>
+                    <option value="price_asc">Prix (croissant)</option>
+                    <option value="price_desc">Prix (décroissant)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="loading-spinner" class="flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 primary-border-color"></div>
+        </div>
+
+        <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        </div>
+
+        <div class="mt-12 flex justify-center">
+            <nav class="inline-flex rounded-md shadow">
+                <a href="#" class="px-4 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white pagination-active font-medium">1</a>
+                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">2</a>
+                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">3</a>
+                <a href="#" class="px-4 py-2 border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 rounded-r-md">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <footer class="dark-background text-white mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 primary-text-color">LeGrandArt</h3>
+                    <p class="text-gray-400">
+                        La plateforme de référence pour découvrir et organiser des événements uniques et mémorables.
                     </p>
-                </div>
-
-                <form id="event-proposal-form" class="grid gap-8 md:grid-cols-2">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2 tracking-widest">Nom de l'événement *</label>
-                        <input type="text" id="ev-title" required class="w-full rounded-2xl px-6 py-4 outline-none transition-all" placeholder="Ex: Vernissage Roots">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2 tracking-widest">Date prévue *</label>
-                        <input type="date" id="ev-date" required class="w-full rounded-2xl px-6 py-4 outline-none transition-all">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2 tracking-widest">Lieu / Ville *</label>
-                        <input type="text" id="ev-location" required class="w-full rounded-2xl px-6 py-4 outline-none transition-all" placeholder="Kinshasa, Gombe...">
-                    </div>
-                    <div class="space-y-2 md:col-span-2">
-                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2 tracking-widest">Description de l'événement *</label>
-                        <textarea id="ev-description" required rows="4" class="w-full rounded-3xl px-6 py-4 outline-none transition-all" placeholder="Détails, artistes invités, objectifs..."></textarea>
-                    </div>
-                    <button type="submit" class="md:col-span-2 bg-yellow-500 hover:bg-yellow-400 text-black font-black py-6 rounded-2xl uppercase text-xs md:text-sm tracking-[0.2em] shadow-[0_20px_40px_-10px_rgba(234,179,8,0.3)] transition-all">
-                        Soumettre pour Approbation
-                    </button>
-                </form>
-            </div>
-        </section>
-
-        <!-- SECTION CALENDRIER -->
-        <section id="events-list" class="space-y-12">
-            <div class="flex items-center justify-between border-b border-white/10 pb-6">
-                <h2 class="text-3xl md:text-5xl font-black uppercase italic text-white">Calendrier <span class="text-yellow-500">2026</span></h2>
-                <span class="text-emerald-500 font-black text-[10px] tracking-widest uppercase bg-emerald-500/10 px-4 py-2 rounded-full">8 Événements confirmés</span>
-            </div>
-            
-            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                <!-- Concours Art, Foi & Racines -->
-                <div class="glass-card rounded-[2.5rem] overflow-hidden group hover:border-yellow-500/30 transition-all duration-500">
-                    <a href="concours.html" class="block h-56 bg-zinc-800 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1523895665936-7bfe172b757d?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700">
-                        <div class="absolute top-6 left-6 bg-emerald-500 text-black px-4 py-1 rounded-full text-[10px] font-black uppercase">01 Mai 2026</div>
-                    </a>
-                    <div class="p-8">
-                        <h3 class="text-2xl font-black text-white uppercase mb-3">Concours <span class="text-yellow-500">Art, Foi & Racines</span></h3>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2">Exprimez votre gratitude envers les ancêtres et célébrez notre héritage à travers ce concours panafricain d'exception.</p>
-                        <div class="flex justify-between items-center border-t border-white/5 pt-6">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"><i class="fas fa-map-marker-alt text-yellow-500 mr-2"></i>Panafricain / Présentiel</span>
-                            <a href="concours.html" class="text-yellow-500 font-black uppercase text-[10px] tracking-widest group-hover:text-white transition">Participer <i class="fas fa-arrow-right ml-2"></i></a>
-                        </div>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:primary-text-color">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:primary-text-color">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:primary-text-color">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:primary-text-color">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
                     </div>
                 </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 primary-text-color">Navigation</h3>
+                    <ul class="space-y-2">
+                        <li><a href="billeterie.html" class="text-gray-400 hover:primary-text-color">Accueil Billetterie</a></li>
+                        <li><a href="evenements.html" class="text-gray-400 hover:primary-text-color">Événements</a></li>
+                        <li><a href="creer.html" class="text-gray-400 hover:primary-text-color">Créer un événement</a></li>
+                        <li><a href="#" class="text-gray-400 hover:primary-text-color">À propos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:primary-text-color">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 primary-text-color">Catégories</h3>
+                    <ul class="space-y-2">
+                        <li><a href="evenements.html?category=music" class="text-gray-400 hover:primary-text-color">Musique</a></li>
+                        <li><a href="evenements.html?category=sport" class="text-gray-400 hover:primary-text-color">Sport</a></li>
+                        <li><a href="evenements.html?category=art" class="text-gray-400 hover:primary-text-color">Art</a></li>
+                        <li><a href="evenements.html?category=food" class="text-gray-400 hover:primary-text-color">Gastronomie</a></li>
+                        <li><a href="evenements.html?category=tech" class="text-gray-400 hover:primary-text-color">Technologie</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 primary-text-color">Contact</h3>
+                    <address class="text-gray-400 not-italic">
+                        <p class="mb-2">18 Avenue Salongo,</p>
+                        <p class="mb-2">Quartier Makelele, Commune de Bandalungwa,</p>
+                        <p class="mb-2">Ville de Kinshasa, Province de Kinshasa, RDC</p>
+                        <p class="mb-2"><i class="fas fa-phone mr-2"></i> +243978415814</p>
+                        <p><i class="fas fa-envelope mr-2"></i> contact@eventplatform.com</p>
+                    </address>
+                </div>
             </div>
-        </section>
-    </main>
+            <div class="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">
+                    &copy; 2025 LeGrandArt. Tous droits réservés.
+                </p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:primary-text-color text-sm">Conditions d'utilisation</a>
+                    <a href="#" class="text-gray-400 hover:primary-text-color text-sm">Politique de confidentialité</a>
+                    <a href="#" class="text-gray-400 hover:primary-text-color text-sm">Mentions légales</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        feather.replace();
-        function toggleEventForm() {
-            const section = document.getElementById('event-form-section');
-            const btn = document.getElementById('organize-btn');
-            if (section.classList.contains('hidden')) {
-                section.classList.remove('hidden');
-                btn.innerText = "Annuler la proposition";
-                btn.classList.replace('bg-yellow-500', 'bg-white');
-                section.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                section.classList.add('hidden');
-                btn.innerText = "Organiser un événement";
-                btn.classList.replace('bg-white', 'bg-yellow-500');
-            }
+        // Data Events Mis à jour pour Kinshasa et vos noms d'images locaux
+        const events = [
+            // Événements d'origine
+            { id: 1, title: "Festival Rumba Congolaise", date: "2025-07-15", time: "20:00", location: "Kinshasa, RDC", category: "music", price: 45, fees: 5, image: "rumba-congolaise-festival.jpg", description: "Une célébration vibrante de la Rumba, patrimoine de l'humanité, avec des artistes congolais de renom.", attendees: 1800 },
+            { id: 2, title: "Course de la Paix 10K", date: "2025-08-20", time: "08:00", location: "Kinshasa, RDC", category: "sport", price: 15, fees: 5, image: "course-paix-10k.jpg", description: "Une course emblématique à travers la capitale pour la promotion de la paix et de la solidarité.", attendees: 3100 },
+            { id: 3, title: "Sommet Tech & Innovation RDC", date: "2025-10-12", time: "09:30", location: "Kinshasa, RDC", category: "tech", price: 150, fees: 5, image: "sommet-tech-rdc.jpg", description: "Explorez le futur numérique de l'Afrique avec des leaders d'opinion et des startups prometteuses.", attendees: 950 },
+            { id: 4, title: "Dîner Gala de la Gastronomie Congolaise", date: "2025-07-22", time: "19:00", location: "Kinshasa, RDC", category: "food", price: 75, fees: 5, image: "diner-gala-gastronomie.jpg", description: "Un dîner exclusif pour déguster les saveurs riches et variées de la cuisine congolaise moderne.", attendees: 250 },
+            { id: 5, title: "Exposition Art et Culture de Kin", date: "2025-09-05", time: "10:00", location: "Kinshasa, RDC", category: "art", price: 10, fees: 5, image: "exposition-art-culture.jpg", description: "Découvrez les œuvres d'artistes contemporains locaux et le riche héritage culturel.", attendees: 800 },
+            { id: 6, title: "Soirée Jazz au Fleuve Congo", date: "2025-08-30", time: "19:30", location: "Kinshasa, RDC", category: "music", price: 35, fees: 5, image: "soiree-jazz-fleuve.jpg", description: "Profitez d'une soirée de jazz envoûtante sur les rives du majestueux Fleuve Congo.", attendees: 500 },
+
+            // Nouveaux 12 événements (Total : 18)
+            { id: 7, title: "Atelier IA pour PME Congolaises", date: "2025-11-05", time: "09:00", location: "Kinshasa, RDC", category: "tech", price: 60, fees: 5, image: "atelier-ia-pme.jpg", description: "Formation pratique sur l'intégration de l'intelligence artificielle dans les petites et moyennes entreprises.", attendees: 120 },
+            { id: 8, title: "Grand Tournoi de Basketball Inter-Clubs", date: "2025-12-10", time: "17:00", location: "Kinshasa, RDC", category: "sport", price: 5, fees: 2, image: "tournoi-basketball-kin.jpg", description: "Finale spectaculaire du championnat de basketball local, ambiance garantie.", attendees: 4500 },
+            { id: 9, title: "Concert Gospel de Noël", date: "2025-12-24", time: "20:30", location: "Kinshasa, RDC", category: "music", price: 25, fees: 5, image: "concert-gospel-kin.jpg", description: "Célébrez Noël avec les plus belles voix de la scène Gospel congolaise.", attendees: 2000 },
+            { id: 10, title: "Vernissage Galerie Limete : Photographie", date: "2025-07-29", time: "18:00", location: "Kinshasa, RDC", category: "art", price: 0, fees: 0, image: "vernissage-galerie-limete.jpg", description: "Inauguration d'une exposition dédiée aux photographes émergents de la RDC. Entrée Gratuite.", attendees: 300 },
+            { id: 11, title: "Kinshasa Food Truck Festival", date: "2025-09-15", time: "12:00", location: "Kinshasa, RDC", category: "food", price: 0, fees: 0, image: "food-truck-festival.jpg", description: "Le plus grand rassemblement de 'Food Trucks' de la ville. Dégustations illimitées ! Entrée Gratuite.", attendees: 5500 },
+            { id: 12, title: "Hackathon 48h du Numérique", date: "2025-11-20", time: "08:00", location: "Kinshasa, RDC", category: "tech", price: 10, fees: 5, image: "hackathon-numerique.jpg", description: "Compétition de programmation intense pour créer des solutions numériques innovantes en 48h.", attendees: 80 },
+            { id: 13, title: "Grande Marche de Sensibilisation contre le Paludisme", date: "2025-10-01", time: "07:00", location: "Kinshasa, RDC", category: "sport", price: 5, fees: 2, image: "marche-paludisme.jpg", description: "Rejoignez la communauté pour cette marche santé et sensibilisation à travers la Gombe.", attendees: 4000 },
+            { id: 14, title: "Open Mic : Les Nouveaux Talents de la RDC", date: "2025-11-12", time: "19:00", location: "Kinshasa, RDC", category: "music", price: 12, fees: 5, image: "open-mic-talents.jpg", description: "Scène ouverte pour découvrir les chanteurs, poètes et comédiens de demain.", attendees: 400 },
+            { id: 15, title: "Sculptures Urbaines du 21e Siècle", date: "2025-09-28", time: "14:00", location: "Kinshasa, RDC", category: "art", price: 8, fees: 5, image: "sculptures-urbaines.jpg", description: "Exposition éphémère de grandes œuvres sculpturales dans les espaces publics de la ville.", attendees: 1100 },
+            { id: 16, title: "Masterclass de Cuisine Locale avec le Chef Serge", date: "2025-10-25", time: "15:00", location: "Kinshasa, RDC", category: "food", price: 90, fees: 10, image: "masterclass-cuisine-locale.jpg", description: "Cours intensif sur les techniques traditionnelles et modernes de la cuisine congolaise.", attendees: 50 },
+            { id: 17, title: "Séminaire : Cybersécurité pour Tous", date: "2025-12-03", time: "10:00", location: "Kinshasa, RDC", category: "tech", price: 20, fees: 5, image: "cybersécurite-pour-tous.jpg", description: "Apprenez à vous protéger et à protéger vos données dans le monde numérique actuel.", attendees: 300 },
+            { id: 18, title: "Cours de Boxe Découverte et Initiation", date: "2025-07-01", time: "16:00", location: "Kinshasa, RDC", category: "sport", price: 20, fees: 5, image: "cours-boxe-decouverte.jpg", description: "Session d'initiation gratuite (frais de service uniquement) pour découvrir les bases de la boxe olympique.", attendees: 150 }
+        ];
+
+        // --- Le reste du code JavaScript (fonctions de tri, filtre, affichage) est inchangé et gère les 18 événements ---
+
+        let currentFilter = 'all';
+        let currentSort = 'date_asc';
+        let currentSearchTerm = '';
+
+        // Helper functions
+        function getCategoryName(category) {
+            const names = {
+                music: 'Musique',
+                sport: 'Sport',
+                art: 'Art',
+                food: 'Gastronomie',
+                tech: 'Technologie'
+            };
+            return names[category] || category;
         }
+
+        function getCategoryClass(category) {
+            const classes = {
+                music: 'bg-yellow-100 text-dark',
+                sport: 'bg-green-100 text-dark',
+                art: 'bg-red-100 text-dark',
+                food: 'bg-blue-100 text-dark',
+                tech: 'bg-purple-100 text-dark'
+            };
+            return classes[category] || 'bg-gray-100 text-dark';
+        }
+
+        // Function to sort events
+        function sortEvents(eventArray, sortType) {
+            eventArray.sort((a, b) => {
+                switch (sortType) {
+                    case 'attendees_desc':
+                        return b.attendees - a.attendees; 
+                    case 'price_asc':
+                        return a.price - b.price; 
+                    case 'price_desc':
+                        return b.price - a.price; 
+                    case 'date_asc':
+                    default:
+                        return new Date(a.date) - new Date(b.date);
+                }
+            });
+            return eventArray;
+        }
+
+        // Function to apply filtering and search
+        function getFilteredAndSearchedEvents(filter, search, eventArray) {
+            let results = eventArray;
+
+            // 1. Category Filter
+            if (filter !== 'all') {
+                results = results.filter(event => event.category === filter);
+            }
+
+            // 2. Search Filter (Case-insensitive)
+            if (search) {
+                const term = search.toLowerCase();
+                results = results.filter(event => 
+                    event.title.toLowerCase().includes(term) ||
+                    event.description.toLowerCase().includes(term) ||
+                    event.location.toLowerCase().includes(term)
+                );
+            }
+
+            return results;
+        }
+
+
+        // Function to display events (combined logic)
+        function displayEvents() {
+            const container = document.getElementById('events-container');
+            container.innerHTML = '';
+            
+            // Show loading spinner
+            document.getElementById('loading-spinner').style.display = 'flex';
+            
+            // Apply Filters and Search
+            let filteredAndSearchedEvents = getFilteredAndSearchedEvents(currentFilter, currentSearchTerm, [...events]);
+            
+            // Apply Sort
+            const finalEvents = sortEvents(filteredAndSearchedEvents, currentSort);
+
+            // Simule l'affichage des 6 premiers événements (pour montrer l'effet de la pagination)
+            // Dans une vraie application, c'est ici qu'on ferait le slicing de la page courante
+            const eventsToShow = finalEvents.slice(0, 12); // Affiche les 12 premiers événements (ou tous si moins de 12)
+            
+            setTimeout(() => {
+                
+                if (eventsToShow.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-3 text-center py-12">
+                            <i class="fas fa-calendar-times text-5xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-medium text-dark">Aucun événement trouvé</h3>
+                            <p class="text-gray-500 mt-2">Aucun événement ne correspond à vos critères. Essayez une autre catégorie ou terme de recherche.</p>
+                        </div>
+                    `;
+                } else {
+                    eventsToShow.forEach(event => {
+                        const eventDate = new Date(event.date);
+                        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                        const formattedDate = eventDate.toLocaleDateString('fr-FR', options);
+                        const total = event.price + event.fees;
+                        
+                        // Construction de l'URL pour le paiement
+                        const paymentLink = `paiement.html?event=${encodeURIComponent(event.title)}&price=${event.price}&fees=${event.fees}&total=${total}`;
+
+                        const card = document.createElement('div');
+                        card.className = 'event-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 border border-gray-100';
+                        card.innerHTML = `
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="${event.image}" alt="${event.title}" class="w-full h-full object-cover">
+                                <div class="absolute top-4 right-4 bg-white bg-opacity-90 px-3 py-1 rounded-full text-sm font-semibold text-dark">
+                                    ${event.price === 0 ? 'Gratuit' : `$${event.price}`}
+                                </div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                                    <span class="text-white font-medium">${event.location}</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="text-xl font-bold text-dark">${event.title}</h3>
+                                    <span class="text-sm text-gray-500 flex items-center">
+                                        <i class="fas fa-users mr-1"></i> ${event.attendees.toLocaleString()}
+                                    </span>
+                                </div>
+                                <div class="flex items-center text-gray-600 mb-4">
+                                    <i class="far fa-calendar-alt mr-2"></i>
+                                    <span>${formattedDate}</span>
+                                    <i class="far fa-clock ml-4 mr-2"></i>
+                                    <span>${event.time}</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">${event.description}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getCategoryClass(event.category)}">
+                                        ${getCategoryName(event.category)}
+                                    </span>
+                                    <a href="${paymentLink}" class="primary-color hover:bg-yellow-500 text-dark px-4 py-2 rounded-md text-sm font-medium transition duration-300">
+                                        <i class="fas fa-ticket-alt mr-2"></i> Réserver
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+                
+                // Hide loading spinner
+                document.getElementById('loading-spinner').style.display = 'none';
+            }, 500);
+        }
+
+        // Function to read category from URL parameters on load
+        function getCategoryFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('category') || 'all';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            currentFilter = getCategoryFromUrl();
+            
+            const initialFilterButton = document.querySelector(`.category-filter[data-category="${currentFilter}"]`);
+            if (initialFilterButton) {
+                document.querySelectorAll('.category-filter').forEach(f => f.classList.remove('active'));
+                initialFilterButton.classList.add('active');
+            }
+
+            displayEvents();
+            
+            // Add event listeners to category filters
+            const filters = document.querySelectorAll('.category-filter');
+            filters.forEach(filter => {
+                filter.addEventListener('click', function() {
+                    currentFilter = this.dataset.category;
+                    filters.forEach(f => f.classList.remove('active'));
+                    this.classList.add('active');
+                    displayEvents();
+                });
+            });
+
+            // Add event listener to sort select
+            document.getElementById('sort-select').addEventListener('change', function() {
+                currentSort = this.value;
+                displayEvents();
+            });
+
+            // Add event listener to search input/button
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+
+            const handleSearch = () => {
+                currentSearchTerm = searchInput.value.trim();
+                displayEvents();
+            };
+
+            searchButton.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            });
+        });
     </script>
 </body>
 </html>

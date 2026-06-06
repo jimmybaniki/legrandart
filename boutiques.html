@@ -181,6 +181,9 @@
                     <button onclick="switchClientTab('shops-tab')" id="btn-shops-tab" class="client-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200 whitespace-nowrap">
                         <i class="fa-solid fa-store text-yellow-600"></i> Boutiques Partenaires
                     </button>
+                    <button onclick="switchClientTab('favorites-tab')" id="btn-favorites-tab" class="client-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent whitespace-nowrap">
+                        <i class="fa-solid fa-heart text-rose-500"></i> Mes Favoris
+                    </button>
                     <button onclick="switchClientTab('history-tab')" id="btn-history-tab" class="client-tab-btn shrink-0 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 border border-transparent relative whitespace-nowrap">
                         <i class="fa-solid fa-clock-rotate-left"></i> Historique d'Achats
                     </button>
@@ -201,6 +204,19 @@
 
                         <div id="shops-explorer-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <p class="text-slate-400 text-xs text-center py-10 col-span-2 italic">Chargement des boutiques disponibles...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAVORITES TAB -->
+                <div id="favorites-tab" class="client-tab-content hidden space-y-6">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="bg-rose-50 text-rose-600 p-1.5 rounded-lg text-xs"><i class="fa-solid fa-heart"></i></span>
+                            Mes Boutiques Favorites
+                        </h3>
+                        <div id="favorites-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <p class="text-slate-400 text-xs text-center py-10 col-span-2 italic">Vous n'avez pas encore de favoris.</p>
                         </div>
                     </div>
                 </div>
@@ -709,10 +725,21 @@
             try {
                 // 1. Fetch Global Shops and Client History (if not specific to a single shop)
                 if (!specificShopOnly) {
-                    const { data: shopsData } = await sb.from('boutique_config').select('*').order('name');
+                    const { data: shopsData } = await sb.from('boutique_config').select('*');
                     if (shopsData) {
                         allShops = shopsData;
+                        
+                        // On extrait les réglages globaux si présents (Top Categories)
+                        const globalSettings = allShops.find(s => s.shop_id === 'platform_global_settings');
+                        if (globalSettings && globalSettings.default_category) {
+                            platformCategories = globalSettings.default_category.split(',').map(c => c.trim());
+                        }
+                        
+                        // On retire les réglages de la liste des boutiques affichées
+                        allShops = allShops.filter(s => s.shop_id !== 'platform_global_settings');
+                        
                         renderShopsExplorer();
+                        renderCategoryPills();
                     }
 
                     if (currentUser) {
@@ -756,6 +783,7 @@
                             price: Number(p.price),
                             oldPrice: p.old_price ? Number(p.old_price) : null,
                             stock: Number(p.stock),
+                            minQty: Number(p.min_order_qty || 1),
                             description: p.description,
                             imgUrl: p.img_url
                         }));
@@ -807,10 +835,23 @@
                 return;
             }
 
-            const shopsToRender = arguments.length > 0 ? arguments[0] : allShops;
+            let shopsToRender = arguments.length > 0 ? arguments[0] : allShops;
 
-            container.innerHTML = shopsToRender.map(s => `
-                <div onclick="enterShop('${s.shop_id}')" class="bg-white p-4 rounded-2xl border ${activeShopId === s.shop_id ? 'border-indigo-500 shadow-md ring-2 ring-indigo-100' : 'border-slate-100 shadow-sm'} hover:border-indigo-400 transition cursor-pointer flex items-center gap-4">
+            // TRI : Les boutiques marquées "is_featured" apparaissent en premier
+            shopsToRender = [...shopsToRender].sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0));
+
+            container.innerHTML = shopsToRender.map(s => {
+                const isFav = favorites.includes(s.shop_id);
+                const favIcon = isFav ? 'fa-solid fa-heart text-rose-500' : 'fa-regular fa-heart text-slate-300';
+                
+                const featuredBadge = s.is_featured ? 
+                    `<div class="absolute -top-2 -left-2 bg-amber-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-sm z-10 animate-bounce">
+                        <i class="fa-solid fa-star mr-1"></i>TOP PAGE
+                    </div>` : '';
+
+                return `
+                <div onclick="enterShop('${s.shop_id}')" class="bg-white p-4 rounded-2xl border ${activeShopId === s.shop_id ? 'border-indigo-500 shadow-md ring-2 ring-indigo-100' : 'border-slate-100 shadow-sm'} ${s.is_featured ? 'ring-1 ring-amber-200 bg-amber-50/20 shadow-amber-100/50' : ''} hover:border-indigo-400 transition cursor-pointer flex items-center gap-4 group relative">
+                    ${featuredBadge}
                     <div class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 border border-slate-200">
                         ${s.logo_url ? `<img src="${s.logo_url}" class="h-full w-full object-cover">` : `<i class="fa-solid fa-store text-slate-300"></i>`}
                     </div>
@@ -818,6 +859,49 @@
                         <h4 class="text-sm font-bold text-slate-900 truncate">${s.name}</h4>
                         <p class="text-[10px] text-slate-400 truncate">${s.slogan || 'Boutique'}</p>
                     </div>
+                    <button onclick="toggleFavorite('${s.shop_id}', event)" class="p-2 rounded-full hover:bg-rose-50 transition-colors">
+                        <i class="${favIcon}"></i>
+                    </button>
+                </div>
+            `;}).join('');
+        }
+
+        function toggleFavorite(shopId, event) {
+            if(event) event.stopPropagation();
+            const index = favorites.indexOf(shopId);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                showNotification("Retiré des favoris");
+            } else {
+                favorites.push(shopId);
+                showNotification("Ajouté aux favoris");
+            }
+            localStorage.setItem('lg_client_favorites', JSON.stringify(favorites));
+            renderShopsExplorer(); 
+            if(document.getElementById('favorites-tab').offsetParent !== null) renderFavorites();
+        }
+
+        function renderFavorites() {
+            const container = document.getElementById('favorites-container');
+            const favShops = allShops.filter(s => favorites.includes(s.shop_id));
+            
+            if (favShops.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-xs text-center py-10 col-span-2 italic">Vous n'avez pas encore de favoris.</p>`;
+                return;
+            }
+            
+            container.innerHTML = favShops.map(s => `
+                <div onclick="enterShop('${s.shop_id}')" class="bg-white p-4 rounded-2xl border ${activeShopId === s.shop_id ? 'border-indigo-500 shadow-md ring-2 ring-indigo-100' : 'border-slate-100 shadow-sm'} hover:border-indigo-400 transition cursor-pointer flex items-center gap-4 group">
+                    <div class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 border border-slate-200">
+                        ${s.logo_url ? `<img src="${s.logo_url}" class="h-full w-full object-cover">` : `<i class="fa-solid fa-store text-slate-300"></i>`}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-bold text-slate-900 truncate">${s.name}</h4>
+                        <p class="text-[10px] text-slate-400 truncate">${s.slogan || 'Boutique'}</p>
+                    </div>
+                    <button onclick="toggleFavorite('${s.shop_id}', event)" class="p-2 rounded-full hover:bg-rose-50 transition-colors">
+                        <i class="fa-solid fa-heart text-rose-500"></i>
+                    </button>
                 </div>
             `).join('');
         }
@@ -945,6 +1029,8 @@
                 activeBtn.classList.add('bg-white', 'text-slate-900', 'shadow-sm', 'border-slate-200');
                 activeBtn.classList.remove('text-slate-600', 'hover:text-slate-900', 'border-transparent');
             }
+
+            if(tabId === 'favorites-tab') renderFavorites();
         }
 
         // --- FULLSCREEN TOGGLE ---
@@ -1034,6 +1120,20 @@
             renderPhoneProducts();
         }
 
+        // Rendre les catégories dynamiques définies par l'admin
+        function renderCategoryPills() {
+            const container = document.querySelector('#screen-home .flex.gap-2.overflow-x-auto');
+            if (!container) return;
+            
+            let html = `<button onclick="filterCategory('tous')" class="cat-pill bg-indigo-600 text-white px-3 py-1 rounded-full font-medium shadow-sm transition">Tous</button>`;
+            
+            platformCategories.forEach(cat => {
+                html += `<button onclick="filterCategory('${cat}')" class="cat-pill bg-white text-slate-600 border border-slate-200 px-3 py-1 rounded-full font-medium transition">${cat}</button>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
         function handlePhoneSearch() {
             renderPhoneProducts(document.getElementById('phone-search-input').value.toLowerCase());
         }
@@ -1085,6 +1185,7 @@
                                 <div>
                                     <span class="text-[8px] text-indigo-600 font-bold uppercase block category-txt">${product.category}</span>
                                     <h4 class="text-[10.5px] font-bold text-slate-800 line-clamp-1 leading-snug">${product.name}</h4>
+                            ${product.minQty > 1 ? `<span class="text-[8px] font-black text-amber-600 uppercase">Min: ${product.minQty}</span>` : ''}
                                 </div>
                                 <div class="flex items-baseline justify-between pt-0.5">
                                     <span class="text-xs font-bold text-slate-900">${formatVal(product.price)}</span>
@@ -1102,6 +1203,7 @@
                                 <div>
                                     <span class="text-[8px] text-indigo-600 font-bold uppercase block category-txt">${product.category}</span>
                                     <h4 class="text-[11px] font-bold text-slate-800 line-clamp-1">${product.name}</h4>
+                            ${product.minQty > 1 ? `<span class="text-[8px] font-black text-amber-600 uppercase">Min: ${product.minQty}</span>` : ''}
                                 </div>
                                 <div class="flex items-baseline gap-2">
                                     <span class="text-xs font-bold text-slate-900">${formatVal(product.price)}</span>
@@ -1121,7 +1223,7 @@
             document.getElementById('detail-img').src = product.imgUrl;
             document.getElementById('detail-category').innerText = product.category;
             document.getElementById('detail-category').style.color = storeConfig.themeColor;
-            
+
             document.getElementById('detail-name').innerText = product.name;
             document.getElementById('detail-price').innerText = formatVal(product.price);
             
@@ -1133,6 +1235,9 @@
             }
 
             document.getElementById('detail-desc').innerText = product.description || "Aucune description.";
+            if (product.minQty > 1) {
+                document.getElementById('detail-desc').innerHTML += `<br><br><span class="text-indigo-600 font-bold">Commande minimale : ${product.minQty} unités</span>`;
+            }
             
             const stockBadge = document.getElementById('detail-stock');
             if (product.stock > 0) {
@@ -1205,14 +1310,19 @@
         function addProductToCart(product) {
             const existing = cart.find(item => item.product.id === product.id);
             if (existing) {
-                if(existing.quantity < product.stock) {
+                if (existing.quantity < product.stock) {
                     existing.quantity += 1;
                 } else {
                     openPhoneToast("Limite de stock atteinte !");
                     return;
                 }
             } else {
-                cart.push({ product: product, quantity: 1 });
+                const qtyToAdd = product.minQty > 1 ? product.minQty : 1;
+                if (qtyToAdd > product.stock) {
+                    openPhoneToast("Stock insuffisant pour la quantité minimale.");
+                    return;
+                }
+                cart.push({ product: product, quantity: qtyToAdd });
             }
             updatePhoneCartBadge();
             openPhoneToast(`🛒 Article ajouté !`);
@@ -1268,9 +1378,24 @@
         function changeCartQty(id, delta) {
             const item = cart.find(i => i.product.id === id);
             if(item) {
-                const targetQty = item.quantity + delta;
-                if(targetQty <= 0) removeFromCart(id);
-                else if(targetQty <= item.product.stock) {
+                let targetQty = item.quantity + delta;
+                const minOrderQty = item.product.minQty || 1;
+
+                if (targetQty < minOrderQty) {
+                    if (minOrderQty === 1 && targetQty === 0) { // Allow removal if minQty is 1
+                        removeFromCart(id);
+                        return;
+                    }
+                    openPhoneToast(`Quantité minimale pour ce produit: ${minOrderQty}`);
+                    targetQty = minOrderQty; // Set to minQty if trying to go below
+                } else if (targetQty > item.product.stock) {
+                    openPhoneToast("Limite de stock atteinte !");
+                    targetQty = item.product.stock; // Cap at available stock
+                }
+
+                if (targetQty <= 0 && minOrderQty === 1) { // Allow removal if minQty is 1 and target is 0
+                    removeFromCart(id);
+                } else if (targetQty <= item.product.stock) {
                     item.quantity = targetQty;
                     renderPhoneCart();
                     updatePhoneCartBadge();

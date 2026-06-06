@@ -13,26 +13,54 @@ function initSupabase() {
     }
 }
 
-function getLocalShops() {
-    return JSON.parse(localStorage.getItem('lg_shops') || '[]');
-}
-
 function getLocalProfile() {
     return JSON.parse(localStorage.getItem('lg_pro_user') || 'null');
 }
 
-function getLocalWorks() {
-    return JSON.parse(localStorage.getItem('lg_artworks') || '[]');
+// Fonction pour vérifier la session de manière persistante
+async function checkAuthPersistence() {
+    initSupabase();
+    if (!sb) return;
+
+    const { data: { session } } = await sb.auth.getSession();
+    
+    if (session) {
+        const user = session.user;
+        const role = user.user_metadata?.role;
+
+        // Si c'est un profil pro (artiste ou gérant)
+        if (role === 'artiste' || role === 'gerant') {
+            const profile = {
+                id: user.id,
+                name: user.user_metadata?.name || user.email.split('@')[0],
+                email: user.email,
+                role: role,
+                description: user.user_metadata?.description || '',
+                city: user.user_metadata?.city || '',
+                country: user.user_metadata?.country || ''
+            };
+            
+            // On met à jour le cache local pour la cohérence de l'UI
+            localStorage.setItem('lg_pro_user', JSON.stringify(profile));
+            localStorage.setItem('lg_user_name', profile.name);
+            
+            // Si on est sur une page pro et que l'affichage est masqué, on le montre
+            if (document.getElementById('selection-view')) {
+                document.getElementById('selection-view').classList.add('hidden');
+                document.getElementById('dashboard-page')?.classList.remove('hidden');
+            }
+        }
+    }
 }
 
 let currentMode = '';
 
 function switchMode(mode) {
     // Vérification de la passerelle : l'utilisateur doit être authentifié
-    const sessionUser = localStorage.getItem('lg_user_name');
-    if (!sessionUser) {
+    const proProfile = getLocalProfile();
+    if (!proProfile) {
         alert("Veuillez vous authentifier via la passerelle avant de créer un compte.");
-        window.location.href = 'index.html?openLogin=true';
+        window.location.href = 'index.html?openLogin=true'; 
         return;
     }
 
@@ -108,10 +136,6 @@ function addShop(shop) {
             if (error) console.error('Erreur Supabase addShop:', error);
         });
     }
-
-    const shops = getLocalShops();
-    shops.unshift(shop);
-    localStorage.setItem('lg_shops', JSON.stringify(shops));
 }
 
 function addArtwork(artwork) {
@@ -136,10 +160,6 @@ function addArtwork(artwork) {
             if (error) console.error('Erreur Supabase addArtwork:', error);
         });
     }
-
-    const artworks = getLocalWorks();
-    artworks.unshift(artwork);
-    localStorage.setItem('lg_artworks', JSON.stringify(artworks));
 }
 
 async function loadEvents() {
@@ -187,7 +207,7 @@ async function loadShops() {
     const container = document.getElementById('dynamic-shops');
     if (!container) return;
 
-    let shops = getLocalShops();
+    let shops = []; // Initialize as empty, will be populated from Supabase or defaults
     
     // 1. Tentative de chargement depuis Supabase (Boutiques réelles du Dashboard)
     initSupabase();
@@ -315,10 +335,49 @@ function populateDashboard() {
     }
 }
 
-function showMyShops() {
-    const shops = getLocalShops().filter((shop) => shop.owner === getLocalProfile().name);
+async function showMyShops() {
     const section = document.getElementById('content-list');
-    section.innerHTML = shops.length ? shops.map((shop) => `
+    section.innerHTML = '<div class="text-gray-600 text-xs uppercase tracking-widest text-center py-20 italic">Chargement de vos boutiques...</div>';
+
+    const profile = getLocalProfile();
+    if (!profile || !profile.email) {
+        section.innerHTML = '<p class="text-gray-400">Veuillez vous connecter pour voir vos boutiques.</p>';
+        return;
+    }
+
+    initSupabase();
+    if (!sb) {
+        section.innerHTML = '<p class="text-red-500">Erreur: Supabase non initialisé.</p>';
+        return;
+    }
+
+    try {
+        const { data: supabaseShops, error } = await sb
+            .from('boutique_config')
+            .select('*')
+            .eq('owner_id', profile.email) // Filter by the owner's email
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (supabaseShops && supabaseShops.length > 0) {
+            // Map Supabase data to the expected format for rendering
+            const shopsToRender = supabaseShops.map(shop => ({
+                id: shop.shop_id, // Use Supabase shop_id
+                shopName: shop.name,
+                description: shop.slogan,
+                country: shop.contact_info?.address?.split(', ').pop() || '', // Extract country from address if available
+                city: shop.contact_info?.address?.split(', ')[0] || '', // Extract city from address if available
+                tags: shop.default_category,
+                image: shop.logo_url,
+                owner: profile.name // Keep owner name for display if needed
+            }));
+
+            // Mise à jour des compteurs statistiques dans l'interface
+            if (document.getElementById('stat-total-items')) document.getElementById('stat-total-items').innerText = shopsToRender.length;
+            if (document.getElementById('stat-label')) document.getElementById('stat-label').innerText = 'Boutiques';
+
+            section.innerHTML = shopsToRender.map((shop) => `
         <div class="glass p-6 rounded-3xl border border-white/10">
             <div class="flex justify-between items-start mb-4">
                 <h3 class="text-xl font-black text-white">${shop.shopName}</h3>
@@ -334,13 +393,57 @@ function showMyShops() {
             <p class="text-gray-400 mb-3">${shop.description}</p>
             <div class="text-xs uppercase tracking-[0.35em] text-yellow-400 font-black">${shop.country} • ${shop.city}</div>
         </div>
-    `).join('') : '<p class="text-gray-400">Vous n’avez pas encore de boutique enregistrée. Créez-en une avec le formulaire ci-dessus.</p>';
+    `).join('');
+        } else {
+            section.innerHTML = '<p class="text-gray-400">Vous n’avez pas encore de boutique enregistrée. Créez-en une avec le formulaire ci-dessus.</p>';
+        }
+    } catch (e) {
+        console.error("Erreur lors du chargement des boutiques depuis Supabase:", e);
+        section.innerHTML = '<p class="text-red-500">Erreur lors du chargement de vos boutiques.</p>';
+    }
 }
 
-function showMyArtworks() {
-    const artworks = getLocalWorks().filter((art) => art.artist === getLocalProfile().name);
+async function showMyArtworks() {
     const section = document.getElementById('content-list');
-    section.innerHTML = artworks.length ? artworks.map((art) => `
+    section.innerHTML = '<div class="text-gray-600 text-xs uppercase tracking-widest text-center py-20 italic">Chargement de vos œuvres...</div>';
+
+    const profile = getLocalProfile();
+    if (!profile || !profile.name) {
+        section.innerHTML = '<p class="text-gray-400">Veuillez vous connecter pour voir vos œuvres.</p>';
+        return;
+    }
+
+    initSupabase();
+    if (!sb) {
+        section.innerHTML = '<p class="text-red-500">Erreur: Supabase non initialisé.</p>';
+        return;
+    }
+
+    try {
+        const { data: supabaseArtworks, error } = await sb
+            .from('boutique_products')
+            .select('*')
+            .eq('owner_id', profile.name) // Filter by the artist's name
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (supabaseArtworks && supabaseArtworks.length > 0) {
+            // Map Supabase data to the expected format for rendering
+            const artworksToRender = supabaseArtworks.map(art => ({
+                id: art.id,
+                artist: profile.name, // Assuming current user is the artist
+                title: art.name,
+                image: art.img_url,
+                description: art.description,
+                date: new Date(art.created_at).toLocaleDateString() // Format date
+            }));
+
+            // Mise à jour des compteurs statistiques dans l'interface
+            if (document.getElementById('stat-total-items')) document.getElementById('stat-total-items').innerText = artworksToRender.length;
+            if (document.getElementById('stat-label')) document.getElementById('stat-label').innerText = 'Œuvres';
+
+            section.innerHTML = artworksToRender.map((art) => `
         <div class="glass p-6 rounded-3xl border border-white/10 flex flex-col md:flex-row gap-6">
             <img src="${art.image}" alt="${art.title}" class="w-full md:w-40 h-40 object-cover rounded-3xl">
             <div class="flex-1">
@@ -359,7 +462,14 @@ function showMyArtworks() {
                 <div class="text-xs uppercase tracking-[0.35em] text-yellow-400 font-black">Publié le ${art.date}</div>
             </div>
         </div>
-    `).join('') : '<p class="text-gray-400">Aucune œuvre publiée pour l’instant. Utilisez le formulaire pour ajouter votre première création.</p>';
+    `).join('');
+        } else {
+            section.innerHTML = '<p class="text-gray-400">Aucune œuvre publiée pour l’instant. Utilisez le formulaire pour ajouter votre première création.</p>';
+        }
+    } catch (e) {
+        console.error("Erreur lors du chargement des œuvres depuis Supabase:", e);
+        section.innerHTML = '<p class="text-red-500">Erreur lors du chargement de vos œuvres.</p>';
+    }
 }
 
 function submitShopForm(event) {
@@ -374,7 +484,7 @@ function submitShopForm(event) {
         country: document.getElementById('shop-country').value,
         city: document.getElementById('shop-city').value,
         tags: document.getElementById('shop-tags').value || 'Boutique partenaire',
-        image: document.getElementById('shop-image').value || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=800'
+        image: document.getElementById('shop-image').value || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=800' // Default image
     };
     addShop(shop);
     showMyShops();
@@ -389,7 +499,7 @@ function submitArtworkForm(event) {
         id: Date.now(),
         artist: profile.name,
         title: document.getElementById('art-title').value,
-        image: document.getElementById('art-image').value || 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800',
+        image: document.getElementById('art-image').value || 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800', // Default image
         description: document.getElementById('art-desc').value,
         date: new Date().toLocaleDateString()
     };
@@ -416,56 +526,145 @@ function editProfile() {
     }
 }
 
-function editShop(shopId) {
-    const shops = getLocalShops();
-    const shop = shops.find(s => s.id == shopId);
-    if (!shop) return;
-    
-    const newName = prompt('Nouveau nom de boutique:', shop.shopName);
-    const newDesc = prompt('Nouvelle description:', shop.description);
-    const newTags = prompt('Nouvelles catégories:', shop.tags);
-    
-    if (newName && newDesc) {
-        shop.shopName = newName;
-        shop.description = newDesc;
-        shop.tags = newTags;
-        localStorage.setItem('lg_shops', JSON.stringify(shops));
-        showMyShops();
+async function editShop(shopId) {
+    initSupabase();
+    if (!sb) {
+        alert("Erreur: Supabase non initialisé.");
+        return;
+    }
+
+    try {
+        const { data: shop, error: fetchError } = await sb
+            .from('boutique_config')
+            .select('*')
+            .eq('shop_id', shopId)
+            .single();
+
+        if (fetchError) throw fetchError;
+        if (!shop) {
+            alert('Boutique non trouvée.');
+            return;
+        }
+
+        const newName = prompt('Nouveau nom de boutique:', shop.name);
+        const newSlogan = prompt('Nouvelle description:', shop.slogan);
+        const newTags = prompt('Nouvelles catégories:', shop.default_category);
+        const newAddress = prompt('Nouvelle adresse:', shop.contact_info?.address || '');
+
+        if (newName !== null && newSlogan !== null) { // Check for null to see if user cancelled
+            const updatedContactInfo = { ...shop.contact_info, address: newAddress };
+            const { error: updateError } = await sb
+                .from('boutique_config')
+                .update({
+                    name: newName,
+                    slogan: newSlogan,
+                    default_category: newTags,
+                    contact_info: updatedContactInfo,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('shop_id', shopId);
+
+            if (updateError) throw updateError;
+            showMyShops(); // Refresh the list
+            alert('Boutique mise à jour avec succès !');
+        }
+    } catch (e) {
+        console.error("Erreur lors de l'édition de la boutique:", e);
+        alert("Erreur lors de l'édition de la boutique.");
     }
 }
 
-function editArtwork(artId) {
-    const artworks = getLocalWorks();
-    const artwork = artworks.find(a => a.id == artId);
-    if (!artwork) return;
-    
-    const newTitle = prompt('Nouveau titre:', artwork.title);
-    const newDesc = prompt('Nouvelle description:', artwork.description);
-    const newImage = prompt('Nouvelle URL image:', artwork.image);
-    
-    if (newTitle && newDesc) {
-        artwork.title = newTitle;
-        artwork.description = newDesc;
-        artwork.image = newImage;
-        localStorage.setItem('lg_artworks', JSON.stringify(artworks));
-        showMyArtworks();
+async function deleteShop(shopId) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette boutique ? Cette action est irréversible.')) return;
+
+    initSupabase();
+    if (!sb) {
+        alert("Erreur: Supabase non initialisé.");
+        return;
+    }
+
+    try {
+        const { error } = await sb
+            .from('boutique_config')
+            .delete()
+            .eq('shop_id', shopId);
+
+        if (error) throw error;
+        showMyShops(); // Refresh the list
+        alert('Boutique supprimée avec succès !');
+    } catch (e) {
+        console.error("Erreur lors de la suppression de la boutique:", e);
+        alert("Erreur lors de la suppression de la boutique.");
     }
 }
 
-function deleteShop(shopId) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette boutique ?')) return;
-    let shops = getLocalShops();
-    shops = shops.filter(s => s.id != shopId);
-    localStorage.setItem('lg_shops', JSON.stringify(shops));
-    showMyShops();
+async function editArtwork(artId) {
+    initSupabase();
+    if (!sb) {
+        alert("Erreur: Supabase non initialisé.");
+        return;
+    }
+
+    try {
+        const { data: artwork, error: fetchError } = await sb
+            .from('boutique_products')
+            .select('*')
+            .eq('id', artId)
+            .single();
+
+        if (fetchError) throw fetchError;
+        if (!artwork) {
+            alert('Œuvre non trouvée.');
+            return;
+        }
+
+        const newTitle = prompt('Nouveau titre:', artwork.name);
+        const newDesc = prompt('Nouvelle description:', artwork.description);
+        const newImage = prompt('Nouvelle URL image:', artwork.img_url);
+
+        if (newTitle !== null && newDesc !== null) { // Check for null to see if user cancelled
+            const { error: updateError } = await sb
+                .from('boutique_products')
+                .update({
+                    name: newTitle,
+                    description: newDesc,
+                    img_url: newImage,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', artId);
+
+            if (updateError) throw updateError;
+            showMyArtworks(); // Refresh the list
+            alert('Œuvre mise à jour avec succès !');
+        }
+    } catch (e) {
+        console.error("Erreur lors de l'édition de l'œuvre:", e);
+        alert("Erreur lors de l'édition de l'œuvre.");
+    }
 }
 
-function deleteArtwork(artId) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette œuvre ?')) return;
-    let artworks = getLocalWorks();
-    artworks = artworks.filter(a => a.id != artId);
-    localStorage.setItem('lg_artworks', JSON.stringify(artworks));
-    showMyArtworks();
+async function deleteArtwork(artId) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette œuvre ? Cette action est irréversible.')) return;
+
+    initSupabase();
+    if (!sb) {
+        alert("Erreur: Supabase non initialisé.");
+        return;
+    }
+
+    try {
+        const { error } = await sb
+            .from('boutique_products')
+            .delete()
+            .eq('id', artId);
+
+        if (error) throw error;
+        showMyArtworks(); // Refresh the list
+        alert('Œuvre supprimée avec succès !');
+    } catch (e) {
+        console.error("Erreur lors de la suppression de l'œuvre:", e);
+        alert("Erreur lors de la suppression de l'œuvre.");
+    }
 }
 
 function logout() {
@@ -485,7 +684,14 @@ function initSelectionMode() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    initSupabase();
+    // On initialise et on vérifie la session immédiatement
+    checkAuthPersistence().then(() => {
+        if (document.getElementById('dashboard-page') && !getLocalProfile()) {
+            window.location.href = 'index.html?openLogin=true';
+            return;
+        }
+    });
+
     if (document.getElementById('dynamic-shops')) {
         loadShops();
     }
