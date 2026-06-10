@@ -162,6 +162,127 @@ function addArtwork(artwork) {
     }
 }
 
+async function loadInvestableEvents() {
+    const container = document.getElementById('invest-events-container');
+    if (!container) return;
+
+    initSupabase();
+    if (!sb) return;
+
+    try {
+        const { data: events, error } = await sb
+            .from('events')
+            .select('*')
+            .eq('investment_open', true);
+
+        if (error) throw error;
+
+        container.innerHTML = events.map(event => `
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 flex flex-col justify-between hover:-translate-y-2 transition-all duration-300 group">
+                <div>
+                    <div class="flex justify-between mb-6">
+                        <span class="bg-brand-yellow/10 text-brand-yellowHover px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">${event.category || 'Culture'}</span>
+                        <span class="text-emerald-600 text-[10px] font-black uppercase tracking-widest">ROI : +${event.profit_per_ticket || '2'}$ / Billet</span>
+                    </div>
+                    <h3 class="text-2xl font-heading font-black text-brand-dark uppercase mb-4">${event.title}</h3>
+                    <p class="text-slate-500 text-sm mb-8 leading-relaxed line-clamp-2">${event.description}</p>
+                </div>
+                
+                <div class="space-y-5">
+                    <div class="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                        <span class="text-slate-400">Objectif à atteindre</span>
+                        <span class="text-brand-dark">${event.target_budget || '10,000'}$</span>
+                    </div>
+                    <div class="w-full bg-slate-50 border border-slate-100 h-3 rounded-full overflow-hidden">
+                        <div class="bg-brand-yellow h-full transition-all duration-1000" style="width: ${event.funding_progress || '45'}%"></div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                         <span class="text-[9px] font-black uppercase text-brand-yellowHover">Reste ${100 - (event.funding_progress || 45)}%</span>
+                         <span class="text-[9px] font-black uppercase text-slate-400 italic">Remboursement J-15 Garanti</span>
+                    </div>
+                </div>
+
+                <button onclick="openInvestModal('${event.id}', '${event.title}')" class="mt-8 w-full bg-brand-dark text-white font-bold py-4 rounded-2xl uppercase text-[10px] tracking-[0.2em] hover:bg-brand-yellow hover:text-brand-dark transition-all shadow-lg">
+                    Investir maintenant
+                </button>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error("Erreur invest:", e);
+    }
+}
+
+async function populateInvestorDashboard() {
+    const profile = getLocalProfile();
+    if (!profile) return;
+
+    initSupabase();
+    if (!sb) return;
+
+    try {
+        const { data: investments, error } = await sb
+            .from('event_investments')
+            .select('*, events(title, status)')
+            .eq('investor_id', profile.id);
+
+        if (error) throw error;
+
+        const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+        const totalProfit = investments.reduce((sum, inv) => sum + (inv.current_profit || 0), 0);
+
+        if(document.getElementById('inv-total-invested')) document.getElementById('inv-total-invested').innerText = totalInvested + '$';
+        if(document.getElementById('inv-total-profit')) document.getElementById('inv-total-profit').innerText = totalProfit + '$';
+        
+        const listContainer = document.getElementById('my-investments-list');
+        if (listContainer) {
+            listContainer.innerHTML = investments.map(inv => {
+                // Calcul délai remboursement (15 jours)
+                const daysRemaining = (new Date(inv.events.date) - new Date()) / (1000 * 60 * 60 * 24);
+                const canRefund = daysRemaining > 15;
+
+                return `
+                <div class="flex items-center justify-between p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                    <div class="space-y-1">
+                        <h4 class="text-brand-dark font-black uppercase text-sm">${inv.events.title}</h4>
+                        <p class="text-[9px] text-slate-400 uppercase font-bold">Placé le ${new Date(inv.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div class="flex items-center gap-8">
+                        <div class="text-right">
+                            <div class="text-brand-dark font-black">$${inv.amount}</div>
+                            <div class="text-emerald-500 text-[10px] font-black uppercase">+${inv.current_profit || 0}$ Reçus</div>
+                        </div>
+                        ${canRefund ? `<button onclick="refundInvestment('${inv.id}')" class="text-rose-400 text-[9px] font-black uppercase border border-rose-100 px-3 py-2 rounded-lg hover:bg-rose-50 transition">Annuler & Rembourser</button>` : `<span class="text-slate-300 text-[9px] font-black uppercase cursor-not-allowed">Remboursement clos</span>`}
+                    </div>
+                </div>
+            `}).join('');
+        }
+    } catch (e) {
+        console.error("Erreur Dashboard Investisseur:", e);
+    }
+}
+
+function openInvestModal(id, title) {
+    const amount = prompt(`Combien souhaitez-vous investir dans "${title}" ? (en USD)`);
+    if (amount && !isNaN(amount)) {
+        processInvestment(id, parseFloat(amount));
+    }
+}
+
+async function processInvestment(eventId, amount) {
+    const profile = getLocalProfile();
+    initSupabase();
+    const { error } = await sb.from('event_investments').insert({
+        event_id: eventId,
+        investor_id: profile.id,
+        amount: amount,
+        status: 'completed'
+    });
+    if (!error) {
+        alert("Investissement validé ! Merci de soutenir LeGrandArt.");
+        populateInvestorDashboard();
+    }
+}
+
 async function loadEvents() {
     const container = document.getElementById('events-container');
     if (!container) return;

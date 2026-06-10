@@ -1,442 +1,523 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Événements - LeGrandArt</title>
+    <title>Événements Premium - LeGrandArt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Polices Modernes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            yellow: '#facc15', // primary-color
+                            yellowHover: '#eab308',
+                            dark: '#0f172a', // deep slate
+                            gray: '#1e293b',
+                            light: '#f8fafc'
+                        }
+                    },
+                    animation: {
+                        'shimmer': 'shimmer 2s infinite linear',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                    },
+                    keyframes: {
+                        shimmer: {
+                            '0%': { backgroundPosition: '-1000px 0' },
+                            '100%': { backgroundPosition: '1000px 0' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Définition des couleurs Noir/Jaune/Blanc */
-        .primary-color {
-            background-color: #facc15; /* Jaune (yellow-400) */
-        }
-        .primary-text-color {
-            color: #facc15; /* Jaune */
-        }
-        .primary-border-color {
-            border-color: #facc15; /* Jaune */
-        }
-        .dark-background {
-            background-color: #111827; /* Gris très foncé (Tailwind Gray-900) */
-        }
-        .text-dark {
-            color: #111827; /* Gris très foncé/Noir */
+        /* Effet Skeleton / Chargement */
+        .skeleton-bg {
+            background: #e2e8f0;
+            background-image: linear-gradient(to right, #e2e8f0 0%, #cbd5e1 20%, #e2e8f0 40%, #e2e8f0 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 100%; 
+            animation: shimmer 1.5s infinite linear forwards;
         }
 
-        /* Styles de la liste d'événements */
-        .event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #facc15; }
+
+        /* Filtres */
+        .filter-btn {
+            transition: all 0.3s ease;
         }
-        /* Style des filtres actifs (adapté au jaune) */
-        .category-filter.active {
+        .filter-btn.active {
             background-color: #facc15;
-            color: #111827;
-        }
-        /* Style de la pagination active */
-        .pagination-active {
-            background-color: #facc15 !important;
-            color: #111827 !important;
-            border-color: #facc15 !important;
-        }
-
-        #loading-spinner {
-            display: none;
+            color: #0f172a;
+            border-color: #facc15;
+            box-shadow: 0 4px 14px 0 rgba(250, 204, 21, 0.39);
+            transform: translateY(-2px);
         }
     </style>
 </head>
-<body class="bg-gray-50 font-sans flex flex-col min-h-screen">
-    <nav class="dark-background shadow-lg">
+<body class="bg-brand-light font-sans text-slate-800 flex flex-col min-h-screen antialiased">
+
+    <!-- Navbar Glassmorphism -->
+    <nav class="fixed w-full z-50 bg-brand-dark/90 backdrop-blur-lg border-b border-white/10 transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 flex items-center">
-                        <i class="fas fa-calendar-alt primary-text-color text-2xl mr-2"></i>
-                        <span class="text-xl font-bold text-white">LeGrandArt</span>
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="w-10 h-10 bg-brand-yellow rounded-xl flex items-center justify-center shadow-lg shadow-brand-yellow/20">
+                        <i class="fas fa-calendar-alt text-brand-dark text-xl"></i>
                     </div>
+                    <span class="text-2xl font-heading font-black text-white tracking-tight">LeGrand<span class="text-brand-yellow">Art</span></span>
                 </div>
-                <div class="hidden md:ml-6 md:flex md:items-center md:space-x-8">
-                    <a href="billeterie.html" class="text-gray-300 hover:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:primary-border-color text-sm font-medium">Accueil Billetterie</a>
-                    <a href="evenements.html" class="text-white inline-flex items-center px-1 pt-1 border-b-2 primary-border-color text-sm font-medium">Événements</a>
-                    <a href="creer.html" class="text-gray-300 hover:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:primary-border-color text-sm font-medium">Créer</a>
-                    <a href="#" class="text-gray-300 hover:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:primary-border-color text-sm font-medium">Contact</a>
-                    <button onclick="window.location.href='index.html?openLogin=true'" class="primary-color hover:bg-yellow-500 text-dark px-4 py-2 rounded-md text-sm font-medium transition duration-300">Connexion</button>
+                
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="#" class="text-slate-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Accueil</a>
+                    <a href="#" class="text-brand-yellow px-4 py-2 rounded-lg text-sm font-semibold bg-brand-yellow/10">Événements</a>
+                    <a href="#" class="text-slate-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Créer</a>
+                    <a href="#" class="text-slate-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Contact</a>
                 </div>
-                <div class="-mr-2 flex items-center md:hidden">
-                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:primary-color" aria-controls="mobile-menu" aria-expanded="false">
-                        <span class="sr-only">Open main menu</span>
-                        <i class="fas fa-bars text-xl"></i>
+
+                <div class="hidden md:flex items-center gap-4">
+                    <button class="text-slate-300 hover:text-white transition-colors">
+                        <i class="fas fa-search text-lg"></i>
+                    </button>
+                    <div class="w-px h-6 bg-slate-700 mx-2"></div>
+                    <button class="bg-brand-yellow hover:bg-brand-yellowHover text-brand-dark px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(250,204,21,0.2)] hover:shadow-[0_0_25px_rgba(250,204,21,0.4)] hover:-translate-y-0.5">
+                        <i class="far fa-user mr-2"></i> Connexion
+                    </button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-slate-300 hover:text-white focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
                     </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow">
-        <h1 class="text-3xl font-extrabold text-dark mb-8">Tous nos Événements à Venir à Kinshasa 🇨🇩</h1>
-        
-        <div class="mb-12 flex flex-col sm:flex-row gap-4">
-            <input type="text" id="search-input" placeholder="Rechercher par titre ou description..." class="px-4 py-3 rounded-lg border border-gray-300 w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-            <button id="search-button" class="primary-color text-dark hover:bg-yellow-500 px-6 py-3 rounded-lg font-medium transition duration-300">
-                <i class="fas fa-search mr-2"></i> Filtrer la recherche
-            </button>
+    <!-- Hero Banner Premium -->
+    <header class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-brand-dark overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Concert Crowd" class="w-full h-full object-cover opacity-20">
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/80 to-transparent"></div>
         </div>
         
-        <div class="mb-12">
-            <h2 class="text-2xl font-bold text-dark mb-6">Filtrer par catégorie</h2>
-            <div class="flex flex-wrap gap-3">
-                <button class="category-filter active px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="all">
-                    <i class="fas fa-list mr-2"></i> Tous
-                </button>
-                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="music">
-                    <i class="fas fa-music mr-2"></i> Musique
-                </button>
-                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="sport">
-                    <i class="fas fa-running mr-2"></i> Sport
-                </button>
-                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="art">
-                    <i class="fas fa-paint-brush mr-2"></i> Art
-                </button>
-                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="food">
-                    <i class="fas fa-utensils mr-2"></i> Gastronomie
-                </button>
-                <button class="category-filter px-4 py-2 rounded-full border border-gray-300 hover:bg-yellow-100 transition duration-200" data-category="tech">
-                    <i class="fas fa-laptop-code mr-2"></i> Technologie
-                </button>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow text-sm font-medium mb-8">
+                <span class="w-2 h-2 rounded-full bg-brand-yellow animate-pulse"></span>
+                Kinshasa & RDC
             </div>
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-heading font-black text-white mb-6 tracking-tight leading-tight">
+                Vivez l'Émotion, <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-yellow-200">Partagez l'Art.</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10">
+                Découvrez et réservez vos places pour les concerts, spectacles, conférences et festivals les plus exclusifs de la capitale.
+            </p>
         </div>
+    </header>
 
-        <div class="mb-8 flex justify-between items-center">
-            <h2 class="text-2xl font-bold text-dark">Résultats</h2>
-            <div class="flex items-center">
-                <span class="text-gray-600 mr-2">Trier par :</span>
-                <select id="sort-select" class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                    <option value="date_asc">Date (proches)</option>
-                    <option value="attendees_desc">Popularité</option>
-                    <option value="price_asc">Prix (croissant)</option>
-                    <option value="price_desc">Prix (décroissant)</option>
-                </select>
-            </div>
-        </div>
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 pb-20 w-full">
+        
+        <!-- Command Center (Search & Filters) - Sticky -->
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 md:p-6 mb-12 sticky top-24 z-40 transition-all">
+            <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
+                
+                <!-- Barre de recherche stylisée -->
+                <div class="relative w-full lg:w-1/3">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-slate-400"></i>
+                    </div>
+                    <input type="text" id="search-input" placeholder="Rechercher un événement, artiste..." class="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-yellow focus:border-brand-yellow transition-all outline-none">
+                </div>
 
-        <div id="loading-spinner" class="flex justify-center items-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 primary-border-color"></div>
-        </div>
+                <!-- Filtres Catégories -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
+                    <button class="filter-btn active whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50" data-category="all">
+                        Tous
+                    </button>
+                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="music">
+                        <i class="fas fa-music text-brand-yellow"></i> Musique
+                    </button>
+                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="sport">
+                        <i class="fas fa-running text-brand-yellow"></i> Sport
+                    </button>
+                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="art">
+                        <i class="fas fa-paint-brush text-brand-yellow"></i> Art
+                    </button>
+                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="food">
+                        <i class="fas fa-utensils text-brand-yellow"></i> Gastronomie
+                    </button>
+                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="tech">
+                        <i class="fas fa-laptop-code text-brand-yellow"></i> Tech
+                    </button>
+                </div>
 
-        <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        </div>
-
-        <div class="mt-12 flex justify-center">
-            <nav class="inline-flex rounded-md shadow">
-                <a href="#" class="px-4 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white pagination-active font-medium">1</a>
-                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">2</a>
-                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">3</a>
-                <a href="#" class="px-4 py-2 border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 rounded-r-md">
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-            </nav>
-        </div>
-    </div>
-
-    <footer class="dark-background text-white mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <h3 class="text-lg font-semibold mb-4 primary-text-color">LeGrandArt</h3>
-                    <p class="text-gray-400">
-                        La plateforme de référence pour découvrir et organiser des événements uniques et mémorables.
-                    </p>
-                    <div class="flex space-x-4 mt-4">
-                        <a href="#" class="text-gray-400 hover:primary-text-color">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:primary-text-color">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:primary-text-color">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:primary-text-color">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
+                <!-- Tri -->
+                <div class="w-full lg:w-auto flex justify-end shrink-0">
+                    <div class="relative w-full lg:w-auto">
+                        <select id="sort-select" class="block w-full appearance-none bg-white border border-slate-200 text-slate-700 py-3.5 pl-4 pr-10 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-yellow cursor-pointer">
+                            <option value="date_asc">🗓️ Plus proches</option>
+                            <option value="attendees_desc">🔥 Plus populaires</option>
+                            <option value="price_asc">💵 Prix croissants</option>
+                            <option value="price_desc">💎 Prix décroissants</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Section Header -->
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-3xl font-heading font-bold text-brand-dark">À la Une</h2>
+                <p class="text-slate-500 mt-1" id="results-count">18 événements trouvés</p>
+            </div>
+        </div>
+
+        <!-- Container des événements -->
+        <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Rempli par JavaScript -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-16 flex justify-center" id="pagination-container">
+            <nav class="inline-flex items-center gap-2 bg-white px-2 py-2 rounded-2xl shadow-sm border border-slate-200">
+                <button class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors disabled:opacity-50">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-brand-yellow text-brand-dark font-bold shadow-md">1</button>
+                <button class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 font-medium transition-colors">2</button>
+                <button class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 font-medium transition-colors">3</button>
+                <span class="px-2 text-slate-400">...</span>
+                <button class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </nav>
+        </div>
+    </main>
+
+    <!-- Footer Premium -->
+    <footer class="bg-brand-dark text-slate-300 pt-16 pb-8 border-t-4 border-brand-yellow mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <div class="lg:col-span-1">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 bg-brand-yellow rounded-lg flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-brand-dark"></i>
+                        </div>
+                        <span class="text-2xl font-heading font-black text-white">LeGrand<span class="text-brand-yellow">Art</span></span>
+                    </div>
+                    <p class="text-slate-400 mb-6 text-sm leading-relaxed">
+                        La plateforme N°1 en RDC pour découvrir, partager et organiser des événements qui marquent les esprits.
+                    </p>
+                    <div class="flex gap-3">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-dark transition-all"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-dark transition-all"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-dark transition-all"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
                 <div>
-                    <h3 class="text-lg font-semibold mb-4 primary-text-color">Navigation</h3>
-                    <ul class="space-y-2">
-                        <li><a href="billeterie.html" class="text-gray-400 hover:primary-text-color">Accueil Billetterie</a></li>
-                        <li><a href="evenements.html" class="text-gray-400 hover:primary-text-color">Événements</a></li>
-                        <li><a href="creer.html" class="text-gray-400 hover:primary-text-color">Créer un événement</a></li>
-                        <li><a href="#" class="text-gray-400 hover:primary-text-color">À propos</a></li>
-                        <li><a href="#" class="text-gray-400 hover:primary-text-color">Contact</a></li>
+                    <h3 class="text-white font-heading font-bold text-lg mb-6">Navigation Rapide</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Accueil Billetterie</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Tous les Événements</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Créer votre événement</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Espace Organisateur</a></li>
                     </ul>
                 </div>
+                
                 <div>
-                    <h3 class="text-lg font-semibold mb-4 primary-text-color">Catégories</h3>
-                    <ul class="space-y-2">
-                        <li><a href="evenements.html?category=music" class="text-gray-400 hover:primary-text-color">Musique</a></li>
-                        <li><a href="evenements.html?category=sport" class="text-gray-400 hover:primary-text-color">Sport</a></li>
-                        <li><a href="evenements.html?category=art" class="text-gray-400 hover:primary-text-color">Art</a></li>
-                        <li><a href="evenements.html?category=food" class="text-gray-400 hover:primary-text-color">Gastronomie</a></li>
-                        <li><a href="evenements.html?category=tech" class="text-gray-400 hover:primary-text-color">Technologie</a></li>
+                    <h3 class="text-white font-heading font-bold text-lg mb-6">Top Catégories</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Concerts & Festivals</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Compétitions Sportives</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Expositions d'Art</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Gastronomie & Ateliers</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Conférences Tech</a></li>
                     </ul>
                 </div>
+                
                 <div>
-                    <h3 class="text-lg font-semibold mb-4 primary-text-color">Contact</h3>
-                    <address class="text-gray-400 not-italic">
-                        <p class="mb-2">18 Avenue Salongo,</p>
-                        <p class="mb-2">Quartier Makelele, Commune de Bandalungwa,</p>
-                        <p class="mb-2">Ville de Kinshasa, Province de Kinshasa, RDC</p>
-                        <p class="mb-2"><i class="fas fa-phone mr-2"></i> +243978415814</p>
-                        <p><i class="fas fa-envelope mr-2"></i> contact@eventplatform.com</p>
-                    </address>
+                    <h3 class="text-white font-heading font-bold text-lg mb-6">Nous Contacter</h3>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-map-marker-alt text-brand-yellow mt-1"></i>
+                            <span>18 Avenue Salongo, Quartier Makelele, Bandalungwa, Kinshasa, RDC</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-phone-alt text-brand-yellow"></i>
+                            <span>+243 978 415 814</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-brand-yellow"></i>
+                            <span>hello@legrandart.cd</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <div class="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-400 text-sm">
-                    &copy; 2025 LeGrandArt. Tous droits réservés.
-                </p>
-                <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="#" class="text-gray-400 hover:primary-text-color text-sm">Conditions d'utilisation</a>
-                    <a href="#" class="text-gray-400 hover:primary-text-color text-sm">Politique de confidentialité</a>
-                    <a href="#" class="text-gray-400 hover:primary-text-color text-sm">Mentions légales</a>
+            
+            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+                <p>&copy; 2026 LeGrandArt. Tous droits réservés.</p>
+                <div class="flex flex-wrap justify-center gap-6">
+                    <a href="#" class="hover:text-white transition-colors">Conditions Générales</a>
+                    <a href="#" class="hover:text-white transition-colors">Confidentialité</a>
+                    <a href="#" class="hover:text-white transition-colors">FAQ</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script>
-        // Data Events Mis à jour pour Kinshasa et vos noms d'images locaux
+        /* Navbar Blur Effect on Scroll */
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-lg', 'bg-brand-dark/95');
+                nav.classList.remove('bg-brand-dark/90');
+            } else {
+                nav.classList.remove('shadow-lg', 'bg-brand-dark/95');
+                nav.classList.add('bg-brand-dark/90');
+            }
+        });
+
+        /* Remplacement des images locales par des images haute qualité Unsplash pour un rendu premium */
         const events = [
-            // Événements d'origine
-            { id: 1, title: "Festival Rumba Congolaise", date: "2025-07-15", time: "20:00", location: "Kinshasa, RDC", category: "music", price: 45, fees: 5, image: "rumba-congolaise-festival.jpg", description: "Une célébration vibrante de la Rumba, patrimoine de l'humanité, avec des artistes congolais de renom.", attendees: 1800 },
-            { id: 2, title: "Course de la Paix 10K", date: "2025-08-20", time: "08:00", location: "Kinshasa, RDC", category: "sport", price: 15, fees: 5, image: "course-paix-10k.jpg", description: "Une course emblématique à travers la capitale pour la promotion de la paix et de la solidarité.", attendees: 3100 },
-            { id: 3, title: "Sommet Tech & Innovation RDC", date: "2025-10-12", time: "09:30", location: "Kinshasa, RDC", category: "tech", price: 150, fees: 5, image: "sommet-tech-rdc.jpg", description: "Explorez le futur numérique de l'Afrique avec des leaders d'opinion et des startups prometteuses.", attendees: 950 },
-            { id: 4, title: "Dîner Gala de la Gastronomie Congolaise", date: "2025-07-22", time: "19:00", location: "Kinshasa, RDC", category: "food", price: 75, fees: 5, image: "diner-gala-gastronomie.jpg", description: "Un dîner exclusif pour déguster les saveurs riches et variées de la cuisine congolaise moderne.", attendees: 250 },
-            { id: 5, title: "Exposition Art et Culture de Kin", date: "2025-09-05", time: "10:00", location: "Kinshasa, RDC", category: "art", price: 10, fees: 5, image: "exposition-art-culture.jpg", description: "Découvrez les œuvres d'artistes contemporains locaux et le riche héritage culturel.", attendees: 800 },
-            { id: 6, title: "Soirée Jazz au Fleuve Congo", date: "2025-08-30", time: "19:30", location: "Kinshasa, RDC", category: "music", price: 35, fees: 5, image: "soiree-jazz-fleuve.jpg", description: "Profitez d'une soirée de jazz envoûtante sur les rives du majestueux Fleuve Congo.", attendees: 500 },
-
-            // Nouveaux 12 événements (Total : 18)
-            { id: 7, title: "Atelier IA pour PME Congolaises", date: "2025-11-05", time: "09:00", location: "Kinshasa, RDC", category: "tech", price: 60, fees: 5, image: "atelier-ia-pme.jpg", description: "Formation pratique sur l'intégration de l'intelligence artificielle dans les petites et moyennes entreprises.", attendees: 120 },
-            { id: 8, title: "Grand Tournoi de Basketball Inter-Clubs", date: "2025-12-10", time: "17:00", location: "Kinshasa, RDC", category: "sport", price: 5, fees: 2, image: "tournoi-basketball-kin.jpg", description: "Finale spectaculaire du championnat de basketball local, ambiance garantie.", attendees: 4500 },
-            { id: 9, title: "Concert Gospel de Noël", date: "2025-12-24", time: "20:30", location: "Kinshasa, RDC", category: "music", price: 25, fees: 5, image: "concert-gospel-kin.jpg", description: "Célébrez Noël avec les plus belles voix de la scène Gospel congolaise.", attendees: 2000 },
-            { id: 10, title: "Vernissage Galerie Limete : Photographie", date: "2025-07-29", time: "18:00", location: "Kinshasa, RDC", category: "art", price: 0, fees: 0, image: "vernissage-galerie-limete.jpg", description: "Inauguration d'une exposition dédiée aux photographes émergents de la RDC. Entrée Gratuite.", attendees: 300 },
-            { id: 11, title: "Kinshasa Food Truck Festival", date: "2025-09-15", time: "12:00", location: "Kinshasa, RDC", category: "food", price: 0, fees: 0, image: "food-truck-festival.jpg", description: "Le plus grand rassemblement de 'Food Trucks' de la ville. Dégustations illimitées ! Entrée Gratuite.", attendees: 5500 },
-            { id: 12, title: "Hackathon 48h du Numérique", date: "2025-11-20", time: "08:00", location: "Kinshasa, RDC", category: "tech", price: 10, fees: 5, image: "hackathon-numerique.jpg", description: "Compétition de programmation intense pour créer des solutions numériques innovantes en 48h.", attendees: 80 },
-            { id: 13, title: "Grande Marche de Sensibilisation contre le Paludisme", date: "2025-10-01", time: "07:00", location: "Kinshasa, RDC", category: "sport", price: 5, fees: 2, image: "marche-paludisme.jpg", description: "Rejoignez la communauté pour cette marche santé et sensibilisation à travers la Gombe.", attendees: 4000 },
-            { id: 14, title: "Open Mic : Les Nouveaux Talents de la RDC", date: "2025-11-12", time: "19:00", location: "Kinshasa, RDC", category: "music", price: 12, fees: 5, image: "open-mic-talents.jpg", description: "Scène ouverte pour découvrir les chanteurs, poètes et comédiens de demain.", attendees: 400 },
-            { id: 15, title: "Sculptures Urbaines du 21e Siècle", date: "2025-09-28", time: "14:00", location: "Kinshasa, RDC", category: "art", price: 8, fees: 5, image: "sculptures-urbaines.jpg", description: "Exposition éphémère de grandes œuvres sculpturales dans les espaces publics de la ville.", attendees: 1100 },
-            { id: 16, title: "Masterclass de Cuisine Locale avec le Chef Serge", date: "2025-10-25", time: "15:00", location: "Kinshasa, RDC", category: "food", price: 90, fees: 10, image: "masterclass-cuisine-locale.jpg", description: "Cours intensif sur les techniques traditionnelles et modernes de la cuisine congolaise.", attendees: 50 },
-            { id: 17, title: "Séminaire : Cybersécurité pour Tous", date: "2025-12-03", time: "10:00", location: "Kinshasa, RDC", category: "tech", price: 20, fees: 5, image: "cybersécurite-pour-tous.jpg", description: "Apprenez à vous protéger et à protéger vos données dans le monde numérique actuel.", attendees: 300 },
-            { id: 18, title: "Cours de Boxe Découverte et Initiation", date: "2025-07-01", time: "16:00", location: "Kinshasa, RDC", category: "sport", price: 20, fees: 5, image: "cours-boxe-decouverte.jpg", description: "Session d'initiation gratuite (frais de service uniquement) pour découvrir les bases de la boxe olympique.", attendees: 150 }
+            { id: 1, title: "Festival Rumba Congolaise", date: "2026-07-15", time: "20:00", location: "Stade des Martyrs, Kinshasa", category: "music", price: 45, fees: 5, image: "https://images.unsplash.com/photo-1533174000255-161391e847c2?auto=format&fit=crop&w=800&q=80", description: "Une célébration vibrante de la Rumba, patrimoine de l'humanité, avec des artistes congolais de renom.", attendees: 1800 },
+            { id: 2, title: "Course de la Paix 10K", date: "2026-08-20", time: "08:00", location: "Boulevard Triomphal", category: "sport", price: 15, fees: 5, image: "https://images.unsplash.com/photo-1552674605-15c37eee02a9?auto=format&fit=crop&w=800&q=80", description: "Une course emblématique à travers la capitale pour la promotion de la paix et de la solidarité.", attendees: 3100 },
+            { id: 3, title: "Sommet Tech & Innovation RDC", date: "2026-10-12", time: "09:30", location: "Pullman Hotel, Kinshasa", category: "tech", price: 150, fees: 5, image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80", description: "Explorez le futur numérique de l'Afrique avec des leaders d'opinion et des startups prometteuses.", attendees: 950 },
+            { id: 4, title: "Dîner Gala Gastronomie", date: "2026-07-22", time: "19:00", location: "Rotana Hotel", category: "food", price: 75, fees: 5, image: "https://images.unsplash.com/photo-1555244162-803834f87a33?auto=format&fit=crop&w=800&q=80", description: "Un dîner exclusif pour déguster les saveurs riches et variées de la cuisine congolaise moderne.", attendees: 250 },
+            { id: 5, title: "Exposition Art et Culture", date: "2026-09-05", time: "10:00", location: "Musée National de la RDC", category: "art", price: 10, fees: 5, image: "https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=800&q=80", description: "Découvrez les œuvres d'artistes contemporains locaux et le riche héritage culturel.", attendees: 800 },
+            { id: 6, title: "Soirée Jazz au Fleuve", date: "2026-08-30", time: "19:30", location: "Majestic River, Kinshasa", category: "music", price: 35, fees: 5, image: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80", description: "Profitez d'une soirée de jazz envoûtante sur les rives du majestueux Fleuve Congo.", attendees: 500 },
+            { id: 7, title: "Atelier IA pour PME", date: "2026-11-05", time: "09:00", location: "Silikin Village", category: "tech", price: 60, fees: 5, image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80", description: "Formation pratique sur l'intégration de l'intelligence artificielle dans les PME congolaises.", attendees: 120 },
+            { id: 8, title: "Finale Basketball Inter-Clubs", date: "2026-12-10", time: "17:00", location: "Stade Tata Raphaël", category: "sport", price: 5, fees: 2, image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80", description: "Finale spectaculaire du championnat de basketball local, ambiance garantie.", attendees: 4500 },
+            { id: 9, title: "Concert Gospel de Noël", date: "2026-12-24", time: "20:30", location: "Théâtre de Verdure", category: "music", price: 25, fees: 5, image: "https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?auto=format&fit=crop&w=800&q=80", description: "Célébrez Noël avec les plus belles voix de la scène Gospel congolaise.", attendees: 2000 },
+            { id: 10, title: "Vernissage : Photographie RDC", date: "2026-07-29", time: "18:00", location: "Galerie Symphonie des Arts", category: "art", price: 0, fees: 0, image: "https://images.unsplash.com/photo-1482686115713-0fbcaced6e28?auto=format&fit=crop&w=800&q=80", description: "Inauguration d'une exposition dédiée aux photographes émergents de la RDC.", attendees: 300 },
+            { id: 11, title: "Food Truck Festival", date: "2026-09-15", time: "12:00", location: "Place de la Gare Centrale", category: "food", price: 0, fees: 0, image: "https://images.unsplash.com/photo-1565123409695-4bec56e6a412?auto=format&fit=crop&w=800&q=80", description: "Le plus grand rassemblement de Food Trucks de Kinshasa. Entrée Gratuite.", attendees: 5500 },
+            { id: 12, title: "Hackathon 48h Numérique", date: "2026-11-20", time: "08:00", location: "Kinshasa Digital Academy", category: "tech", price: 10, fees: 5, image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80", description: "Compétition de programmation intense pour créer des solutions numériques innovantes.", attendees: 80 }
         ];
-
-        // --- Le reste du code JavaScript (fonctions de tri, filtre, affichage) est inchangé et gère les 18 événements ---
 
         let currentFilter = 'all';
         let currentSort = 'date_asc';
         let currentSearchTerm = '';
 
-        // Helper functions
-        function getCategoryName(category) {
-            const names = {
-                music: 'Musique',
-                sport: 'Sport',
-                art: 'Art',
-                food: 'Gastronomie',
-                tech: 'Technologie'
-            };
-            return names[category] || category;
-        }
+        // Dictionnaires pour l'affichage élégant
+        const categoryConfig = {
+            music: { name: 'Musique', icon: 'fa-music', color: 'bg-purple-100 text-purple-700' },
+            sport: { name: 'Sport', icon: 'fa-running', color: 'bg-emerald-100 text-emerald-700' },
+            art: { name: 'Art', icon: 'fa-paint-brush', color: 'bg-rose-100 text-rose-700' },
+            food: { name: 'Gastronomie', icon: 'fa-utensils', color: 'bg-orange-100 text-orange-700' },
+            tech: { name: 'Technologie', icon: 'fa-laptop-code', color: 'bg-blue-100 text-blue-700' }
+        };
 
-        function getCategoryClass(category) {
-            const classes = {
-                music: 'bg-yellow-100 text-dark',
-                sport: 'bg-green-100 text-dark',
-                art: 'bg-red-100 text-dark',
-                food: 'bg-blue-100 text-dark',
-                tech: 'bg-purple-100 text-dark'
-            };
-            return classes[category] || 'bg-gray-100 text-dark';
-        }
+        const moisAbr = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
 
-        // Function to sort events
         function sortEvents(eventArray, sortType) {
-            eventArray.sort((a, b) => {
+            return eventArray.sort((a, b) => {
                 switch (sortType) {
-                    case 'attendees_desc':
-                        return b.attendees - a.attendees; 
-                    case 'price_asc':
-                        return a.price - b.price; 
-                    case 'price_desc':
-                        return b.price - a.price; 
-                    case 'date_asc':
-                    default:
-                        return new Date(a.date) - new Date(b.date);
+                    case 'attendees_desc': return b.attendees - a.attendees; 
+                    case 'price_asc': return a.price - b.price; 
+                    case 'price_desc': return b.price - a.price; 
+                    case 'date_asc': default: return new Date(a.date) - new Date(b.date);
                 }
             });
-            return eventArray;
         }
 
-        // Function to apply filtering and search
-        function getFilteredAndSearchedEvents(filter, search, eventArray) {
-            let results = eventArray;
-
-            // 1. Category Filter
-            if (filter !== 'all') {
-                results = results.filter(event => event.category === filter);
-            }
-
-            // 2. Search Filter (Case-insensitive)
-            if (search) {
-                const term = search.toLowerCase();
-                results = results.filter(event => 
-                    event.title.toLowerCase().includes(term) ||
-                    event.description.toLowerCase().includes(term) ||
-                    event.location.toLowerCase().includes(term)
-                );
-            }
-
-            return results;
+        function filterEvents(eventArray) {
+            return eventArray.filter(event => {
+                const matchCategory = currentFilter === 'all' || event.category === currentFilter;
+                const searchLower = currentSearchTerm.toLowerCase();
+                const matchSearch = event.title.toLowerCase().includes(searchLower) || 
+                                    event.location.toLowerCase().includes(searchLower);
+                return matchCategory && matchSearch;
+            });
         }
 
-
-        // Function to display events (combined logic)
-        function displayEvents() {
+        function renderSkeletons() {
             const container = document.getElementById('events-container');
             container.innerHTML = '';
-            
-            // Show loading spinner
-            document.getElementById('loading-spinner').style.display = 'flex';
-            
-            // Apply Filters and Search
-            let filteredAndSearchedEvents = getFilteredAndSearchedEvents(currentFilter, currentSearchTerm, [...events]);
-            
-            // Apply Sort
-            const finalEvents = sortEvents(filteredAndSearchedEvents, currentSort);
+            for(let i=0; i<6; i++) {
+                container.innerHTML += `
+                    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden h-full flex flex-col">
+                        <div class="h-56 skeleton-bg w-full"></div>
+                        <div class="p-6 flex-1 flex flex-col gap-4">
+                            <div class="h-6 skeleton-bg w-3/4 rounded"></div>
+                            <div class="h-4 skeleton-bg w-1/2 rounded"></div>
+                            <div class="h-16 skeleton-bg w-full rounded mt-2"></div>
+                            <div class="mt-auto flex justify-between items-center pt-4">
+                                <div class="h-8 skeleton-bg w-24 rounded-full"></div>
+                                <div class="h-10 skeleton-bg w-28 rounded-xl"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
 
-            // Simule l'affichage des 6 premiers événements (pour montrer l'effet de la pagination)
-            // Dans une vraie application, c'est ici qu'on ferait le slicing de la page courante
-            const eventsToShow = finalEvents.slice(0, 12); // Affiche les 12 premiers événements (ou tous si moins de 12)
+        function displayEvents() {
+            const container = document.getElementById('events-container');
+            const countLabel = document.getElementById('results-count');
+            
+            // Effet visuel moderne : Skeletons
+            renderSkeletons();
             
             setTimeout(() => {
+                const filtered = filterEvents([...events]);
+                const finalEvents = sortEvents(filtered, currentSort);
                 
-                if (eventsToShow.length === 0) {
+                countLabel.textContent = `${finalEvents.length} événement${finalEvents.length > 1 ? 's' : ''} trouvé${finalEvents.length > 1 ? 's' : ''}`;
+                container.innerHTML = '';
+                
+                if (finalEvents.length === 0) {
                     container.innerHTML = `
-                        <div class="col-span-3 text-center py-12">
-                            <i class="fas fa-calendar-times text-5xl text-gray-400 mb-4"></i>
-                            <h3 class="text-xl font-medium text-dark">Aucun événement trouvé</h3>
-                            <p class="text-gray-500 mt-2">Aucun événement ne correspond à vos critères. Essayez une autre catégorie ou terme de recherche.</p>
+                        <div class="col-span-full py-16 text-center bg-white rounded-3xl border border-slate-100 border-dashed">
+                            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-search text-3xl text-slate-300"></i>
+                            </div>
+                            <h3 class="text-2xl font-heading font-bold text-slate-800 mb-2">Oups, aucun résultat</h3>
+                            <p class="text-slate-500">Essayez de modifier vos filtres ou de chercher autre chose.</p>
+                            <button onclick="document.querySelector('.filter-btn[data-category=\\'all\\']').click()" class="mt-6 text-brand-yellow font-bold hover:underline">Réinitialiser les filtres</button>
                         </div>
                     `;
-                } else {
-                    eventsToShow.forEach(event => {
-                        const eventDate = new Date(event.date);
-                        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                        const formattedDate = eventDate.toLocaleDateString('fr-FR', options);
-                        const total = event.price + event.fees;
-                        
-                        // Construction de l'URL pour le paiement
-                        const paymentLink = `paiement.html?event=${encodeURIComponent(event.title)}&price=${event.price}&fees=${event.fees}&total=${total}`;
-
-                        const card = document.createElement('div');
-                        card.className = 'event-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 border border-gray-100';
-                        card.innerHTML = `
-                            <div class="relative h-48 overflow-hidden">
-                                <img src="${event.image}" alt="${event.title}" class="w-full h-full object-cover">
-                                <div class="absolute top-4 right-4 bg-white bg-opacity-90 px-3 py-1 rounded-full text-sm font-semibold text-dark">
-                                    ${event.price === 0 ? 'Gratuit' : `$${event.price}`}
-                                </div>
-                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                                    <span class="text-white font-medium">${event.location}</span>
-                                </div>
-                            </div>
-                            <div class="p-6">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h3 class="text-xl font-bold text-dark">${event.title}</h3>
-                                    <span class="text-sm text-gray-500 flex items-center">
-                                        <i class="fas fa-users mr-1"></i> ${event.attendees.toLocaleString()}
-                                    </span>
-                                </div>
-                                <div class="flex items-center text-gray-600 mb-4">
-                                    <i class="far fa-calendar-alt mr-2"></i>
-                                    <span>${formattedDate}</span>
-                                    <i class="far fa-clock ml-4 mr-2"></i>
-                                    <span>${event.time}</span>
-                                </div>
-                                <p class="text-gray-600 mb-4">${event.description}</p>
-                                <div class="flex justify-between items-center">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getCategoryClass(event.category)}">
-                                        ${getCategoryName(event.category)}
-                                    </span>
-                                    <a href="${paymentLink}" class="primary-color hover:bg-yellow-500 text-dark px-4 py-2 rounded-md text-sm font-medium transition duration-300">
-                                        <i class="fas fa-ticket-alt mr-2"></i> Réserver
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    });
+                    document.getElementById('pagination-container').style.display = 'none';
+                    return;
                 }
-                
-                // Hide loading spinner
-                document.getElementById('loading-spinner').style.display = 'none';
-            }, 500);
+
+                document.getElementById('pagination-container').style.display = 'flex';
+
+                finalEvents.forEach((event, index) => {
+                    const dateObj = new Date(event.date);
+                    const day = dateObj.getDate();
+                    const month = moisAbr[dateObj.getMonth()];
+                    const conf = categoryConfig[event.category];
+                    const delay = index * 100; // Effet cascade
+                    
+                    const card = `
+                        <div class="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 flex flex-col h-full overflow-hidden opacity-0 animate-fade-in-up" style="animation-delay: ${delay}ms">
+                            
+                            <!-- Image Header -->
+                            <div class="relative h-56 overflow-hidden bg-slate-100">
+                                <img src="${event.image}" alt="${event.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                
+                                <!-- Overlay Gradient -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
+                                
+                                <!-- Date Badge -->
+                                <div class="absolute top-4 left-4 bg-white/95 backdrop-blur shadow-lg rounded-xl p-2 text-center min-w-[3.5rem] transform group-hover:-translate-y-1 transition-transform">
+                                    <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">${month}</span>
+                                    <span class="block text-xl font-heading font-black text-brand-dark leading-none mt-1">${day}</span>
+                                </div>
+
+                                <!-- Like Button -->
+                                <button class="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white backdrop-blur-md rounded-full flex items-center justify-center text-white hover:text-rose-500 transition-colors">
+                                    <i class="far fa-heart"></i>
+                                </button>
+
+                                <!-- Location Overlay -->
+                                <div class="absolute bottom-4 left-4 flex items-center gap-2 text-white/90 text-sm font-medium">
+                                    <i class="fas fa-map-marker-alt text-brand-yellow"></i>
+                                    <span class="truncate pr-4">${event.location}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Card Body -->
+                            <div class="p-6 flex-1 flex flex-col">
+                                <div class="flex justify-between items-start mb-3 gap-2">
+                                    <h3 class="text-xl font-heading font-bold text-slate-900 group-hover:text-brand-yellowHover transition-colors line-clamp-2 leading-tight">
+                                        ${event.title}
+                                    </h3>
+                                </div>
+                                
+                                <div class="flex items-center gap-4 text-sm text-slate-500 mb-4 font-medium">
+                                    <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
+                                        <i class="far fa-clock text-slate-400"></i> ${event.time}
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <i class="fas fa-fire text-orange-400"></i> ${event.attendees.toLocaleString()} int.
+                                    </div>
+                                </div>
+                                
+                                <p class="text-slate-600 text-sm mb-6 line-clamp-2 leading-relaxed flex-1">
+                                    ${event.description}
+                                </p>
+                                
+                                <!-- Card Footer -->
+                                <div class="flex justify-between items-center pt-4 border-t border-slate-100 mt-auto">
+                                    <div class="flex flex-col">
+                                        <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">À partir de</span>
+                                        <span class="text-2xl font-black text-brand-dark">
+                                            ${event.price === 0 ? '<span class="text-emerald-500">Gratuit</span>' : `$${event.price}`}
+                                        </span>
+                                    </div>
+                                    
+                                    <button class="bg-brand-dark hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-dark/20 group-hover:-translate-y-1 group-hover:bg-brand-yellow group-hover:text-brand-dark">
+                                        Réserver <i class="fas fa-arrow-right text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            }, 600); // 600ms délai pour montrer les belles animations
         }
 
-        // Function to read category from URL parameters on load
-        function getCategoryFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('category') || 'all';
-        }
-
-        // Initialize page
+        // Écouteurs d'événements
         document.addEventListener('DOMContentLoaded', () => {
-            currentFilter = getCategoryFromUrl();
-            
-            const initialFilterButton = document.querySelector(`.category-filter[data-category="${currentFilter}"]`);
-            if (initialFilterButton) {
-                document.querySelectorAll('.category-filter').forEach(f => f.classList.remove('active'));
-                initialFilterButton.classList.add('active');
-            }
-
             displayEvents();
             
-            // Add event listeners to category filters
-            const filters = document.querySelectorAll('.category-filter');
-            filters.forEach(filter => {
-                filter.addEventListener('click', function() {
-                    currentFilter = this.dataset.category;
+            // Gestion des boutons de filtre
+            const filters = document.querySelectorAll('.filter-btn');
+            filters.forEach(btn => {
+                btn.addEventListener('click', function() {
                     filters.forEach(f => f.classList.remove('active'));
                     this.classList.add('active');
+                    currentFilter = this.dataset.category;
                     displayEvents();
                 });
             });
 
-            // Add event listener to sort select
+            // Gestion du tri
             document.getElementById('sort-select').addEventListener('change', function() {
                 currentSort = this.value;
                 displayEvents();
             });
 
-            // Add event listener to search input/button
+            // Gestion de la recherche (en temps réel + Entrée)
             const searchInput = document.getElementById('search-input');
-            const searchButton = document.getElementById('search-button');
-
-            const handleSearch = () => {
-                currentSearchTerm = searchInput.value.trim();
-                displayEvents();
-            };
-
-            searchButton.addEventListener('click', handleSearch);
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    handleSearch();
-                }
+            let timeout = null;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    currentSearchTerm = e.target.value.trim();
+                    displayEvents();
+                }, 400); // Debounce pour ne pas recharger à chaque lettre
             });
         });
     </script>

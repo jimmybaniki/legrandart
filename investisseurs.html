@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Culturelle - Investisseurs LeGrandArt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], heading: ['Outfit', 'sans-serif'] },
+                    colors: { brand: { yellow: '#facc15', yellowHover: '#eab308', dark: '#0f172a', light: '#f8fafc' } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-light font-sans text-slate-800 flex flex-col min-h-screen">
+
+    <nav class="fixed w-full z-50 bg-brand-dark/95 backdrop-blur-lg border-b border-white/10 h-20 flex items-center">
+        <div class="max-w-7xl mx-auto px-4 w-full flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand-yellow rounded-xl flex items-center justify-center"><i class="fas fa-chart-line text-brand-dark text-xl"></i></div>
+                <span class="text-2xl font-heading font-black text-white tracking-tight">LeGrand<span class="text-brand-yellow">Art</span></span>
+            </a>
+            <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
+                <a href="index.html" class="hover:text-white transition">Accueil</a>
+                <a href="evenements.html" class="hover:text-white transition">Billetterie</a>
+                <button onclick="logout()" class="text-rose-400 font-bold bg-white/5 px-4 py-2 rounded-xl border border-white/10">Sortir</button>
+            </nav>
+        </div>
+    </nav>
+
+    <header class="relative pt-32 pb-24 bg-brand-dark overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover opacity-10">
+        </div>
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow text-sm font-medium mb-6 uppercase tracking-widest">
+                Espace Partenaires Financiers
+            </div>
+            <h1 class="text-4xl md:text-6xl font-heading font-black text-white mb-4 uppercase tracking-tight">Votre <span class="text-brand-yellow italic">Portefeuille</span></h1>
+            <p class="text-slate-400 max-w-2xl text-lg">Financez la culture, récoltez l'excellence. Suivez vos dividendes sur chaque billet vendu.</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 -mt-12 relative z-20 pb-20 w-full space-y-16">
+        
+        <!-- Dashboard Financer -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-2">Total Engagé</p>
+                <h3 class="text-4xl font-heading font-black text-brand-dark" id="inv-total-invested">$0</h3>
+            </div>
+            <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-2">Dividendes Cumulés</p>
+                <h3 class="text-4xl font-heading font-black text-emerald-600" id="inv-total-profit">$0</h3>
+            </div>
+            <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-2">Performance Globale</p>
+                <h3 class="text-4xl font-heading font-black text-brand-dark">+14.2%</h3>
+            </div>
+        </section>
+
+        <!-- Mes Investissements Actuels -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-heading font-black text-brand-dark uppercase">Suivi de mes Actifs</h2>
+            <div id="my-investments-list" class="grid gap-4">
+                <!-- Injecté par app.js -->
+                <p class="text-slate-400 italic text-xs">Analyse de vos placements en cours...</p>
+            </div>
+        </section>
+
+        <!-- OPPORTUNITÉS DE PLACEMENT -->
+        <section class="space-y-12">
+            <div>
+                <h2 class="text-3xl font-heading font-black text-brand-dark uppercase tracking-tight">Opportunités <span class="text-brand-yellow">Actives</span></h2>
+                <p class="text-slate-500">Participez au financement des événements les plus attendus de 2026.</p>
+            </div>
+
+            <div id="invest-events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Injecté par app.js -->
+            </div>
+
+            <!-- Rappel Politique -->
+            <div class="bg-brand-dark p-10 rounded-[3rem] text-center space-y-4">
+                <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto text-brand-yellow text-xl">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4 class="text-white font-heading font-bold text-xl uppercase">Protection des Investisseurs</h4>
+                <p class="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
+                    Sécurité garantie : Conformément à nos conditions, vous disposez d'une option de <strong>remboursement intégral</strong> sans frais si vous annulez votre participation au moins <strong>15 jours avant la date de l'événement</strong>.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-brand-dark text-slate-300 pt-16 pb-8 border-t-4 border-brand-yellow mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-500 text-[10px] uppercase font-black tracking-[0.3em]">LeGrandArt Finance Culturelle &copy; 2026</p>
+        </div>
+    </footer>
+</body>
+</html>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            // Vérification auth
+            const profile = JSON.parse(localStorage.getItem('lg_pro_user') || 'null');
+            if (!profile) {
+                window.location.href = 'index.html?openLogin=true';
+                return;
+            }
+
+            // Initialisation des données
+            setTimeout(() => {
+                loadInvestableEvents();
+                populateInvestorDashboard();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

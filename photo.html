@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Organisateur - LeGrandArt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], heading: ['Outfit', 'sans-serif'] },
+                    colors: { brand: { yellow: '#facc15', yellowHover: '#eab308', dark: '#0f172a', light: '#f8fafc' } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-light font-sans text-slate-800 flex flex-col min-h-screen">
+
+    <nav class="fixed w-full z-50 bg-brand-dark/95 backdrop-blur-lg border-b border-white/10 h-20 flex items-center">
+        <div class="max-w-7xl mx-auto px-4 w-full flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand-yellow rounded-xl flex items-center justify-center"><i class="fas fa-calendar-alt text-brand-dark"></i></div>
+                <span class="text-2xl font-heading font-black text-white">LeGrand<span class="text-brand-yellow">Art</span></span>
+            </a>
+            <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
+                <a href="evenements.html" class="hover:text-white transition">Événements</a>
+                <a href="creer.html" class="hover:text-white transition">Nouveau Projet</a>
+                <button onclick="logout()" class="text-rose-400 font-bold">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative pt-32 pb-16 bg-brand-dark overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <h1 class="text-4xl md:text-6xl font-heading font-black text-white mb-4 uppercase tracking-tight">Espace <span class="text-brand-yellow italic">Organisateur</span></h1>
+            <p class="text-slate-400 max-w-2xl">Pilotez vos événements, suivez vos ventes de billets et gérez vos partenaires financiers.</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 -mt-8 relative z-20 pb-20 w-full space-y-12">
+        <!-- Dashboard Organisateur -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Événements Actifs</p>
+                <h3 class="text-4xl font-heading font-black text-brand-dark">04</h3>
+            </div>
+            <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Billets Vendus</p>
+                <h3 class="text-4xl font-heading font-black text-emerald-600">1,240</h3>
+            </div>
+            <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Revenu Net</p>
+                <h3 class="text-4xl font-heading font-black text-brand-dark">$18,600</h3>
+            </div>
+        </div>
+
+        <!-- Liste des événements gérés -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-heading font-black text-brand-dark uppercase">Mes Événements</h2>
+            <div id="organizer-events-list" class="grid gap-6">
+                <!-- Exemple de carte d'événement pour l'organisateur -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 flex flex-col md:flex-row items-center gap-6 shadow-sm hover:shadow-md transition">
+                    <img src="https://images.unsplash.com/photo-1533174000255-161391e847c2?auto=format&fit=crop&w=300&q=80" class="w-full md:w-40 h-32 object-cover rounded-2xl" alt="">
+                    <div class="flex-1">
+                        <h4 class="text-xl font-heading font-bold text-brand-dark">Festival Rumba Congolaise</h4>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-widest mt-1">15 Juillet 2026 • Kinshasa</p>
+                        <div class="flex gap-4 mt-4">
+                            <div class="text-center">
+                                <span class="block text-lg font-black text-brand-dark">850</span>
+                                <span class="text-[9px] uppercase font-bold text-slate-400">Visiteurs</span>
+                            </div>
+                            <div class="text-center">
+                                <span class="block text-lg font-black text-emerald-500">72%</span>
+                                <span class="text-[9px] uppercase font-bold text-slate-400">Remplissage</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 w-full md:w-auto">
+                        <button class="bg-brand-dark text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest">Modifier</button>
+                        <button class="border border-slate-200 text-slate-600 px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest">Statistiques</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
