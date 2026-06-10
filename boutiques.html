@@ -738,7 +738,6 @@
                         }
                         
                         // On retire les réglages de la liste des boutiques affichées
-                        allShops = allShops.filter(s => s.shop_id !== 'platform_global_settings');
                         const systemIds = ['platform_global_settings', 'platform_content_settings', 'platform_settings'];
                         allShops = allShops.filter(s => !systemIds.includes(s.shop_id));
                         
