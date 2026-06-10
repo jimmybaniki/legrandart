@@ -2,8 +2,8 @@
 // Les profils, boutiques et œuvres sont enregistrés dans la même instance Supabase.
 // localStorage n'est conservé que comme cache d'interface ou fallback non principal.
 
-const SUPABASE_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_fYpLwujskWmD2rQRsxD5TQ_qgAG6Bm_';
+const SUPABASE_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co'; // URL Supabase centralisée
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkcWl6a3VtcXVkd2JucmRjb21hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODY5NDcsImV4cCI6MjA5NTQ2Mjk0N30.3bjAcBSu64FZ9AaGiuVTZNpM4fsqc6NKOdEdD4WuX6c'; // Clé Supabase centralisée
 
 let sb = null;
 
