@@ -1,525 +1,120 @@
 <!DOCTYPE html>
-<html lang="fr" class="scroll-smooth">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Événements Premium - LeGrandArt</title>
+    <title>Événements 2026 - LeGrandArt</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Polices Modernes -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        heading: ['Outfit', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            yellow: '#facc15', // primary-color
-                            yellowHover: '#eab308',
-                            dark: '#0f172a', // deep slate
-                            gray: '#1e293b',
-                            light: '#f8fafc'
-                        }
-                    },
-                    animation: {
-                        'shimmer': 'shimmer 2s infinite linear',
-                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
-                    },
-                    keyframes: {
-                        shimmer: {
-                            '0%': { backgroundPosition: '-1000px 0' },
-                            '100%': { backgroundPosition: '1000px 0' },
-                        },
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        /* Effet Skeleton / Chargement */
-        .skeleton-bg {
-            background: #e2e8f0;
-            background-image: linear-gradient(to right, #e2e8f0 0%, #cbd5e1 20%, #e2e8f0 40%, #e2e8f0 100%);
-            background-repeat: no-repeat;
-            background-size: 800px 100%; 
-            animation: shimmer 1.5s infinite linear forwards;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #facc15; }
-
-        /* Filtres */
-        .filter-btn {
-            transition: all 0.3s ease;
-        }
-        .filter-btn.active {
-            background-color: #facc15;
-            color: #0f172a;
-            border-color: #facc15;
-            box-shadow: 0 4px 14px 0 rgba(250, 204, 21, 0.39);
-            transform: translateY(-2px);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0b; color: #f0f0f0; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        input, textarea { background: rgba(0,0,0,0.4) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
+        input:focus, textarea:focus { border-color: #eab308 !important; outline: none; box-shadow: 0 0 15px rgba(234, 179, 8, 0.2); }
     </style>
 </head>
-<body class="bg-brand-light font-sans text-slate-800 flex flex-col min-h-screen antialiased">
+<body class="min-h-screen">
 
-    <!-- Navbar Glassmorphism -->
-    <nav class="fixed w-full z-50 bg-brand-dark/90 backdrop-blur-lg border-b border-white/10 transition-all duration-300" id="navbar">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
-                <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
-                    <div class="w-10 h-10 bg-brand-yellow rounded-xl flex items-center justify-center shadow-lg shadow-brand-yellow/20">
-                        <i class="fas fa-calendar-alt text-brand-dark text-xl"></i>
-                    </div>
-                    <span class="text-2xl font-heading font-black text-white tracking-tight">LeGrand<span class="text-brand-yellow">Art</span></span>
-                </div>
-                
-                <div class="hidden md:flex items-center space-x-1">
-                    <a href="#" class="text-slate-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Accueil</a>
-                    <a href="#" class="text-brand-yellow px-4 py-2 rounded-lg text-sm font-semibold bg-brand-yellow/10">Événements</a>
-                    <a href="#" class="text-slate-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Créer</a>
-                    <a href="#" class="text-slate-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Contact</a>
-                </div>
-
-                <div class="hidden md:flex items-center gap-4">
-                    <button class="text-slate-300 hover:text-white transition-colors">
-                        <i class="fas fa-search text-lg"></i>
-                    </button>
-                    <div class="w-px h-6 bg-slate-700 mx-2"></div>
-                    <button class="bg-brand-yellow hover:bg-brand-yellowHover text-brand-dark px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(250,204,21,0.2)] hover:shadow-[0_0_25px_rgba(250,204,21,0.4)] hover:-translate-y-0.5">
-                        <i class="far fa-user mr-2"></i> Connexion
-                    </button>
-                </div>
-
-                <!-- Mobile menu button -->
-                <div class="md:hidden flex items-center">
-                    <button class="text-slate-300 hover:text-white focus:outline-none">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
-                </div>
+    <header class="bg-black/90 backdrop-blur-xl border-b border-white/5 py-6 px-6 sticky top-0 z-50">
+        <div class="max-w-[1400px] mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex flex-col leading-none">
+                <span class="text-2xl font-black text-white">LeGrand<span class="text-yellow-500">Art</span></span>
+                <span class="text-[8px] uppercase tracking-[0.4em] text-emerald-500 font-black mt-1">Événements Culturels</span>
+            </a>
+            <div class="flex items-center gap-6">
+                <button onclick="toggleEventForm()" id="organize-btn" class="bg-yellow-500 hover:bg-white text-black font-black py-3 px-6 rounded-xl uppercase text-[10px] tracking-widest transition-all">
+                    Organiser un événement
+                </button>
+                <a href="index.html" class="text-gray-400 hover:text-white transition uppercase text-[10px] font-black tracking-widest">Retour</a>
             </div>
-        </div>
-    </nav>
-
-    <!-- Hero Banner Premium -->
-    <header class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-brand-dark overflow-hidden">
-        <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Concert Crowd" class="w-full h-full object-cover opacity-20">
-            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/80 to-transparent"></div>
-        </div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow text-sm font-medium mb-8">
-                <span class="w-2 h-2 rounded-full bg-brand-yellow animate-pulse"></span>
-                Kinshasa & RDC
-            </div>
-            <h1 class="text-4xl md:text-6xl lg:text-7xl font-heading font-black text-white mb-6 tracking-tight leading-tight">
-                Vivez l'Émotion, <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-yellow-200">Partagez l'Art.</span>
-            </h1>
-            <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10">
-                Découvrez et réservez vos places pour les concerts, spectacles, conférences et festivals les plus exclusifs de la capitale.
-            </p>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 pb-20 w-full">
+    <main class="max-w-6xl mx-auto px-6 py-20">
         
-        <!-- Command Center (Search & Filters) - Sticky -->
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 md:p-6 mb-12 sticky top-24 z-40 transition-all">
-            <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
-                
-                <!-- Barre de recherche stylisée -->
-                <div class="relative w-full lg:w-1/3">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-slate-400"></i>
+        <!-- SECTION FORMULAIRE (Masquée par défaut) -->
+        <section id="event-form-section" class="hidden mb-24 animate-fade-in">
+            <div class="glass-card p-10 md:p-16 rounded-[3rem] border-yellow-500/20 relative">
+                <button onclick="toggleEventForm()" class="absolute top-8 right-8 text-gray-500 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="mb-12">
+                    <h2 class="text-4xl font-black text-white uppercase tracking-tighter italic">Proposer un <span class="text-yellow-500">Événement</span></h2>
+                    <p class="text-emerald-500 text-[10px] font-black uppercase tracking-[0.3em] mt-3 flex items-center gap-2">
+                        <i class="fas fa-shield-alt"></i> Soumission pour approbation manager
+                    </p>
+                </div>
+
+                <form id="event-proposal-form" class="grid gap-8 md:grid-cols-2">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2 tracking-widest">Nom de l'événement *</label>
+                        <input type="text" id="ev-title" required class="w-full rounded-2xl px-6 py-4 outline-none transition-all" placeholder="Ex: Vernissage Roots">
                     </div>
-                    <input type="text" id="search-input" placeholder="Rechercher un événement, artiste..." class="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-yellow focus:border-brand-yellow transition-all outline-none">
-                </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2 tracking-widest">Date prévue *</label>
+                        <input type="date" id="ev-date" required class="w-full rounded-2xl px-6 py-4 outline-none transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2 tracking-widest">Lieu / Ville *</label>
+                        <input type="text" id="ev-location" required class="w-full rounded-2xl px-6 py-4 outline-none transition-all" placeholder="Kinshasa, Gombe...">
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="text-[10px] font-black uppercase text-gray-500 ml-2 tracking-widest">Description de l'événement *</label>
+                        <textarea id="ev-description" required rows="4" class="w-full rounded-3xl px-6 py-4 outline-none transition-all" placeholder="Détails, artistes invités, objectifs..."></textarea>
+                    </div>
+                    <button type="submit" class="md:col-span-2 bg-yellow-500 hover:bg-yellow-400 text-black font-black py-6 rounded-2xl uppercase text-xs md:text-sm tracking-[0.2em] shadow-[0_20px_40px_-10px_rgba(234,179,8,0.3)] transition-all">
+                        Soumettre pour Approbation
+                    </button>
+                </form>
+            </div>
+        </section>
 
-                <!-- Filtres Catégories -->
-                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
-                    <button class="filter-btn active whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50" data-category="all">
-                        Tous
-                    </button>
-                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="music">
-                        <i class="fas fa-music text-brand-yellow"></i> Musique
-                    </button>
-                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="sport">
-                        <i class="fas fa-running text-brand-yellow"></i> Sport
-                    </button>
-                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="art">
-                        <i class="fas fa-paint-brush text-brand-yellow"></i> Art
-                    </button>
-                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="food">
-                        <i class="fas fa-utensils text-brand-yellow"></i> Gastronomie
-                    </button>
-                    <button class="filter-btn whitespace-nowrap px-5 py-2.5 rounded-xl border border-slate-200 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50 flex items-center gap-2" data-category="tech">
-                        <i class="fas fa-laptop-code text-brand-yellow"></i> Tech
-                    </button>
-                </div>
-
-                <!-- Tri -->
-                <div class="w-full lg:w-auto flex justify-end shrink-0">
-                    <div class="relative w-full lg:w-auto">
-                        <select id="sort-select" class="block w-full appearance-none bg-white border border-slate-200 text-slate-700 py-3.5 pl-4 pr-10 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-yellow cursor-pointer">
-                            <option value="date_asc">🗓️ Plus proches</option>
-                            <option value="attendees_desc">🔥 Plus populaires</option>
-                            <option value="price_asc">💵 Prix croissants</option>
-                            <option value="price_desc">💎 Prix décroissants</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                            <i class="fas fa-chevron-down text-xs"></i>
+        <!-- SECTION CALENDRIER -->
+        <section id="events-list" class="space-y-12">
+            <div class="flex items-center justify-between border-b border-white/10 pb-6">
+                <h2 class="text-3xl md:text-5xl font-black uppercase italic text-white">Calendrier <span class="text-yellow-500">2026</span></h2>
+                <span class="text-emerald-500 font-black text-[10px] tracking-widest uppercase bg-emerald-500/10 px-4 py-2 rounded-full">8 Événements confirmés</span>
+            </div>
+            
+            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                <!-- Concours Art, Foi & Racines -->
+                <div class="glass-card rounded-[2.5rem] overflow-hidden group hover:border-yellow-500/30 transition-all duration-500">
+                    <a href="concours.html" class="block h-56 bg-zinc-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1523895665936-7bfe172b757d?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute top-6 left-6 bg-emerald-500 text-black px-4 py-1 rounded-full text-[10px] font-black uppercase">01 Mai 2026</div>
+                    </a>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-black text-white uppercase mb-3">Concours <span class="text-yellow-500">Art, Foi & Racines</span></h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2">Exprimez votre gratitude envers les ancêtres et célébrez notre héritage à travers ce concours panafricain d'exception.</p>
+                        <div class="flex justify-between items-center border-t border-white/5 pt-6">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"><i class="fas fa-map-marker-alt text-yellow-500 mr-2"></i>Panafricain / Présentiel</span>
+                            <a href="concours.html" class="text-yellow-500 font-black uppercase text-[10px] tracking-widest group-hover:text-white transition">Participer <i class="fas fa-arrow-right ml-2"></i></a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Section Header -->
-        <div class="flex justify-between items-end mb-8">
-            <div>
-                <h2 class="text-3xl font-heading font-bold text-brand-dark">À la Une</h2>
-                <p class="text-slate-500 mt-1" id="results-count">18 événements trouvés</p>
-            </div>
-        </div>
-
-        <!-- Container des événements -->
-        <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Rempli par JavaScript -->
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-16 flex justify-center" id="pagination-container">
-            <nav class="inline-flex items-center gap-2 bg-white px-2 py-2 rounded-2xl shadow-sm border border-slate-200">
-                <button class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors disabled:opacity-50">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-brand-yellow text-brand-dark font-bold shadow-md">1</button>
-                <button class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 font-medium transition-colors">2</button>
-                <button class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 font-medium transition-colors">3</button>
-                <span class="px-2 text-slate-400">...</span>
-                <button class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </nav>
-        </div>
+        </section>
     </main>
 
-    <!-- Footer Premium -->
-    <footer class="bg-brand-dark text-slate-300 pt-16 pb-8 border-t-4 border-brand-yellow mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-                <div class="lg:col-span-1">
-                    <div class="flex items-center gap-2 mb-6">
-                        <div class="w-8 h-8 bg-brand-yellow rounded-lg flex items-center justify-center">
-                            <i class="fas fa-calendar-alt text-brand-dark"></i>
-                        </div>
-                        <span class="text-2xl font-heading font-black text-white">LeGrand<span class="text-brand-yellow">Art</span></span>
-                    </div>
-                    <p class="text-slate-400 mb-6 text-sm leading-relaxed">
-                        La plateforme N°1 en RDC pour découvrir, partager et organiser des événements qui marquent les esprits.
-                    </p>
-                    <div class="flex gap-3">
-                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-dark transition-all"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-dark transition-all"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-dark transition-all"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-white font-heading font-bold text-lg mb-6">Navigation Rapide</h3>
-                    <ul class="space-y-3 text-sm">
-                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Accueil Billetterie</a></li>
-                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Tous les Événements</a></li>
-                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Créer votre événement</a></li>
-                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Espace Organisateur</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h3 class="text-white font-heading font-bold text-lg mb-6">Top Catégories</h3>
-                    <ul class="space-y-3 text-sm">
-                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Concerts & Festivals</a></li>
-                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Compétitions Sportives</a></li>
-                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Expositions d'Art</a></li>
-                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Gastronomie & Ateliers</a></li>
-                        <li><a href="#" class="hover:text-brand-yellow transition-colors">Conférences Tech</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h3 class="text-white font-heading font-bold text-lg mb-6">Nous Contacter</h3>
-                    <ul class="space-y-4 text-sm">
-                        <li class="flex items-start gap-3">
-                            <i class="fas fa-map-marker-alt text-brand-yellow mt-1"></i>
-                            <span>18 Avenue Salongo, Quartier Makelele, Bandalungwa, Kinshasa, RDC</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-phone-alt text-brand-yellow"></i>
-                            <span>+243 978 415 814</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-envelope text-brand-yellow"></i>
-                            <span>hello@legrandart.cd</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-                <p>&copy; 2026 LeGrandArt. Tous droits réservés.</p>
-                <div class="flex flex-wrap justify-center gap-6">
-                    <a href="#" class="hover:text-white transition-colors">Conditions Générales</a>
-                    <a href="#" class="hover:text-white transition-colors">Confidentialité</a>
-                    <a href="#" class="hover:text-white transition-colors">FAQ</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
     <script>
-        /* Navbar Blur Effect on Scroll */
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 20) {
-                nav.classList.add('shadow-lg', 'bg-brand-dark/95');
-                nav.classList.remove('bg-brand-dark/90');
+        feather.replace();
+        function toggleEventForm() {
+            const section = document.getElementById('event-form-section');
+            const btn = document.getElementById('organize-btn');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                btn.innerText = "Annuler la proposition";
+                btn.classList.replace('bg-yellow-500', 'bg-white');
+                section.scrollIntoView({ behavior: 'smooth' });
             } else {
-                nav.classList.remove('shadow-lg', 'bg-brand-dark/95');
-                nav.classList.add('bg-brand-dark/90');
-            }
-        });
-
-        /* Remplacement des images locales par des images haute qualité Unsplash pour un rendu premium */
-        const events = [
-            { id: 1, title: "Festival Rumba Congolaise", date: "2026-07-15", time: "20:00", location: "Stade des Martyrs, Kinshasa", category: "music", price: 45, fees: 5, image: "https://images.unsplash.com/photo-1533174000255-161391e847c2?auto=format&fit=crop&w=800&q=80", description: "Une célébration vibrante de la Rumba, patrimoine de l'humanité, avec des artistes congolais de renom.", attendees: 1800 },
-            { id: 2, title: "Course de la Paix 10K", date: "2026-08-20", time: "08:00", location: "Boulevard Triomphal", category: "sport", price: 15, fees: 5, image: "https://images.unsplash.com/photo-1552674605-15c37eee02a9?auto=format&fit=crop&w=800&q=80", description: "Une course emblématique à travers la capitale pour la promotion de la paix et de la solidarité.", attendees: 3100 },
-            { id: 3, title: "Sommet Tech & Innovation RDC", date: "2026-10-12", time: "09:30", location: "Pullman Hotel, Kinshasa", category: "tech", price: 150, fees: 5, image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80", description: "Explorez le futur numérique de l'Afrique avec des leaders d'opinion et des startups prometteuses.", attendees: 950 },
-            { id: 4, title: "Dîner Gala Gastronomie", date: "2026-07-22", time: "19:00", location: "Rotana Hotel", category: "food", price: 75, fees: 5, image: "https://images.unsplash.com/photo-1555244162-803834f87a33?auto=format&fit=crop&w=800&q=80", description: "Un dîner exclusif pour déguster les saveurs riches et variées de la cuisine congolaise moderne.", attendees: 250 },
-            { id: 5, title: "Exposition Art et Culture", date: "2026-09-05", time: "10:00", location: "Musée National de la RDC", category: "art", price: 10, fees: 5, image: "https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=800&q=80", description: "Découvrez les œuvres d'artistes contemporains locaux et le riche héritage culturel.", attendees: 800 },
-            { id: 6, title: "Soirée Jazz au Fleuve", date: "2026-08-30", time: "19:30", location: "Majestic River, Kinshasa", category: "music", price: 35, fees: 5, image: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80", description: "Profitez d'une soirée de jazz envoûtante sur les rives du majestueux Fleuve Congo.", attendees: 500 },
-            { id: 7, title: "Atelier IA pour PME", date: "2026-11-05", time: "09:00", location: "Silikin Village", category: "tech", price: 60, fees: 5, image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80", description: "Formation pratique sur l'intégration de l'intelligence artificielle dans les PME congolaises.", attendees: 120 },
-            { id: 8, title: "Finale Basketball Inter-Clubs", date: "2026-12-10", time: "17:00", location: "Stade Tata Raphaël", category: "sport", price: 5, fees: 2, image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80", description: "Finale spectaculaire du championnat de basketball local, ambiance garantie.", attendees: 4500 },
-            { id: 9, title: "Concert Gospel de Noël", date: "2026-12-24", time: "20:30", location: "Théâtre de Verdure", category: "music", price: 25, fees: 5, image: "https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?auto=format&fit=crop&w=800&q=80", description: "Célébrez Noël avec les plus belles voix de la scène Gospel congolaise.", attendees: 2000 },
-            { id: 10, title: "Vernissage : Photographie RDC", date: "2026-07-29", time: "18:00", location: "Galerie Symphonie des Arts", category: "art", price: 0, fees: 0, image: "https://images.unsplash.com/photo-1482686115713-0fbcaced6e28?auto=format&fit=crop&w=800&q=80", description: "Inauguration d'une exposition dédiée aux photographes émergents de la RDC.", attendees: 300 },
-            { id: 11, title: "Food Truck Festival", date: "2026-09-15", time: "12:00", location: "Place de la Gare Centrale", category: "food", price: 0, fees: 0, image: "https://images.unsplash.com/photo-1565123409695-4bec56e6a412?auto=format&fit=crop&w=800&q=80", description: "Le plus grand rassemblement de Food Trucks de Kinshasa. Entrée Gratuite.", attendees: 5500 },
-            { id: 12, title: "Hackathon 48h Numérique", date: "2026-11-20", time: "08:00", location: "Kinshasa Digital Academy", category: "tech", price: 10, fees: 5, image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80", description: "Compétition de programmation intense pour créer des solutions numériques innovantes.", attendees: 80 }
-        ];
-
-        let currentFilter = 'all';
-        let currentSort = 'date_asc';
-        let currentSearchTerm = '';
-
-        // Dictionnaires pour l'affichage élégant
-        const categoryConfig = {
-            music: { name: 'Musique', icon: 'fa-music', color: 'bg-purple-100 text-purple-700' },
-            sport: { name: 'Sport', icon: 'fa-running', color: 'bg-emerald-100 text-emerald-700' },
-            art: { name: 'Art', icon: 'fa-paint-brush', color: 'bg-rose-100 text-rose-700' },
-            food: { name: 'Gastronomie', icon: 'fa-utensils', color: 'bg-orange-100 text-orange-700' },
-            tech: { name: 'Technologie', icon: 'fa-laptop-code', color: 'bg-blue-100 text-blue-700' }
-        };
-
-        const moisAbr = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
-
-        function sortEvents(eventArray, sortType) {
-            return eventArray.sort((a, b) => {
-                switch (sortType) {
-                    case 'attendees_desc': return b.attendees - a.attendees; 
-                    case 'price_asc': return a.price - b.price; 
-                    case 'price_desc': return b.price - a.price; 
-                    case 'date_asc': default: return new Date(a.date) - new Date(b.date);
-                }
-            });
-        }
-
-        function filterEvents(eventArray) {
-            return eventArray.filter(event => {
-                const matchCategory = currentFilter === 'all' || event.category === currentFilter;
-                const searchLower = currentSearchTerm.toLowerCase();
-                const matchSearch = event.title.toLowerCase().includes(searchLower) || 
-                                    event.location.toLowerCase().includes(searchLower);
-                return matchCategory && matchSearch;
-            });
-        }
-
-        function renderSkeletons() {
-            const container = document.getElementById('events-container');
-            container.innerHTML = '';
-            for(let i=0; i<6; i++) {
-                container.innerHTML += `
-                    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden h-full flex flex-col">
-                        <div class="h-56 skeleton-bg w-full"></div>
-                        <div class="p-6 flex-1 flex flex-col gap-4">
-                            <div class="h-6 skeleton-bg w-3/4 rounded"></div>
-                            <div class="h-4 skeleton-bg w-1/2 rounded"></div>
-                            <div class="h-16 skeleton-bg w-full rounded mt-2"></div>
-                            <div class="mt-auto flex justify-between items-center pt-4">
-                                <div class="h-8 skeleton-bg w-24 rounded-full"></div>
-                                <div class="h-10 skeleton-bg w-28 rounded-xl"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                section.classList.add('hidden');
+                btn.innerText = "Organiser un événement";
+                btn.classList.replace('bg-white', 'bg-yellow-500');
             }
         }
-
-        function displayEvents() {
-            const container = document.getElementById('events-container');
-            const countLabel = document.getElementById('results-count');
-            
-            // Effet visuel moderne : Skeletons
-            renderSkeletons();
-            
-            setTimeout(() => {
-                const filtered = filterEvents([...events]);
-                const finalEvents = sortEvents(filtered, currentSort);
-                
-                countLabel.textContent = `${finalEvents.length} événement${finalEvents.length > 1 ? 's' : ''} trouvé${finalEvents.length > 1 ? 's' : ''}`;
-                container.innerHTML = '';
-                
-                if (finalEvents.length === 0) {
-                    container.innerHTML = `
-                        <div class="col-span-full py-16 text-center bg-white rounded-3xl border border-slate-100 border-dashed">
-                            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <i class="fas fa-search text-3xl text-slate-300"></i>
-                            </div>
-                            <h3 class="text-2xl font-heading font-bold text-slate-800 mb-2">Oups, aucun résultat</h3>
-                            <p class="text-slate-500">Essayez de modifier vos filtres ou de chercher autre chose.</p>
-                            <button onclick="document.querySelector('.filter-btn[data-category=\\'all\\']').click()" class="mt-6 text-brand-yellow font-bold hover:underline">Réinitialiser les filtres</button>
-                        </div>
-                    `;
-                    document.getElementById('pagination-container').style.display = 'none';
-                    return;
-                }
-
-                document.getElementById('pagination-container').style.display = 'flex';
-
-                finalEvents.forEach((event, index) => {
-                    const dateObj = new Date(event.date);
-                    const day = dateObj.getDate();
-                    const month = moisAbr[dateObj.getMonth()];
-                    const conf = categoryConfig[event.category];
-                    const delay = index * 100; // Effet cascade
-                    
-                    const card = `
-                        <div class="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 flex flex-col h-full overflow-hidden opacity-0 animate-fade-in-up" style="animation-delay: ${delay}ms">
-                            
-                            <!-- Image Header -->
-                            <div class="relative h-56 overflow-hidden bg-slate-100">
-                                <img src="${event.image}" alt="${event.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                                
-                                <!-- Overlay Gradient -->
-                                <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
-                                
-                                <!-- Date Badge -->
-                                <div class="absolute top-4 left-4 bg-white/95 backdrop-blur shadow-lg rounded-xl p-2 text-center min-w-[3.5rem] transform group-hover:-translate-y-1 transition-transform">
-                                    <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">${month}</span>
-                                    <span class="block text-xl font-heading font-black text-brand-dark leading-none mt-1">${day}</span>
-                                </div>
-
-                                <!-- Like Button -->
-                                <button class="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white backdrop-blur-md rounded-full flex items-center justify-center text-white hover:text-rose-500 transition-colors">
-                                    <i class="far fa-heart"></i>
-                                </button>
-
-                                <!-- Location Overlay -->
-                                <div class="absolute bottom-4 left-4 flex items-center gap-2 text-white/90 text-sm font-medium">
-                                    <i class="fas fa-map-marker-alt text-brand-yellow"></i>
-                                    <span class="truncate pr-4">${event.location}</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Card Body -->
-                            <div class="p-6 flex-1 flex flex-col">
-                                <div class="flex justify-between items-start mb-3 gap-2">
-                                    <h3 class="text-xl font-heading font-bold text-slate-900 group-hover:text-brand-yellowHover transition-colors line-clamp-2 leading-tight">
-                                        ${event.title}
-                                    </h3>
-                                </div>
-                                
-                                <div class="flex items-center gap-4 text-sm text-slate-500 mb-4 font-medium">
-                                    <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
-                                        <i class="far fa-clock text-slate-400"></i> ${event.time}
-                                    </div>
-                                    <div class="flex items-center gap-1.5">
-                                        <i class="fas fa-fire text-orange-400"></i> ${event.attendees.toLocaleString()} int.
-                                    </div>
-                                </div>
-                                
-                                <p class="text-slate-600 text-sm mb-6 line-clamp-2 leading-relaxed flex-1">
-                                    ${event.description}
-                                </p>
-                                
-                                <!-- Card Footer -->
-                                <div class="flex justify-between items-center pt-4 border-t border-slate-100 mt-auto">
-                                    <div class="flex flex-col">
-                                        <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">À partir de</span>
-                                        <span class="text-2xl font-black text-brand-dark">
-                                            ${event.price === 0 ? '<span class="text-emerald-500">Gratuit</span>' : `$${event.price}`}
-                                        </span>
-                                    </div>
-                                    
-                                    <button class="bg-brand-dark hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-dark/20 group-hover:-translate-y-1 group-hover:bg-brand-yellow group-hover:text-brand-dark">
-                                        Réserver <i class="fas fa-arrow-right text-xs"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    container.innerHTML += card;
-                });
-            }, 600); // 600ms délai pour montrer les belles animations
-        }
-
-        // Écouteurs d'événements
-        document.addEventListener('DOMContentLoaded', () => {
-            displayEvents();
-            
-            // Gestion des boutons de filtre
-            const filters = document.querySelectorAll('.filter-btn');
-            filters.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    filters.forEach(f => f.classList.remove('active'));
-                    this.classList.add('active');
-                    currentFilter = this.dataset.category;
-                    displayEvents();
-                });
-            });
-
-            // Gestion du tri
-            document.getElementById('sort-select').addEventListener('change', function() {
-                currentSort = this.value;
-                displayEvents();
-            });
-
-            // Gestion de la recherche (en temps réel + Entrée)
-            const searchInput = document.getElementById('search-input');
-            let timeout = null;
-            
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    currentSearchTerm = e.target.value.trim();
-                    displayEvents();
-                }, 400); // Debounce pour ne pas recharger à chaque lettre
-            });
-        });
     </script>
 </body>
 </html>

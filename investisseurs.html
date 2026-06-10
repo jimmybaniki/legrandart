@@ -3,125 +3,1145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Culturelle - Investisseurs LeGrandArt</title>
+    <title>Espace Investisseurs Premium - LeGrandArt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Polices Modernes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js" defer></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], heading: ['Outfit', 'sans-serif'] },
-                    colors: { brand: { yellow: '#facc15', yellowHover: '#eab308', dark: '#0f172a', light: '#f8fafc' } }
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            yellow: '#facc15', // primary-color
+                            yellowHover: '#eab308',
+                            dark: '#0f172a', // deep slate
+                            gray: '#1e293b',
+                            light: '#f8fafc',
+                            emerald: '#10b981'
+                        }
+                    },
+                    animation: {
+                        'shimmer': 'shimmer 2s infinite linear',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                    },
+                    keyframes: {
+                        shimmer: {
+                            '0%': { backgroundPosition: '-1000px 0' },
+                            '100%': { backgroundPosition: '1000px 0' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
                 }
             }
         }
     </script>
-</head>
-<body class="bg-brand-light font-sans text-slate-800 flex flex-col min-h-screen">
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #facc15; }
 
-    <nav class="fixed w-full z-50 bg-brand-dark/95 backdrop-blur-lg border-b border-white/10 h-20 flex items-center">
-        <div class="max-w-7xl mx-auto px-4 w-full flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-brand-yellow rounded-xl flex items-center justify-center"><i class="fas fa-chart-line text-brand-dark text-xl"></i></div>
-                <span class="text-2xl font-heading font-black text-white tracking-tight">LeGrand<span class="text-brand-yellow">Art</span></span>
-            </a>
-            <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
-                <a href="index.html" class="hover:text-white transition">Accueil</a>
-                <a href="evenements.html" class="hover:text-white transition">Billetterie</a>
-                <button onclick="logout()" class="text-rose-400 font-bold bg-white/5 px-4 py-2 rounded-xl border border-white/10">Sortir</button>
-            </nav>
+        /* Filtres et onglets */
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            border-color: #facc15;
+            color: #facc15;
+            background-color: rgba(250, 204, 21, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-brand-light font-sans text-slate-800 flex flex-col min-h-screen antialiased">
+
+    <!-- Navbar Glassmorphism -->
+    <nav class="fixed w-full z-50 bg-brand-dark/95 backdrop-blur-lg border-b border-white/10 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="w-10 h-10 bg-brand-yellow rounded-xl flex items-center justify-center shadow-lg shadow-brand-yellow/20">
+                        <i class="fas fa-chart-line text-brand-dark text-xl"></i>
+                    </div>
+                    <span class="text-2xl font-heading font-black text-white tracking-tight">LeGrand<span class="text-brand-yellow">Art</span> <span class="text-xs font-semibold uppercase bg-brand-yellow/20 text-brand-yellow px-2 py-1 rounded ml-1">Bourse</span></span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="evenements.html" class="text-slate-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Événements publics</a>
+                    <a href="#" class="text-brand-yellow px-4 py-2 rounded-lg text-sm font-semibold bg-brand-yellow/10">Espace Investisseur</a>
+                    <a href="#" class="text-slate-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Rapports Financiers</a>
+                    <a href="#" class="text-slate-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Support VIP</a>
+                </div>
+
+                <div class="hidden md:flex items-center gap-4">
+                    <div class="flex flex-col items-end">
+                        <span class="text-xs text-slate-400">Portefeuille Actif</span>
+                        <span class="text-sm font-bold text-brand-yellow" id="nav-portfolio-value">$45,000.00</span>
+                    </div>
+                    <div class="w-px h-6 bg-slate-700 mx-1"></div>
+                    <button class="bg-brand-yellow hover:bg-brand-yellowHover text-brand-dark px-5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2">
+                        <i class="fas fa-wallet"></i> Mon Compte
+                    </button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-slate-300 hover:text-white focus:outline-none" id="mobile-menu-btn">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <header class="relative pt-32 pb-24 bg-brand-dark overflow-hidden">
+    <!-- Header Section -->
+    <header class="relative pt-32 pb-16 bg-brand-dark overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover opacity-10">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(250,204,21,0.15),transparent)]"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/90 to-transparent"></div>
         </div>
-        <div class="max-w-7xl mx-auto px-4 relative z-10">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow text-sm font-medium mb-6 uppercase tracking-widest">
-                Espace Partenaires Financiers
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow text-xs font-semibold mb-4">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        MEMBRE CLUB PRIVÉ INVESTISSEUR
+                    </div>
+                    <h1 class="text-3xl md:text-5xl font-heading font-black text-white tracking-tight">
+                        Votre Portefeuille de <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-yellow-200">Rendement Culturel</span>
+                    </h1>
+                    <p class="text-slate-400 mt-2 max-w-xl text-sm md:text-base">
+                        Financez les grands spectacles en RDC, boostez l'écosystème artistique et collectez vos dividendes sur chaque billet vendu.
+                    </p>
+                </div>
+
+                <!-- Fast Statistics Widget -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-slate-900/60 p-6 rounded-2xl border border-white/5 backdrop-blur">
+                    <div>
+                        <span class="block text-xs text-slate-400 uppercase">Investi Total</span>
+                        <span class="text-2xl font-bold font-heading text-white" id="stat-total-invested">$45,000</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs text-slate-400 uppercase">ROI Moyen Estimé</span>
+                        <span class="text-2xl font-bold font-heading text-emerald-400">+18.4%</span>
+                    </div>
+                    <div class="col-span-2 md:col-span-1 border-t md:border-t-0 md:border-l border-slate-800 pt-3 md:pt-0 md:pl-4">
+                        <span class="block text-xs text-slate-400 uppercase">Gains Latents</span>
+                        <span class="text-2xl font-bold font-heading text-brand-yellow" id="stat-latent-returns">+$8,280</span>
+                    </div>
+                </div>
             </div>
-            <h1 class="text-4xl md:text-6xl font-heading font-black text-white mb-4 uppercase tracking-tight">Votre <span class="text-brand-yellow italic">Portefeuille</span></h1>
-            <p class="text-slate-400 max-w-2xl text-lg">Financez la culture, récoltez l'excellence. Suivez vos dividendes sur chaque billet vendu.</p>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 -mt-12 relative z-20 pb-20 w-full space-y-16">
+    <!-- Notification Toast Custom -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-5 py-4 rounded-xl shadow-2xl border border-slate-700 max-w-md">
+        <div id="toast-icon" class="w-8 h-8 rounded-full bg-brand-yellow text-brand-dark flex items-center justify-center font-bold">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div>
+            <p class="text-sm font-bold" id="toast-title">Notification</p>
+            <p class="text-xs text-slate-400" id="toast-message">Détail du message d'action.</p>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
         
-        <!-- Dashboard Financer -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100">
-                <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-2">Total Engagé</p>
-                <h3 class="text-4xl font-heading font-black text-brand-dark" id="inv-total-invested">$0</h3>
-            </div>
-            <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100">
-                <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-2">Dividendes Cumulés</p>
-                <h3 class="text-4xl font-heading font-black text-emerald-600" id="inv-total-profit">$0</h3>
-            </div>
-            <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100">
-                <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-2">Performance Globale</p>
-                <h3 class="text-4xl font-heading font-black text-brand-dark">+14.2%</h3>
-            </div>
-        </section>
+        <!-- Navigation Onglets -->
+        <div class="flex border-b border-slate-200 mb-8 overflow-x-auto">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn active whitespace-nowrap px-6 py-3 border-b-2 font-heading font-bold text-sm text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                <i class="fas fa-columns"></i> Mon Tableau de Bord
+            </button>
+            <button onclick="switchTab('opportunities')" id="tab-opportunities" class="tab-btn whitespace-nowrap px-6 py-3 border-b-2 font-heading font-bold text-sm text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                <i class="fas fa-hand-holding-usd"></i> Opportunités de Financement <span class="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full" id="opportunity-badge">3</span>
+            </button>
+            <button onclick="switchTab('history')" id="tab-history" class="tab-btn whitespace-nowrap px-6 py-3 border-b-2 font-heading font-bold text-sm text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                <i class="fas fa-history"></i> Historique & Remboursements
+            </button>
+        </div>
 
-        <!-- Mes Investissements Actuels -->
-        <section class="space-y-6">
-            <h2 class="text-2xl font-heading font-black text-brand-dark uppercase">Suivi de mes Actifs</h2>
-            <div id="my-investments-list" class="grid gap-4">
-                <!-- Injecté par app.js -->
-                <p class="text-slate-400 italic text-xs">Analyse de vos placements en cours...</p>
-            </div>
-        </section>
-
-        <!-- OPPORTUNITÉS DE PLACEMENT -->
-        <section class="space-y-12">
-            <div>
-                <h2 class="text-3xl font-heading font-black text-brand-dark uppercase tracking-tight">Opportunités <span class="text-brand-yellow">Actives</span></h2>
-                <p class="text-slate-500">Participez au financement des événements les plus attendus de 2026.</p>
-            </div>
-
-            <div id="invest-events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                <!-- Injecté par app.js -->
-            </div>
-
-            <!-- Rappel Politique -->
-            <div class="bg-brand-dark p-10 rounded-[3rem] text-center space-y-4">
-                <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto text-brand-yellow text-xl">
-                    <i class="fas fa-shield-alt"></i>
+        <!-- ================= ONGLET 1 : DASHBOARD ================= -->
+        <section id="section-dashboard" class="space-y-8">
+            
+            <!-- Information Alerte Garantie & Politique -->
+            <div class="bg-gradient-to-r from-amber-500/10 via-brand-yellow/5 to-transparent border-l-4 border-brand-yellow p-4 rounded-r-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-shield-alt text-brand-yellow text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="font-bold text-slate-900 text-sm">Garantie Souple Annulation</h4>
+                        <p class="text-xs text-slate-600 mt-0.5">Remboursement intégral et instantané en un clic jusqu'à <strong>15 jours avant le début de l'événement</strong>. Aucun frais additionnel retenu.</p>
+                    </div>
                 </div>
-                <h4 class="text-white font-heading font-bold text-xl uppercase">Protection des Investisseurs</h4>
-                <p class="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">
-                    Sécurité garantie : Conformément à nos conditions, vous disposez d'une option de <strong>remboursement intégral</strong> sans frais si vous annulez votre participation au moins <strong>15 jours avant la date de l'événement</strong>.
-                </p>
+                <div class="text-xs font-semibold text-slate-500 shrink-0">
+                    <i class="far fa-clock"></i> Politique mise à jour : Juin 2026
+                </div>
+            </div>
+
+            <!-- Liste des investissements actifs -->
+            <div>
+                <h3 class="text-xl font-heading font-bold text-brand-dark mb-4 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Mes Investissements Actuels
+                </h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="my-investments-container">
+                    <!-- Généré dynamiquement en JS -->
+                </div>
+            </div>
+
+            <!-- Conseils de stratégie d'investissement -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-percent text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 text-sm">ROI sur Billets Vendus</h4>
+                        <p class="text-xs text-slate-500 mt-1">Les retours sur investissement sont corrélés aux ventes réelles avec un taux de profit de 15% à 25% brut.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-sync text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 text-sm">Paiements Mensuels</h4>
+                        <p class="text-xs text-slate-500 mt-1">Les gains sont reversés sur votre portefeuille de manière continue pendant la durée de la billetterie.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-user-shield text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 text-sm">Protection du Capital</h4>
+                        <p class="text-xs text-slate-500 mt-1">En cas d'annulation de l'événement par l'organisateur, vous êtes remboursé à 100%.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= ONGLET 2 : OPPORTUNITÉS ================= -->
+        <section id="section-opportunities" class="hidden space-y-8">
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-2xl font-heading font-black text-brand-dark">Projets en cours de financement</h3>
+                    <p class="text-slate-500 text-sm">Découvrez les événements qui recherchent des capitaux pour leur logistique et communication.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500">Trier par :</span>
+                    <select id="opp-sort" onchange="renderOpportunities()" class="bg-white border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-brand-yellow">
+                        <option value="roi_desc">🔥 Plus haut ROI</option>
+                        <option value="percentage_asc">⌛ Près de l'objectif</option>
+                        <option value="target_desc">💎 Montant recherché</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Liste d'opportunités d'investissement -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="opportunities-container">
+                <!-- Rempli en JS -->
+            </div>
+
+        </section>
+
+        <!-- ================= ONGLET 3 : HISTORIQUE ================= -->
+        <section id="section-history" class="hidden space-y-6">
+            
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="font-heading font-bold text-lg text-brand-dark">Journal d'activités & Opérations</h3>
+                    <button onclick="clearHistoryLog()" class="text-xs text-slate-400 hover:text-red-500 transition-colors">Nettoyer l'historique visuel</button>
+                </div>
+                
+                <div class="divide-y divide-slate-100" id="history-log">
+                    <!-- Rempli par JS -->
+                </div>
+            </div>
+
+            <!-- Note d'information -->
+            <div class="text-center py-4">
+                <p class="text-xs text-slate-400"><i class="fas fa-lock"></i> Toutes les transactions sont cryptées et certifiées par la Banque Centrale du Congo via nos API partenaires.</p>
             </div>
         </section>
+
     </main>
 
+    <!-- Modale de Confirmation de Financement -->
+    <div id="invest-modal" class="fixed inset-0 z-50 items-center justify-center bg-brand-dark/70 backdrop-blur-sm hidden transition-all duration-300">
+        <div class="bg-white rounded-3xl max-w-md w-full mx-4 p-6 border border-slate-100 shadow-2xl relative transform scale-95 transition-transform duration-300" id="invest-modal-card">
+            
+            <button onclick="closeInvestModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-800 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="mb-4">
+                <span class="text-xs uppercase tracking-wider font-bold text-brand-yellow" id="modal-project-cat">Musique</span>
+                <h3 class="text-xl font-heading font-black text-brand-dark mt-1" id="modal-project-title">Nom de l'événement</h3>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs space-y-2 mb-6">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">ROI du billet attendu :</span>
+                    <strong class="text-emerald-600" id="modal-project-roi">+20%</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Financé à :</span>
+                    <strong id="modal-project-percent">65%</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Date limite annulation libre :</span>
+                    <strong class="text-slate-800" id="modal-project-refund-limit">-- / -- / --</strong>
+                </div>
+            </div>
+
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Montant de votre investissement ($)</label>
+            <div class="relative mb-4">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <span class="text-slate-400 font-bold">$</span>
+                </div>
+                <input type="number" id="invest-amount-input" value="1000" min="100" max="15000" step="100" oninput="updateInvestmentCalculation()" class="block w-full pl-8 pr-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-lg font-bold text-slate-800 focus:ring-2 focus:ring-brand-yellow focus:border-brand-yellow transition-all outline-none">
+            </div>
+
+            <!-- Dynamic Projection Output -->
+            <div class="bg-brand-yellow/5 border border-brand-yellow/30 p-4 rounded-xl mb-6">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="font-medium text-slate-600">Retour Expecté Estimé :</span>
+                    <span class="text-lg font-heading font-black text-brand-dark" id="modal-calc-profit">$1,200.00</span>
+                </div>
+                <div class="flex justify-between items-center text-[10px] text-emerald-600 mt-1">
+                    <span>*Dont profit net estimé :</span>
+                    <span class="font-bold" id="modal-calc-net">+$200.00</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3">
+                <button onclick="closeInvestModal()" class="w-1/2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all">
+                    Annuler
+                </button>
+                <button onclick="confirmInvestment()" class="w-1/2 py-3 bg-brand-yellow hover:bg-brand-yellowHover text-brand-dark font-bold rounded-xl text-sm transition-all shadow-md shadow-brand-yellow/15">
+                    Investir maintenant
+                </button>
+            </div>
+            
+            <p class="text-[10px] text-slate-400 text-center mt-4">En confirmant, vous acceptez le contrat d'investissement et la retenue d'aucun frais d'entrée.</p>
+        </div>
+    </div>
+
+    <!-- Modale de confirmation remboursement -->
+    <div id="refund-modal" class="fixed inset-0 z-50 items-center justify-center bg-brand-dark/70 backdrop-blur-sm hidden transition-all duration-300">
+        <div class="bg-white rounded-3xl max-w-md w-full mx-4 p-6 border border-slate-100 shadow-2xl relative" id="refund-modal-card">
+            
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xl mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+
+            <h3 class="text-xl font-heading font-bold text-brand-dark text-center mb-2">Demander un Remboursement</h3>
+            <p class="text-xs text-slate-500 text-center mb-6">Vous allez retirer votre investissement de l'événement ci-dessous.</p>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs space-y-2 mb-6">
+                <div>
+                    <span class="text-slate-400 block uppercase tracking-wide">Événement</span>
+                    <strong class="text-slate-800 text-sm" id="refund-event-title">Festival Rumba Congolaise</strong>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-200">
+                    <div>
+                        <span class="text-slate-400 block">Capital à restituer</span>
+                        <strong class="text-slate-800 text-sm" id="refund-event-amount">$5,000</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Status pénalité</span>
+                        <strong class="text-emerald-600 text-sm"><i class="fas fa-check-circle"></i> 0% (Gratuit)</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closeRefundModal()" class="w-1/2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all">
+                    Garder l'investissement
+                </button>
+                <button onclick="executeRefund()" class="w-1/2 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-red-600/10">
+                    Confirmer le retrait
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Premium -->
     <footer class="bg-brand-dark text-slate-300 pt-16 pb-8 border-t-4 border-brand-yellow mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-slate-500 text-[10px] uppercase font-black tracking-[0.3em]">LeGrandArt Finance Culturelle &copy; 2026</p>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <div class="lg:col-span-1">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 bg-brand-yellow rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-brand-dark"></i>
+                        </div>
+                        <span class="text-2xl font-heading font-black text-white">LeGrand<span class="text-brand-yellow">Art</span></span>
+                    </div>
+                    <p class="text-slate-400 mb-6 text-sm leading-relaxed">
+                        L'unique plateforme en RDC permettant aux particuliers et entreprises de co-financer l'art moderne et les événements à fort impact.
+                    </p>
+                    <div class="flex gap-3">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-dark transition-all"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-dark transition-all"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-yellow hover:text-brand-dark transition-all"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-white font-heading font-bold text-lg mb-6">Espace Investisseur</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Tableau de bord actif</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Projets ouverts</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Simulateur de ROI</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Charte éthique</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-white font-heading font-bold text-lg mb-6">Politiques de Retours</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Règle d'annulation -15J</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Versement sur billetterie</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Garantie d'annulation tierce</a></li>
+                        <li><a href="#" class="hover:text-brand-yellow transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-xs"></i> Audit financier annuel</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-white font-heading font-bold text-lg mb-6">Service Investisseur VIP</h3>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-map-marker-alt text-brand-yellow mt-1"></i>
+                            <span>18 Avenue Salongo, Quartier Makelele, Bandalungwa, Kinshasa, RDC</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-phone-alt text-brand-yellow"></i>
+                            <span>+243 978 415 814 (Ligne Directe VIP)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-brand-yellow"></i>
+                            <span>invest@legrandart.cd</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+                <p>&copy; 2026 LeGrandArt Bourse. Tous droits réservés.</p>
+                <div class="flex flex-wrap justify-center gap-6">
+                    <a href="#" class="hover:text-white transition-colors">Termes de contrat d'investissement</a>
+                    <a href="#" class="hover:text-white transition-colors">Confidentialité financière</a>
+                    <a href="#" class="hover:text-white transition-colors">FAQ Investisseurs</a>
+                </div>
+            </div>
         </div>
     </footer>
-</body>
-</html>
 
+    <!-- JS Logic -->
     <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            // Vérification auth
-            const profile = JSON.parse(localStorage.getItem('lg_pro_user') || 'null');
-            if (!profile) {
-                window.location.href = 'index.html?openLogin=true';
+        // --- BASE DE DONNÉES EN MÉMOIRE DES OPPORTUNITÉS DISPONIBLES ET ACQUISES ---
+        
+        // Simuler la date d'aujourd'hui (2026-06-10)
+        const TODAY = new Date("2026-06-10");
+
+        // Liste des opportunités d'investissement
+        let opportunities = [
+            {
+                id: "opp-1",
+                title: "Sommet Tech & Innovation RDC",
+                date: "2026-10-12",
+                location: "Pullman Hotel, Kinshasa",
+                category: "tech",
+                targetAmount: 50000,
+                currentAmount: 38500,
+                expectedRoi: 18, // 18% ROI sur billet vendus
+                image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80",
+                description: "Événement de technologie majeur à Kinshasa réunissant 950 professionnels avec billetterie premium."
+            },
+            {
+                id: "opp-2",
+                title: "Exposition Art et Culture RDC",
+                date: "2026-09-05",
+                location: "Musée National de la RDC",
+                category: "art",
+                targetAmount: 20000,
+                currentAmount: 14000,
+                expectedRoi: 12,
+                image: "https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=800&q=80",
+                description: "Exposition d'art de luxe attirant l'élite locale et touristique."
+            },
+            {
+                id: "opp-3",
+                title: "Soirée Jazz au Fleuve",
+                date: "2026-08-30",
+                location: "Majestic River, Kinshasa",
+                category: "music",
+                targetAmount: 30000,
+                currentAmount: 22000,
+                expectedRoi: 22,
+                image: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80",
+                description: "Spectacle de Jazz chic à bord d'un bateau-mouche de luxe sur le fleuve Congo."
+            },
+            {
+                id: "opp-4",
+                title: "Course de la Paix 10K",
+                date: "2026-08-20",
+                location: "Boulevard Triomphal",
+                category: "sport",
+                targetAmount: 15000,
+                currentAmount: 14500,
+                expectedRoi: 15,
+                image: "https://images.unsplash.com/photo-1552674605-15c37eee02a9?auto=format&fit=crop&w=800&q=80",
+                description: "Marathon majeur et sponsors institutionnels hautement rentables."
+            }
+        ];
+
+        // Liste de mes investissements actifs initiaux
+        let myInvestments = [
+            {
+                id: "my-1",
+                opportunityId: "opp-rumba", // Déjà financé historiquement
+                title: "Festival Rumba Congolaise",
+                date: "2026-07-15",
+                location: "Stade des Martyrs",
+                category: "music",
+                amountInvested: 30000,
+                expectedRoi: 20, // 20% profit attendu
+                image: "https://images.unsplash.com/photo-1533174000255-161391e847c2?auto=format&fit=crop&w=800&q=80",
+                ticketsSoldRatio: 65, // Pourcentage des places déjà vendues
+                dateAdded: "2026-05-10"
+            },
+            {
+                id: "my-2",
+                opportunityId: "opp-gala",
+                title: "Dîner Gala Gastronomie",
+                date: "2026-07-22",
+                location: "Rotana Hotel",
+                category: "food",
+                amountInvested: 15000,
+                expectedRoi: 15, // 15% profit attendu
+                image: "https://images.unsplash.com/photo-1555244162-803834f87a33?auto=format&fit=crop&w=800&q=80",
+                ticketsSoldRatio: 40,
+                dateAdded: "2026-05-25"
+            }
+        ];
+
+        // Historique des opérations
+        let historyLog = [
+            { id: "h-1", type: "system", title: "Compte créé avec succès", date: "2026-05-01", description: "Accès VIP de niveau 1 validé." },
+            { id: "h-2", type: "investment", title: "Investissement approuvé", date: "2026-05-10", description: "Dépot de $30,000 dans 'Festival Rumba Congolaise' (ROI +20%)" },
+            { id: "h-3", type: "investment", title: "Investissement approuvé", date: "2026-05-25", description: "Dépot de $15,000 dans 'Dîner Gala Gastronomie' (ROI +15%)" }
+        ];
+
+        // Configuration pour affichage esthétique par catégorie
+        const categoryConfig = {
+            music: { name: 'Musique', icon: 'fa-music', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+            sport: { name: 'Sport', icon: 'fa-running', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+            art: { name: 'Art', icon: 'fa-paint-brush', color: 'bg-rose-100 text-rose-700 border-rose-200' },
+            food: { name: 'Gastronomie', icon: 'fa-utensils', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+            tech: { name: 'Technologie', icon: 'fa-laptop-code', color: 'bg-blue-100 text-blue-700 border-blue-200' }
+        };
+
+        let activeTab = 'dashboard';
+        let currentInvestProject = null;
+        let currentRefundProject = null;
+
+        // --- NAVIGATION DYNAMIQUE DES ONGLETS ---
+        function switchTab(tabId) {
+            activeTab = tabId;
+            
+            // Toggle classes onglets
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            // Afficher la section correspondante
+            document.getElementById('section-dashboard').classList.add('hidden');
+            document.getElementById('section-opportunities').classList.add('hidden');
+            document.getElementById('section-history').classList.add('hidden');
+
+            if(tabId === 'dashboard') {
+                document.getElementById('section-dashboard').classList.remove('hidden');
+                renderDashboard();
+            } else if(tabId === 'opportunities') {
+                document.getElementById('section-opportunities').classList.remove('hidden');
+                renderOpportunities();
+            } else if(tabId === 'history') {
+                document.getElementById('section-history').classList.remove('hidden');
+                renderHistory();
+            }
+        }
+
+        // --- FONCTIONS AUXILIAIRES DE DATE ET CALCULS ---
+        
+        // Calculer les jours restants entre aujourd'hui et la date de l'événement
+        function getDaysRemaining(eventDateStr) {
+            const evDate = new Date(eventDateStr);
+            const timeDiff = evDate.getTime() - TODAY.getTime();
+            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            return daysDiff;
+        }
+
+        // Formater proprement les dates
+        function formatDate(dateStr) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('fr-FR', options);
+        }
+
+        // --- FONCTION NOTIFICATION DYNAMIQUE ---
+        function showToast(title, message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+
+            if (isSuccess) {
+                toastIcon.className = "w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0";
+                toastIcon.innerHTML = `<i class="fas fa-check-circle"></i>`;
+            } else {
+                toastIcon.className = "w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-bold shrink-0";
+                toastIcon.innerHTML = `<i class="fas fa-exclamation-circle"></i>`;
+            }
+
+            // Faire glisser
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 5000);
+        }
+
+        // --- MISE À JOUR GLOBAL DES STATS DU HAUT ---
+        function updateGlobalStats() {
+            let total = 0;
+            let totalProfitEst = 0;
+
+            myInvestments.forEach(inv => {
+                total += inv.amountInvested;
+                totalProfitEst += (inv.amountInvested * (inv.expectedRoi / 100));
+            });
+
+            document.getElementById('stat-total-invested').textContent = `$${total.toLocaleString()}`;
+            document.getElementById('stat-latent-returns').textContent = `+$${totalProfitEst.toLocaleString()}`;
+            document.getElementById('nav-portfolio-value').textContent = `$${total.toLocaleString()}.00`;
+            
+            // Badge opportunités restantes
+            const oppBadge = document.getElementById('opportunity-badge');
+            if (opportunities.length > 0) {
+                oppBadge.style.display = 'inline-block';
+                oppBadge.textContent = opportunities.length;
+            } else {
+                oppBadge.style.display = 'none';
+            }
+        }
+
+        // --- ENTRAÎNEMENT DE RENDU 1 : TABLEAU DE BORD (Mes investissements actifs) ---
+        function renderDashboard() {
+            const container = document.getElementById('my-investments-container');
+            container.innerHTML = '';
+
+            if(myInvestments.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-100 p-8">
+                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-wallet text-2xl text-slate-300"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-800 mb-1">Aucun investissement actif</h4>
+                        <p class="text-sm text-slate-500 mb-6">Explorez nos projets en recherche de capitaux pour obtenir vos premiers dividendes.</p>
+                        <button onclick="switchTab('opportunities')" class="bg-brand-yellow hover:bg-brand-yellowHover text-brand-dark px-5 py-2.5 rounded-xl text-sm font-bold transition-all">
+                            Voir les opportunités
+                        </button>
+                    </div>
+                `;
                 return;
             }
 
-            // Initialisation des données
+            myInvestments.forEach(inv => {
+                const conf = categoryConfig[inv.category] || { name: 'Autre', icon: 'fa-star', color: 'bg-slate-100 text-slate-700' };
+                const daysRemaining = getDaysRemaining(inv.date);
+                const returnOnInvestment = inv.amountInvested * (inv.expectedRoi / 100);
+                const isRefundable = daysRemaining >= 15;
+
+                // Estimer le gain réel basé sur les tickets vendus
+                const realTimeGain = Math.round(returnOnInvestment * (inv.ticketsSoldRatio / 100));
+
+                const itemHTML = `
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between group hover:border-slate-200 hover:shadow-md transition-all">
+                        
+                        <!-- Header Event Investi -->
+                        <div class="p-6 pb-4">
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-full border ${conf.color}">
+                                    <i class="fas ${conf.icon} mr-1"></i> ${conf.name}
+                                </span>
+                                <div class="text-right">
+                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Jours Restants</span>
+                                    <span class="text-sm font-bold ${daysRemaining > 30 ? 'text-emerald-600' : daysRemaining >= 15 ? 'text-amber-600' : 'text-red-600'}">
+                                        ${daysRemaining > 0 ? `${daysRemaining} jours` : 'Événement passé / En cours'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <h4 class="text-lg font-heading font-black text-slate-900 group-hover:text-brand-yellowHover transition-colors leading-tight">
+                                ${inv.title}
+                            </h4>
+                            <div class="flex items-center gap-2 text-slate-500 text-xs mt-1">
+                                <i class="fas fa-calendar-alt text-brand-yellow"></i>
+                                <span>${formatDate(inv.date)}</span>
+                                <span class="text-slate-300">|</span>
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span class="truncate max-w-[150px]">${inv.location}</span>
+                            </div>
+                        </div>
+
+                        <!-- Graphique / Progression des ventes -->
+                        <div class="px-6 py-4 bg-slate-50 border-y border-slate-100 space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                                    <span>Taux de Billetterie vendue :</span>
+                                    <span class="font-bold text-slate-800">${inv.ticketsSoldRatio}%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-brand-yellow h-full rounded-full transition-all duration-1000" style="width: ${inv.ticketsSoldRatio}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Projections Financières -->
+                            <div class="grid grid-cols-2 gap-4 pt-1">
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 uppercase">Capital Investi</span>
+                                    <span class="text-base font-bold text-slate-800">$${inv.amountInvested.toLocaleString()}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 uppercase">Bénéfice Attendu (+${inv.expectedRoi}%)</span>
+                                    <span class="text-base font-bold text-emerald-600">+$${returnOnInvestment.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div class="p-6 flex items-center justify-between bg-white">
+                            <div>
+                                <span class="block text-[10px] text-slate-400 uppercase">Gains Encaissés (Temps Réel)</span>
+                                <span class="text-sm font-black text-slate-800">+$${realTimeGain.toLocaleString()} <span class="text-[9px] font-medium text-slate-400">USD</span></span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                ${isRefundable ? `
+                                    <button onclick="openRefundModal('${inv.id}')" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-200 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5" title="Retirer l'argent sans frais (Politique -15 jours)">
+                                        <i class="fas fa-undo"></i> Retrait Gratuit
+                                    </button>
+                                ` : `
+                                    <button class="bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5" title="Verrouillé car nous sommes à moins de 15 jours de l'événement">
+                                        <i class="fas fa-lock"></i> Verrouillé (< 15j)
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+                container.innerHTML += itemHTML;
+            });
+        }
+
+        // --- ENTRAÎNEMENT DE RENDU 2 : LISTE DES OPPORTUNITÉS DISPONIBLES À L'INVESTISSEMENT ---
+        function renderOpportunities() {
+            const container = document.getElementById('opportunities-container');
+            container.innerHTML = '';
+
+            const sortType = document.getElementById('opp-sort').value;
+            
+            // Tri en fonction de la sélection
+            let sortedOpps = [...opportunities];
+            sortedOpps.sort((a, b) => {
+                if (sortType === 'roi_desc') return b.expectedRoi - a.expectedRoi;
+                if (sortType === 'target_desc') return b.targetAmount - a.targetAmount;
+                if (sortType === 'percentage_asc') {
+                    const ratioA = (a.currentAmount / a.targetAmount);
+                    const ratioB = (b.currentAmount / b.targetAmount);
+                    return ratioB - ratioA; // Plus proche du financement
+                }
+                return 0;
+            });
+
+            if (sortedOpps.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-16 text-center bg-white rounded-3xl border border-slate-100">
+                        <i class="fas fa-hand-shake text-4xl text-slate-300 mb-4"></i>
+                        <h4 class="text-xl font-bold text-slate-800">Toutes les opportunités sont financées !</h4>
+                        <p class="text-slate-500 text-sm mt-1">Revenez plus tard pour de nouveaux événements exclusifs en cours de montage.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            sortedOpps.forEach(opp => {
+                const progressPercent = Math.round((opp.currentAmount / opp.targetAmount) * 100);
+                const remainingPercent = 100 - progressPercent;
+                const conf = categoryConfig[opp.category] || { name: 'Événement', icon: 'fa-star', color: 'bg-slate-100 text-slate-700' };
+                const daysRemaining = getDaysRemaining(opp.date);
+
+                const itemHTML = `
+                    <div class="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-between h-full group">
+                        
+                        <!-- Image Header -->
+                        <div class="relative h-48 overflow-hidden bg-slate-100">
+                            <img src="${opp.image}" alt="${opp.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent opacity-70"></div>
+                            
+                            <!-- Badges -->
+                            <div class="absolute top-4 left-4 flex flex-col gap-1.5">
+                                <span class="bg-white/95 backdrop-blur shadow text-xs font-black text-brand-dark px-3 py-1 rounded-lg">
+                                    ROI : +${opp.expectedRoi}%
+                                </span>
+                            </div>
+
+                            <div class="absolute bottom-4 left-4 flex items-center gap-1.5 text-white/90 text-xs font-semibold">
+                                <i class="fas fa-map-marker-alt text-brand-yellow"></i>
+                                <span class="truncate pr-4">${opp.location}</span>
+                            </div>
+                        </div>
+
+                        <!-- Corp -->
+                        <div class="p-6 flex-1 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"><i class="fas ${conf.icon}"></i> ${conf.name}</span>
+                                    <span class="text-slate-300 text-xs">•</span>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase">${daysRemaining} jours restants</span>
+                                </div>
+                                <h4 class="text-lg font-heading font-black text-slate-900 leading-tight mb-2 group-hover:text-brand-yellowHover transition-colors">
+                                    ${opp.title}
+                                </h4>
+                                <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">
+                                    ${opp.description}
+                                </p>
+                            </div>
+
+                            <!-- État d'avancement du Financement -->
+                            <div class="space-y-4 pt-4 border-t border-slate-100">
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-slate-500">Financement Requis : <strong class="text-slate-800">$${opp.targetAmount.toLocaleString()}</strong></span>
+                                        <span class="font-bold text-brand-yellowHover">${progressPercent}%</span>
+                                    </div>
+                                    
+                                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
+                                        <div class="bg-brand-yellow h-full rounded-l-full" style="width: ${progressPercent}%"></div>
+                                        <div class="bg-emerald-400 h-full rounded-r-full" style="width: ${remainingPercent}%" title="Reste à investir"></div>
+                                    </div>
+
+                                    <div class="flex justify-between text-[10px]">
+                                        <span class="text-slate-400">Collecté: $${opp.currentAmount.toLocaleString()}</span>
+                                        <span class="text-emerald-600 font-bold">Reste: ${remainingPercent}% ($${(opp.targetAmount - opp.currentAmount).toLocaleString()})</span>
+                                    </div>
+                                </div>
+
+                                <!-- Rendements projetés -->
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 grid grid-cols-2 gap-2 text-center">
+                                    <div>
+                                        <span class="block text-[9px] text-slate-400 uppercase">Achat Min</span>
+                                        <span class="text-xs font-bold text-slate-800">$100.00</span>
+                                    </div>
+                                    <div>
+                                        <span class="block text-[9px] text-slate-400 uppercase">Moy. Rendement net</span>
+                                        <span class="text-xs font-black text-emerald-600">+ $150.00 <span class="text-[8px] font-medium text-slate-400">/ $1k</span></span>
+                                    </div>
+                                </div>
+
+                                <!-- Action de financement -->
+                                <button onclick="openInvestModal('${opp.id}')" class="w-full bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow group-hover:bg-brand-yellow group-hover:text-brand-dark group-hover:shadow-lg group-hover:shadow-brand-yellow/20">
+                                    <i class="fas fa-hand-holding-usd"></i> Co-Financer ce Projet
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+                container.innerHTML += itemHTML;
+            });
+        }
+
+        // --- ENTRAÎNEMENT DE RENDU 3 : HISTORIQUE DES TRANSACTIONS ---
+        function renderHistory() {
+            const container = document.getElementById('history-log');
+            container.innerHTML = '';
+
+            if (historyLog.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-slate-500">
+                        <i class="fas fa-folder-open text-2xl mb-2"></i>
+                        <p class="text-sm">Aucun événement dans l'historique visuel.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyLog.slice().reverse().forEach(log => {
+                let badgeClass = "bg-slate-100 text-slate-600";
+                let iconClass = "fa-info-circle";
+
+                if (log.type === 'investment') {
+                    badgeClass = "bg-emerald-100 text-emerald-700";
+                    iconClass = "fa-dollar-sign";
+                } else if (log.type === 'refund') {
+                    badgeClass = "bg-red-100 text-red-700";
+                    iconClass = "fa-undo";
+                }
+
+                const logHTML = `
+                    <div class="p-4 md:p-6 flex items-start gap-4 transition-colors hover:bg-slate-50/50">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${badgeClass}">
+                            <i class="fas ${iconClass}"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-1">
+                                <h4 class="font-bold text-slate-900 text-sm">${log.title}</h4>
+                                <span class="text-xs text-slate-400 font-medium">${formatDate(log.date)}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">${log.description}</p>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += logHTML;
+            });
+        }
+
+        function clearHistoryLog() {
+            historyLog = [];
+            renderHistory();
+            showToast("Historique vidé", "L'historique visuel a été réinitialisé temporairement.", true);
+        }
+
+        // --- GESTION DE LA MODALE D'INVESTISSEMENT ---
+        function openInvestModal(oppId) {
+            const opp = opportunities.find(o => o.id === oppId);
+            if (!opp) return;
+
+            currentInvestProject = opp;
+
+            document.getElementById('modal-project-title').textContent = opp.title;
+            document.getElementById('modal-project-cat').textContent = categoryConfig[opp.category]?.name || 'Événement';
+            document.getElementById('modal-project-roi').textContent = `+${opp.expectedRoi}%`;
+            
+            const ratio = Math.round((opp.currentAmount / opp.targetAmount) * 100);
+            document.getElementById('modal-project-percent').textContent = `${ratio}%`;
+
+            // Calcul de la date limite d'annulation gratuite (15 jours avant)
+            const evDate = new Date(opp.date);
+            const limitDate = new Date(evDate.getTime() - (15 * 24 * 3600 * 1000));
+            document.getElementById('modal-project-refund-limit').textContent = limitDate.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Initialiser le calcul
+            document.getElementById('invest-amount-input').value = 1000;
+            updateInvestmentCalculation();
+
+            // Ouvrir
+            const modal = document.getElementById('invest-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             setTimeout(() => {
-                loadInvestableEvents();
-                populateInvestorDashboard();
-            }, 1000);
+                document.getElementById('invest-modal-card').classList.remove('scale-95');
+                document.getElementById('invest-modal-card').classList.add('scale-100');
+            }, 50);
+        }
+
+        function closeInvestModal() {
+            const modal = document.getElementById('invest-modal');
+            document.getElementById('invest-modal-card').classList.remove('scale-100');
+            document.getElementById('invest-modal-card').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 150);
+        }
+
+        function updateInvestmentCalculation() {
+            if (!currentInvestProject) return;
+
+            const input = document.getElementById('invest-amount-input');
+            let val = parseFloat(input.value) || 0;
+
+            const roiRatio = currentInvestProject.expectedRoi / 100;
+            const expectedReturn = val * (1 + roiRatio);
+            const netProfit = val * roiRatio;
+
+            document.getElementById('modal-calc-profit').textContent = `$${expectedReturn.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('modal-calc-net').textContent = `+$${netProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+
+        function confirmInvestment() {
+            if (!currentInvestProject) return;
+
+            const amountInput = document.getElementById('invest-amount-input');
+            const amount = parseFloat(amountInput.value);
+
+            if (isNaN(amount) || amount <= 0) {
+                showToast("Montant incorrect", "Veuillez saisir un capital d'investissement valide.", false);
+                return;
+            }
+
+            if (amount < 100) {
+                showToast("Seuil minimum non atteint", "Le ticket minimum pour entrer dans ce projet est de $100.", false);
+                return;
+            }
+
+            const remainingNeeded = currentInvestProject.targetAmount - currentInvestProject.currentAmount;
+            if (amount > remainingNeeded) {
+                showToast("Financement excessif", `Vous ne pouvez pas investir plus que le reste requis ($${remainingNeeded.toLocaleString()}).`, false);
+                return;
+            }
+
+            // Procéder à l'ajout de l'investissement
+            const newInvestment = {
+                id: `my-${Date.now()}`,
+                opportunityId: currentInvestProject.id,
+                title: currentInvestProject.title,
+                date: currentInvestProject.date,
+                location: currentInvestProject.location,
+                category: currentInvestProject.category,
+                amountInvested: amount,
+                expectedRoi: currentInvestProject.expectedRoi,
+                image: currentInvestProject.image,
+                ticketsSoldRatio: Math.floor(Math.random() * 25), // Ventes initiales simulées
+                dateAdded: "2026-06-10"
+            };
+
+            // Mettre à jour l'opportunité dans la liste globale
+            currentInvestProject.currentAmount += amount;
+
+            // Si l'opportunité est complètement financée, la retirer de la liste publique
+            if (currentInvestProject.currentAmount >= currentInvestProject.targetAmount) {
+                opportunities = opportunities.filter(o => o.id !== currentInvestProject.id);
+            }
+
+            myInvestments.push(newInvestment);
+
+            // Ajouter dans le journal de log historique
+            historyLog.push({
+                id: `h-${Date.now()}`,
+                type: 'investment',
+                title: "Investissement validé",
+                date: "2026-06-10",
+                description: `Vous avez financé $${amount.toLocaleString()} dans '${newInvestment.title}' (ROI attendu: +${newInvestment.expectedRoi}%)`
+            });
+
+            // Update UI
+            updateGlobalStats();
+            closeInvestModal();
+            renderDashboard();
+            
+            showToast("Succès !", `Votre participation de $${amount.toLocaleString()} a été validée avec succès.`, true);
+        }
+
+        // --- GESTION DE LA MODALE DE REMBOURSEMENT (ANNULATION -15j) ---
+        function openRefundModal(invId) {
+            const inv = myInvestments.find(i => i.id === invId);
+            if (!inv) return;
+
+            currentRefundProject = inv;
+
+            document.getElementById('refund-event-title').textContent = inv.title;
+            document.getElementById('refund-event-amount').textContent = `$${inv.amountInvested.toLocaleString()} USD`;
+
+            const modal = document.getElementById('refund-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeRefundModal() {
+            const modal = document.getElementById('refund-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            currentRefundProject = null;
+        }
+
+        function executeRefund() {
+            if (!currentRefundProject) return;
+
+            const invId = currentRefundProject.id;
+            const amountRetrieved = currentRefundProject.amountInvested;
+            const title = currentRefundProject.title;
+
+            // Retirer l'investissement de notre liste
+            myInvestments = myInvestments.filter(i => i.id !== invId);
+
+            // Restaurer de l'argent dans l'opportunité si elle existe encore publiquement
+            const opp = opportunities.find(o => o.id === currentRefundProject.opportunityId);
+            if (opp) {
+                opp.currentAmount -= amountRetrieved;
+                if(opp.currentAmount < 0) opp.currentAmount = 0;
+            } else {
+                // Si l'opportunité avait été retirée car pleine, on la recrée/réactive
+                const recreatedOpp = {
+                    id: currentRefundProject.opportunityId,
+                    title: currentRefundProject.title,
+                    date: currentRefundProject.date,
+                    location: currentRefundProject.location,
+                    category: currentRefundProject.category,
+                    targetAmount: amountRetrieved * 2, // Simulation
+                    currentAmount: (amountRetrieved * 2) - amountRetrieved,
+                    expectedRoi: currentRefundProject.expectedRoi,
+                    image: currentRefundProject.image,
+                    description: `Événement réouvert au co-financement suite à une libération d'actions de capital.`
+                };
+                opportunities.push(recreatedOpp);
+            }
+
+            // Ajouter à l'historique d'activités
+            historyLog.push({
+                id: `h-${Date.now()}`,
+                type: 'refund',
+                title: "Remboursement traité",
+                date: "2026-06-10",
+                description: `Remboursement de $${amountRetrieved.toLocaleString()} de '${title}' effectué sans frais additionnels.`
+            });
+
+            // Update UI
+            updateGlobalStats();
+            closeRefundModal();
+            renderDashboard();
+
+            showToast("Remboursement validé", `La somme de $${amountRetrieved.toLocaleString()} a été créditée instantanément sur votre compte.`, true);
+        }
+
+        // --- CYCLE DE VIE INITIALISATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateGlobalStats();
+            renderDashboard();
+
+            // Gérer le responsive menu sur petit écran
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            mobileMenuBtn.addEventListener('click', () => {
+                showToast("Menu VIP", "Espace d'investissement sécurisé. Toutes les fonctions d'audit et de contrat sont accessibles sur PC ou tablette de préférence.", true);
+            });
         });
     </script>
 </body>
