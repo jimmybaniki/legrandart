@@ -1632,7 +1632,7 @@
 
         // Live Config Input Event handler
         function updateStoreConfig() {
-            storeConfig.name = document.getElementById('config-store-name').value || "Ma Boutique";
+            storeConfig.name = document.getElementById('config-store-name').value;
             storeConfig.slogan = document.getElementById('config-store-slogan').value || "";
             storeConfig.banner = document.getElementById('config-banner-text').value || "";
             storeConfig.exchangeRate = parseFloat(document.getElementById('config-exchange-rate').value) || 2800;
