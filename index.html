@@ -585,12 +585,6 @@
                         <a href="#" class="text-[9px] text-gray-600 hover:text-white uppercase tracking-widest transition-colors">Politique de Confidentialité</a>
                         <a href="#" class="text-[9px] text-gray-600 hover:text-white uppercase tracking-widest transition-colors">Conditions Générales</a>
                     </div>
-            <div class="flex justify-center md:justify-end">
-                <button onclick="toggleModal('suggestion-modal')" class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-yellow-500/20 transition-colors">
-                    <i class="fas fa-lightbulb mr-1"></i>
-                    Suggérer une amélioration
-                </button>
-            </div>
                     <p class="text-[9px] text-emerald-500/50 font-black uppercase tracking-[0.3em]">
                         GOMBE, KINSHASA, RDC
                     </p>
@@ -598,28 +592,6 @@
             </div>
         </footer>
     </div>
-
-    <!-- MODAL DE SUGGESTION -->
-    <div id="suggestion-modal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
-        <div class="bg-zinc-900 border border-white/10 w-full max-w-lg rounded-[2.5rem] p-8 md:p-12 text-center relative">
-            <button onclick="toggleModal('suggestion-modal')" class="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors">
-                <i data-feather="x" class="w-6 h-6"></i>
-            </button>
-            <div class="w-16 h-16 bg-yellow-500/10 text-yellow-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
-                <i class="fas fa-lightbulb"></i>
-            </div>
-            <h3 class="text-2xl md:text-3xl font-black text-white mb-2 leading-tight">Une idée pour nous améliorer ?</h3>
-            <p class="text-gray-400 text-sm mb-8">Votre avis est précieux. Partagez vos suggestions avec notre équipe technique.</p>
-            <form id="suggestion-form" class="space-y-4 text-left">
-                <textarea id="suggestion-text" rows="4" class="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-yellow-500/50 focus:bg-white/[0.07] transition-all" placeholder="Décrivez votre idée ici..." required></textarea>
-                <input type="email" id="suggestion-email" placeholder="Votre email (optionnel)" class="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-white outline-none focus:border-yellow-500/50 focus:bg-white/[0.07] transition-all">
-                <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 rounded-xl uppercase text-xs tracking-[0.2em] shadow-[0_10px_30px_-10px_rgba(234,179,8,0.3)] transition-all">
-                    Envoyer la Suggestion
-                </button>
-            </form>
-        </div>
-    </div>
-
 
     <!-- PORTAIL DE CONNEXION SÉCURISÉ -->
     <div id="login-portal" class="fixed inset-0 z-[160] hidden items-center justify-center p-6 bg-black/95 backdrop-blur-2xl overflow-hidden">
