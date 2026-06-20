@@ -236,7 +236,7 @@
             </section>
 
             <!-- RIGHT PANEL: Realistic Smartphone Simulator Frame (40% width on lg) -->
-            <section class="w-full lg:w-[42%] xl:w-[38%] lg:shrink-0 p-4 lg:p-6 bg-slate-100 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200 relative">
+            <section id="right-panel" class="w-full lg:w-[42%] xl:w-[38%] lg:shrink-0 p-4 lg:p-6 bg-slate-100 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200 relative">
                 
                 <!-- FULLSCREEN BUTTON -->
                 <div id="fullscreen-btn-wrap" class="absolute top-4 right-4 z-20">
@@ -549,6 +549,18 @@
         <i class="fa-solid fa-circle-check text-emerald-500"></i> <span class="font-medium" id="toast-msg">Notification</span>
     </div>
 
+    <!-- Floating Eye Button for Mobile -->
+    <div id="mobile-floating-eye" class="fixed bottom-6 right-6 z-50 lg:hidden hidden opacity-0 transition-all duration-300">
+        <button onclick="scrollToSimulator(event)" class="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2 px-4 py-3 rounded-full shadow-2xl border border-indigo-500/30 active:scale-95 transition-all duration-300 animate-bounce">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <i class="fa-solid fa-eye text-base"></i>
+            <span class="text-xs font-bold uppercase tracking-wider">Entrer</span>
+        </button>
+    </div>
+
     <script>
         // CREDENTIALS CLOUD SUPABASE (GÉRANT & CLIENTS)
         const CLOUD_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co'; // URL Supabase centralisée
@@ -608,7 +620,39 @@
 
         window.onload = function() {
             initCloud();
+            setupFloatingEyeObserver();
         };
+
+        function setupFloatingEyeObserver() {
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    const floatingEye = document.getElementById('mobile-floating-eye');
+                    if (!floatingEye) return;
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Simulator is visible, hide the floating button
+                            floatingEye.classList.add('opacity-0');
+                            setTimeout(() => {
+                                if (floatingEye.classList.contains('opacity-0')) {
+                                    floatingEye.classList.add('hidden');
+                                }
+                            }, 300);
+                        } else {
+                            // Simulator is not visible, show the floating button (if a shop is selected)
+                            if (activeShopId) {
+                                floatingEye.classList.remove('hidden');
+                                // force reflow
+                                floatingEye.offsetHeight;
+                                floatingEye.classList.remove('opacity-0');
+                            }
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                const target = document.getElementById('right-panel');
+                if (target) observer.observe(target);
+            }
+        }
 
         // --- AUTHENTICATION & CLOUD INIT ---
 
@@ -814,6 +858,20 @@
 
             updatePhoneCartBadge();
             navigatePhoneTo('home');
+
+            // Show floating eye button on mobile if the simulator is not visible
+            const floatingEye = document.getElementById('mobile-floating-eye');
+            if (floatingEye) {
+                const simulatorSection = document.getElementById('right-panel');
+                const rect = simulatorSection ? simulatorSection.getBoundingClientRect() : null;
+                const isVisible = rect ? (rect.top < window.innerHeight && rect.bottom >= 0) : false;
+                if (!isVisible) {
+                    floatingEye.classList.remove('hidden');
+                    // force reflow
+                    floatingEye.offsetHeight;
+                    floatingEye.classList.remove('opacity-0');
+                }
+            }
             showNotification(`Connexion à la boutique...`);
             await loadAllData(true);
         }
@@ -862,9 +920,16 @@
                         <h4 class="text-sm font-bold text-slate-900 truncate">${s.name}</h4>
                         <p class="text-[10px] text-slate-400 truncate">${s.slogan || 'Boutique'}</p>
                     </div>
-                    <button onclick="toggleFavorite('${s.shop_id}', event)" class="p-2 rounded-full hover:bg-rose-50 transition-colors">
-                        <i class="${favIcon}"></i>
-                    </button>
+                    <div class="flex items-center gap-1">
+                        ${activeShopId === s.shop_id ? `
+                            <button onclick="scrollToSimulator(event)" class="lg:hidden p-2 rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-all flex items-center justify-center animate-pulse" title="Entrer dans la boutique">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                        ` : ''}
+                        <button onclick="toggleFavorite('${s.shop_id}', event)" class="p-2 rounded-full hover:bg-rose-50 transition-colors">
+                            <i class="${favIcon}"></i>
+                        </button>
+                    </div>
                 </div>
             `;}).join('');
         }
@@ -902,9 +967,16 @@
                         <h4 class="text-sm font-bold text-slate-900 truncate">${s.name}</h4>
                         <p class="text-[10px] text-slate-400 truncate">${s.slogan || 'Boutique'}</p>
                     </div>
-                    <button onclick="toggleFavorite('${s.shop_id}', event)" class="p-2 rounded-full hover:bg-rose-50 transition-colors">
-                        <i class="fa-solid fa-heart text-rose-500"></i>
-                    </button>
+                    <div class="flex items-center gap-1">
+                        ${activeShopId === s.shop_id ? `
+                            <button onclick="scrollToSimulator(event)" class="lg:hidden p-2 rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-all flex items-center justify-center animate-pulse" title="Entrer dans la boutique">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                        ` : ''}
+                        <button onclick="toggleFavorite('${s.shop_id}', event)" class="p-2 rounded-full hover:bg-rose-50 transition-colors">
+                            <i class="fa-solid fa-heart text-rose-500"></i>
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -1076,6 +1148,14 @@
                 if(notch) notch.classList.remove('opacity-0');
                 icon.classList.replace('fa-compress', 'fa-expand');
                 document.body.style.overflow = '';
+            }
+        }
+
+        function scrollToSimulator(event) {
+            event.stopPropagation();
+            const simulatorSection = document.getElementById('right-panel');
+            if (simulatorSection) {
+                simulatorSection.scrollIntoView({ behavior: 'smooth' });
             }
         }
 
