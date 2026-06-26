@@ -1,136 +1,135 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LeGrandArt - Super Admin Portal</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeGrandArt - Portail Super Admin Central</title>
     
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- SUPABASE CLIENT -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        'lga-yellow': '#facc15',
-                        'lga-black': '#000000',
-                        'lga-white': '#ffffff',
-                        'adminbg': '#0f172a',
+                        brand: { 50: '#fef8ee', 100: '#fdf0d8', 400: '#facc15', 500: '#eab308', 900: '#713f12' }
                     }
                 }
             }
         }
     </script>
-
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #0f172a; }
-        .sidebar { background: #0f172a; width: 280px; transition: all 0.3s; border-right: 4px solid #facc15; }
-        .nav-link { 
-            display: flex; align-items: center; gap: 1rem; padding: 0.875rem 1.25rem; 
-            color: #94a3b8; border-radius: 0.75rem; transition: 0.2s; margin-bottom: 0.25rem;
-            font-weight: 500; font-size: 0.875rem;
-        }
-        .nav-link:hover { background: rgba(255,255,255,0.05); color: white; }
-        .nav-link.active { background: #facc15; color: black; font-weight: bold; box-shadow: 0 4px 12px rgba(250, 204, 21, 0.3); }
-        .glass-card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05); }
-        .hidden { display: none !important; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border-radius: 1rem; }
+        .nav-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.75rem; color: #64748b; font-size: 0.875rem; font-weight: 600; transition: all 0.2s; }
+        .nav-link:hover { background-color: #f1f5f9; color: #0f172a; }
+        .nav-link.active { background-color: #0f172a; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         
-        /* Barre de défilement personnalisée */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+        /* Status Badges */
+        .status-badge { padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.375rem; }
         .status-active { background: #dcfce7; color: #166534; }
         .status-pending { background: #fef9c3; color: #854d0e; }
         .status-suspended { background: #fee2e2; color: #991b1b; }
         .status-resolved { background: #e0f2fe; color: #0284c7; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden text-sm">
-    
-    <!-- Sidebar -->
-    <aside class="sidebar flex flex-col p-6 text-white shrink-0 relative z-20">
-        <div class="mb-10 px-2 flex flex-col gap-1">
+<body class="h-screen overflow-hidden flex text-slate-800">
+
+    <!-- SIDEBAR -->
+    <aside id="main-sidebar" class="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col h-full absolute md:relative z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+        <div class="p-6 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 text-black p-2.5 rounded-xl shadow-lg shadow-yellow-500/20">
-                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-yellow-400 font-black text-xl shadow-lg">
+                    LGA
                 </div>
                 <div>
-                    <h1 class="text-xl font-black tracking-tight leading-none">LeGrand<span class="text-yellow-400">Art</span></h1>
+                    <h1 class="font-black text-lg leading-none tracking-tight">LeGrandArt</h1>
+                    <span class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Portail Admin Cloud</span>
                 </div>
             </div>
-            <p class="text-[9px] uppercase tracking-widest text-emerald-400 font-bold mt-2 ml-1">Super Admin Portal / Msimamizi Mkuu</p>
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-800"><i class="fas fa-times"></i></button>
         </div>
 
-        <nav class="flex-1 overflow-y-auto pr-2 space-y-1">
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2 mt-4">Principal</p>
+        <div class="px-4 py-2 flex-1 overflow-y-auto space-y-1">
+            <p class="px-4 text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 mt-2">Principal</p>
             <a href="#" onclick="showSection('overview')" class="nav-link active" id="nav-overview"><i class="fas fa-chart-pie w-5 text-center"></i> Tableau de bord</a>
             
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2 mt-6">Gestion / Usimamizi</p>
+            <p class="px-4 text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 mt-6">Gestion / Commercial</p>
             <a href="#" onclick="showSection('agents')" class="nav-link" id="nav-agents"><i class="fas fa-user-tie w-5 text-center"></i> Agents Commerciaux</a>
             <a href="#" onclick="showSection('shops')" class="nav-link" id="nav-shops"><i class="fas fa-store w-5 text-center"></i> Boutiques Globales</a>
             <a href="#" onclick="showSection('clients')" class="nav-link" id="nav-clients"><i class="fas fa-users w-5 text-center"></i> Clients Globaux</a>
-            <a href="#" onclick="showSection('concours')" class="nav-link" id="nav-concours"><i class="fas fa-trophy w-5 text-center"></i> Inscriptions Concours</a>
+            
+            <p class="px-4 text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 mt-6">Culture & Événements</p>
+            <a href="#" onclick="showSection('evenements')" class="nav-link" id="nav-evenements"><i class="fas fa-calendar-check w-5 text-center text-emerald-600"></i> Validations Événements</a>
+            <a href="#" onclick="showSection('concours')" class="nav-link" id="nav-concours"><i class="fas fa-trophy w-5 text-center"></i> Concours 2026</a>
             <a href="#" onclick="showSection('landing')" class="nav-link" id="nav-landing"><i class="fas fa-window-maximize w-5 text-center"></i> Page d'Accueil</a>
             
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2 mt-6">Système / Mfumo</p>
+            <p class="px-4 text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 mt-6">Système & Sécurité</p>
             <a href="#" onclick="showSection('support')" class="nav-link" id="nav-support"><i class="fas fa-headset w-5 text-center"></i> Tickets Support</a>
+            <a href="#" onclick="showSection('superadmin')" class="nav-link" id="nav-superadmin"><i class="fas fa-user-shield w-5 text-center text-yellow-500"></i> Super Admins</a>
             <a href="#" onclick="showSection('settings')" class="nav-link" id="nav-settings"><i class="fas fa-cog w-5 text-center"></i> Paramètres</a>
-        </nav>
-
-        <div class="mt-auto border-t border-slate-700/50 pt-6">
-            <div id="cloud-status" class="flex items-center gap-2 mb-4 px-2 text-[10px] uppercase tracking-widest font-bold text-slate-400">
-                <span class="w-2 h-2 rounded-full bg-slate-500 animate-pulse"></span> Connexion en cours...
-            </div>
-            <button onclick="handleLogout()" class="nav-link w-full text-rose-400 hover:bg-rose-500/10 hover:text-rose-400">
-                <i class="fas fa-sign-out-alt w-5 text-center"></i> Déconnexion
+        </div>
+        
+        <div class="p-4 border-t border-slate-100">
+            <button onclick="window.location.href='index.html'" class="w-full py-2.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center gap-2">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
             </button>
         </div>
     </aside>
 
-    <!-- Main Area -->
-    <main class="flex-1 flex flex-col overflow-hidden relative bg-slate-50">
-        <!-- Top Toolbar -->
-        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative">
+        
+        <!-- HEADER -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10 shadow-sm relative">
             <div class="flex items-center gap-4">
-                <h2 class="font-black text-xl text-slate-800 tracking-tight" id="section-title">Vue d'ensemble</h2>
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-500 hover:text-slate-900 focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h2 id="section-title" class="font-black text-xl text-slate-800">Tableau de bord Global</h2>
             </div>
-            <div class="flex items-center gap-5">
-                <div class="relative group cursor-pointer">
-                    <i class="fas fa-bell text-slate-400 text-lg group-hover:text-yellow-500 transition"></i>
-                    <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[8px] font-black flex items-center justify-center border-2 border-white">3</span>
+
+            <!-- PROFIL CLIQUABLE -->
+            <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition group" onclick="openProfileModal()" title="Modifier mon profil">
+                <div class="flex flex-col text-right hidden sm:flex">
+                    <span id="admin-name" class="font-bold text-slate-800 text-sm leading-tight group-hover:text-slate-900">Chargement...</span>
+                    <span class="text-[9px] text-emerald-500 font-black uppercase tracking-widest flex items-center gap-1 justify-end"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Connecté au Cloud</span>
                 </div>
-                <div class="h-8 w-px bg-slate-200"></div>
-                <div class="flex items-center gap-3">
-                    <div class="flex flex-col text-right">
-                        <span id="admin-name" class="font-bold text-slate-800 text-sm leading-tight">Admin</span>
-                        <span class="text-[9px] text-yellow-500 font-black uppercase tracking-widest">Super Utilisateur</span>
-                    </div>
-                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center font-black text-white shadow-md border-2 border-green-500">
-                        <i class="fas fa-user-shield text-xs text-yellow-400"></i>
-                    </div>
+                <div id="admin-photo-container" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center font-black text-white shadow-md border-2 border-yellow-400 overflow-hidden relative transition-transform group-hover:scale-105">
+                    <img id="admin-photo-img" src="" class="hidden w-full h-full object-cover" alt="Profile">
+                    <i id="admin-photo-icon" class="fas fa-user-shield text-xs text-yellow-400"></i>
                 </div>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+        <!-- PAGE CONTENT -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar">
             
-            <!-- OVERVIEW SECTION -->
-            <div id="section-overview" class="space-y-8">
+            <!-- SECTION: OVERVIEW -->
+            <div id="section-overview" class="space-y-6">
                 <!-- KPI Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                     <div class="glass-card p-6 relative overflow-hidden group">
                         <div class="absolute -right-6 -top-6 w-24 h-24 bg-yellow-500/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-4">
-                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Revenus de la Plateforme</p>
+                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Revenus Globaux</p>
                                 <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fas fa-money-bill-wave"></i></div>
                             </div>
-                            <h3 id="global-revenue" class="text-3xl font-black text-slate-800">0 $</h3>
-                            <p class="text-xs text-emerald-600 mt-2 font-semibold flex items-center gap-1"><i class="fas fa-arrow-trend-up"></i> +12.5% ce mois</p>
+                            <h3 id="global-revenue" class="text-3xl font-black text-slate-800">...</h3>
+                            <p class="text-xs text-emerald-600 mt-2 font-semibold flex items-center gap-1"><i class="fas fa-cloud"></i> Données en direct</p>
                         </div>
                     </div>
                     
@@ -141,8 +140,8 @@
                                 <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Agents Commerciaux</p>
                                 <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fas fa-user-tie"></i></div>
                             </div>
-                            <h3 id="global-agents" class="text-3xl font-black text-slate-800">0</h3>
-                            <p class="text-xs text-slate-400 mt-2">Gestion du réseau</p>
+                            <h3 id="global-agents" class="text-3xl font-black text-slate-800">...</h3>
+                            <p class="text-xs text-slate-400 mt-2">Gestion du réseau actif</p>
                         </div>
                     </div>
 
@@ -153,7 +152,7 @@
                                 <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Boutiques Déployées</p>
                                 <div class="w-8 h-8 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center"><i class="fas fa-store"></i></div>
                             </div>
-                            <h3 id="global-shops" class="text-3xl font-black text-slate-800">0</h3>
+                            <h3 id="global-shops" class="text-3xl font-black text-slate-800">...</h3>
                             <p class="text-xs text-slate-400 mt-2">Sur tout le réseau</p>
                         </div>
                     </div>
@@ -165,7 +164,7 @@
                                 <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Clients Enregistrés</p>
                                 <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fas fa-users"></i></div>
                             </div>
-                            <h3 id="global-clients" class="text-3xl font-black text-slate-800">0</h3>
+                            <h3 id="global-clients" class="text-3xl font-black text-slate-800">...</h3>
                             <p class="text-xs text-slate-400 mt-2">Consommateurs inscrits</p>
                         </div>
                     </div>
@@ -176,38 +175,38 @@
                     <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
                         <div>
                             <h3 class="font-black text-base text-slate-800">Transactions Globales Récentes</h3>
-                            <p class="text-xs text-slate-500 mt-0.5">Dernières ventes de toutes les boutiques partenaires.</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Dernières ventes de toutes les boutiques partenaires remises à jour via Supabase.</p>
                         </div>
-                        <button class="text-xs font-bold text-yellow-600 hover:text-yellow-700">Voir tout</button>
+                        <button onclick="loadGlobalData()" class="text-slate-400 hover:text-slate-900 text-sm"><i class="fas fa-sync-alt"></i></button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-widest">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
                                 <tr>
                                     <th class="px-6 py-4">ID Transaction</th>
-                                    <th class="px-6 py-4">Boutique</th>
+                                    <th class="px-6 py-4">Boutique ID</th>
                                     <th class="px-6 py-4">Client</th>
                                     <th class="px-6 py-4">Montant</th>
                                     <th class="px-6 py-4">Réf Agent</th>
                                     <th class="px-6 py-4">Statut</th>
                                 </tr>
                             </thead>
-                            <tbody id="global-activity-body" class="divide-y divide-slate-100 bg-white">
-                                <tr><td colspan="6" class="px-6 py-8 text-center text-xs text-slate-400">Chargement...</td></tr>
+                            <tbody id="global-activity-body" class="divide-y divide-slate-50 bg-white">
+                                <tr><td colspan="6" class="px-6 py-8 text-center text-xs text-slate-400">Synchronisation en cours...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- AGENTS SECTION -->
+            <!-- SECTION: AGENTS -->
             <div id="section-agents" class="hidden space-y-6">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h3 class="font-black text-lg text-slate-800">Agents Commerciaux</h3>
-                        <p class="text-xs text-slate-500">Gerez vos forces de vente, leurs performances et créez de nouveaux comptes.</p>
+                        <p class="text-xs text-slate-500">Gérez vos forces de vente, leurs codes promo et créez de nouveaux comptes.</p>
                     </div>
-                    <button onclick="openAgentModal()" class="bg-[#0f172a] hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg flex items-center gap-2">
+                    <button onclick="openAgentModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg flex items-center gap-2">
                         <i class="fas fa-plus"></i> Nouvel Agent
                     </button>
                 </div>
@@ -215,7 +214,7 @@
                 <div class="glass-card overflow-hidden">
                     <div class="p-4 border-b border-slate-100 bg-slate-50 flex gap-4">
                         <div class="relative flex-1 max-w-md">
-                            <i class="fas fa-search absolute left-4 top-3 text-slate-400"></i>
+                            <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
                             <input type="text" id="agent-search" oninput="filterAgents()" placeholder="Rechercher un agent..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none bg-white">
                         </div>
                     </div>
@@ -225,23 +224,115 @@
                                 <tr>
                                     <th class="px-6 py-4">Détails Agent</th>
                                     <th class="px-6 py-4">Code Promo</th>
-                                    <th class="px-6 py-4">Boutiques Gérées</th>
+                                    <th class="px-6 py-4">Boutiques Créées</th>
                                     <th class="px-6 py-4">Revenus Générés</th>
                                     <th class="px-6 py-4">Statut</th>
                                     <th class="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="agents-table-body" class="divide-y divide-slate-50 bg-white">
-                                <!-- Rempli en JS -->
+                                <!-- Rempli dynamiquement -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- CONCOURS SECTION -->
+            <!-- SECTION: SHOPS -->
+            <div id="section-shops" class="hidden space-y-6">
+                <div>
+                    <h3 class="font-black text-lg text-slate-800">Répertoire des Boutiques</h3>
+                    <p class="text-xs text-slate-500">Supervisez l'ensemble des boutiques créées dans le Cloud.</p>
+                </div>
+
+                <div class="glass-card overflow-hidden">
+                    <div class="p-4 border-b border-slate-100 bg-slate-50 flex gap-4">
+                        <div class="relative flex-1 max-w-md">
+                            <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                            <input type="text" id="shop-search" oninput="filterShops()" placeholder="Rechercher une boutique..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-500 outline-none bg-white">
+                        </div> 
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-white text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
+                                <tr>
+                                    <th class="px-6 py-4">Infos Boutique</th>
+                                    <th class="px-6 py-4">Propriétaire ID</th>
+                                    <th class="px-6 py-4">Catégorie</th>
+                                    <th class="px-6 py-4">Réf (Agent)</th>
+                                    <th class="px-6 py-4">Statut</th>
+                                    <th class="px-6 py-4 text-right">Contrôle</th>
+                                </tr>
+                            </thead>
+                            <tbody id="shops-table-body" class="divide-y divide-slate-50 bg-white">
+                                <!-- Rempli dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: CLIENTS -->
+            <div id="section-clients" class="hidden space-y-6">
+                <div>
+                    <h3 class="font-black text-lg text-slate-800">Clients Enregistrés</h3>
+                    <p class="text-xs text-slate-500">Base de données de l'ensemble des consommateurs de la plateforme.</p>
+                </div>
+
+                <div class="glass-card overflow-hidden">
+                    <div class="overflow-x-auto p-4">
+                        <table class="w-full text-left">
+                            <thead class="bg-transparent text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
+                                <tr>
+                                    <th class="px-6 py-4">Email / ID Client</th>
+                                    <th class="px-6 py-4">Date d'inscription</th>
+                                    <th class="px-6 py-4">Statut</th>
+                                    <th class="px-6 py-4 text-right">Contrôle</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clients-table-body" class="divide-y divide-slate-50 bg-white">
+                                <!-- Rempli dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: EVENEMENTS (SUPABASE) -->
+            <div id="section-evenements" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="font-black text-lg text-slate-800">Validation des Événements</h3>
+                        <p class="text-xs text-slate-500">Examinez, approuvez ou rejetez les événements soumis par les organisateurs de <span class="font-bold">creer.html</span>.</p>
+                    </div>
+                    <button onclick="fetchAdminEvents()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i> Rafraîchir
+                    </button>
+                </div>
+
+                <div class="glass-card overflow-hidden">
+                    <div class="overflow-x-auto p-4">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
+                                <tr>
+                                    <th class="px-6 py-4">Événement</th>
+                                    <th class="px-6 py-4">Organisateur</th>
+                                    <th class="px-6 py-4">Date & Lieu</th>
+                                    <th class="px-6 py-4">Statut</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="evenements-admin-body" class="divide-y divide-slate-50 bg-white">
+                                <tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i> Connexion au Cloud en cours...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: CONCOURS -->
             <div id="section-concours" class="hidden space-y-6">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h3 class="font-black text-lg text-slate-800">Inscriptions Concours 2026</h3>
                         <p class="text-xs text-slate-500">Gérez les participants et spectateurs du concours Art, Foi & Racines.</p>
@@ -252,17 +343,17 @@
                 </div>
                 <div class="glass-card overflow-hidden">
                     <div class="overflow-x-auto p-4">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-gray-100 text-gray-500 text-[10px] uppercase font-black tracking-widest">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
                                 <tr>
-                                    <th class="px-6 py-3">Type</th>
-                                    <th class="px-6 py-3">Nom / Email</th>
-                                    <th class="px-6 py-3">Catégorie / Ticket</th>
-                                    <th class="px-6 py-3">Total</th>
-                                    <th class="px-6 py-3 text-right">Action</th>
+                                    <th class="px-6 py-4">Type</th>
+                                    <th class="px-6 py-4">Nom / Email</th>
+                                    <th class="px-6 py-4">Catégorie / Ticket</th>
+                                    <th class="px-6 py-4">Total Payé</th>
+                                    <th class="px-6 py-4 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="concours-table-body" class="divide-y divide-gray-50 bg-white">
+                            <tbody id="concours-table-body" class="divide-y divide-slate-50 bg-white">
                                 <tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">Chargement...</td></tr>
                             </tbody>
                         </table>
@@ -270,11 +361,11 @@
                 </div>
             </div>
 
-            <!-- LANDING PAGE CONTENT SECTION -->
+            <!-- SECTION: LANDING PAGE -->
             <div id="section-landing" class="hidden space-y-6 max-w-4xl">
                 <div>
                     <h3 class="font-black text-lg text-slate-800">Gestion de l'Accueil</h3>
-                    <p class="text-xs text-slate-500">Contrôlez les bannières et les annonces de la page principale.</p>
+                    <p class="text-xs text-slate-500">Contrôlez les bannières et les annonces de la page principale de LeGrandArt.</p>
                 </div>
                 <div class="glass-card p-8 space-y-6">
                     <div class="space-y-4">
@@ -282,109 +373,39 @@
                         <textarea id="config-global-announcement" placeholder="Texte à afficher sur la page d'accueil..." class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none h-24"></textarea>
                     </div>
                     <div class="space-y-4">
-                        <h4 class="font-black text-sm uppercase border-b border-slate-100 pb-2">Vidéo Vedette (ID Dailymotion ou YouTube)</h4>
-                        <input type="text" id="config-featured-video-id" placeholder="Ex: kZ1qIW1IoWsp7nF837a" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm font-mono">
+                        <h4 class="font-black text-sm uppercase border-b border-slate-100 pb-2">Vidéo Vedette (ID YouTube)</h4>
+                        <input type="text" id="config-featured-video-id" placeholder="Ex: kZ1qIW1IoWsp7nF837a" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-yellow-400">
                         <p class="text-[10px] text-slate-400 italic">ID de la vidéo mise en avant dans la section Musique.</p>
                     </div>
                     <div class="pt-4">
-                        <button onclick="savePlatformContent()" class="bg-[#0f172a] hover:bg-slate-800 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg w-full">
-                            Mettre à jour l'Accueil
+                        <button onclick="savePlatformContent()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg w-full">
+                            Mettre à jour l'Accueil (Simulation)
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- SHOPS SECTION -->
-            <div id="section-shops" class="hidden space-y-6">
-                <div>
-                    <h3 class="font-black text-lg text-slate-800">Répertoire des Boutiques</h3>
-                    <p class="text-xs text-slate-500">Supervisez l'ensemble des boutiques créées sur LeGrandArt.</p>
-                </div>
-
-                <div class="glass-card overflow-hidden">
-                    <div class="p-4 border-b border-slate-100 bg-slate-50 flex gap-4">
-                        <select class="px-4 py-2.5 rounded-lg border border-slate-200 text-sm outline-none bg-white font-semibold text-slate-700">
-                            <option value="">Toutes Catégories</option>
-                            <option value="fashion">Mode</option>
-                            <option value="electronics">Technologie</option>
-                            <option value="food">Art & Artisanat</option>
-                        </select>
-                        <div class="relative flex-1">
-                            <i class="fas fa-search absolute left-4 top-3 text-slate-400"></i>
-                            <input type="text" placeholder="Rechercher une boutique..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-500 outline-none bg-white">
-                        </div> 
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-white text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
-                                <tr>
-                                    <th class="px-6 py-4">Infos Boutique</th>
-                                    <th class="px-6 py-4">Gérant / Propriétaire</th>
-                                    <th class="px-6 py-4">Créé par (Agent)</th>
-                                    <th class="px-6 py-4">Statut</th>
-                                    <th class="px-6 py-4 text-right">Contrôle</th>
-                                </tr>
-                            </thead>
-                            <tbody id="shops-table-body" class="divide-y divide-slate-50 bg-white">
-                                <!-- Rempli en JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CLIENTS SECTION -->
-            <div id="section-clients" class="hidden space-y-6">
-                <div>
-                    <h3 class="font-black text-lg text-slate-800">Clients Enregistrés</h3>
-                    <p class="text-xs text-slate-500">Base de données de l'ensemble des clients enregistrés.</p>
-                </div>
-
-                <div class="glass-card overflow-hidden">
-                    <div class="overflow-x-auto p-4">
-                        <table class="w-full text-left">
-                            <thead class="bg-transparent text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
-                                <tr>
-                                    <th class="px-6 py-4">Email / ID Client</th>
-                                    <th class="px-6 py-4">Date d'inscription</th>
-                                    <th class="px-6 py-4">Total Commandes</th>
-                                    <th class="px-6 py-4">Statut</th>
-                                    <th class="px-6 py-4 text-right">Contrôle</th>
-                                </tr>
-                            </thead>
-                            <tbody id="clients-table-body" class="divide-y divide-slate-50 bg-white">
-                                <!-- Rempli en JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SUPPORT SECTION -->
+            <!-- SECTION: SUPPORT -->
             <div id="section-support" class="hidden space-y-6">
                 <div>
                     <h3 class="font-black text-lg text-slate-800">Tickets de Support Technique</h3>
-                    <p class="text-xs text-slate-500">Problèmes signalés par les agents commerciaux.</p>
+                    <p class="text-xs text-slate-500">Problèmes signalés par les agents commerciaux et les gérants de boutiques.</p>
                 </div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 space-y-4" id="tickets-container">
-                        <!-- Rempli en JS -->
+                        <p class="text-xs text-slate-500 italic">Aucun ticket pour le moment.</p>
                     </div>
 
-                    <div class="glass-card p-6 h-fit bg-slate-900 text-white">
-                        <h4 class="font-black uppercase tracking-widest text-xs mb-4 text-slate-400">Statut du Système</h4>
+                    <div class="glass-card p-6 h-fit bg-slate-900 text-white shadow-xl">
+                        <h4 class="font-black uppercase tracking-widest text-xs mb-4 text-slate-400">Statut du Système Supabase</h4>
                         <div class="space-y-4">
                             <div>
-                                <div class="flex justify-between text-xs mb-1"><span class="font-bold">Base de Données</span> <span class="text-emerald-500 font-black">99.9% En ligne</span></div>
+                                <div class="flex justify-between text-xs mb-1"><span class="font-bold">Base de Données</span> <span class="text-emerald-500 font-black">En ligne</span></div>
                                 <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full w-full"></div></div>
                             </div>
                             <div>
-                                <div class="flex justify-between text-xs mb-1"><span class="font-bold">Stockage (Images)</span> <span class="text-yellow-500 font-black">75% Utilisé</span></div>
-                                <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="bg-yellow-500 h-1.5 rounded-full w-[75%]"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs mb-1"><span class="font-bold">Services d'Auth</span> <span class="text-emerald-500 font-black">Opérationnel</span></div>
+                                <div class="flex justify-between text-xs mb-1"><span class="font-bold">Realtime Engine</span> <span class="text-emerald-500 font-black">Actif</span></div>
                                 <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full w-full"></div></div>
                             </div>
                         </div>
@@ -392,7 +413,7 @@
                 </div>
             </div>
 
-            <!-- SETTINGS SECTION -->
+            <!-- SECTION: SETTINGS -->
             <div id="section-settings" class="hidden space-y-6 max-w-3xl">
                 <div>
                     <h3 class="font-black text-lg text-slate-800">Paramètres de la Plateforme</h3>
@@ -408,395 +429,332 @@
                                 <input type="number" id="config-agent-commission" value="5" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-bold">
                             </div>
                             <div class="space-y-1">
-                                <label class="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Taux de Change Global ($ en FC)</label>
+                                <label class="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Taux de Change ($ en FC)</label>
                                 <input type="number" id="config-exchange-rate" value="2800" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-bold">
                             </div>
                         </div>
                         <div class="mt-6">
-                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Catégories les plus recherchées / Top Categories (Séparez par des virgules)</label> 
+                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Catégories les plus recherchées (Séparez par des virgules)</label> 
                             <div class="relative">
                                 <i class="fas fa-tags absolute left-4 top-3.5 text-slate-400"></i>
-                                <input type="text" id="config-top-categories" placeholder="Mode, Tech, Art, Artisanat..." class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition font-medium" />
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h4 class="font-black text-sm uppercase border-b border-slate-100 pb-2 mb-4">Sécurité</h4>
-                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
-                            <div class="space-y-1">
-                                <p class="font-bold text-sm text-slate-800">Double Authentification pour les Agents</p>
-                                <p class="text-xs text-slate-500">Forcer les agents commerciaux à configurer l'authentification forte.</p>
-                            </div> 
-                            <div class="w-12 h-6 bg-emerald-500 rounded-full relative cursor-pointer shadow-inner">
-                                <div class="absolute right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
+                                <input type="text" id="config-top-categories" placeholder="Mode, Tech, Art, Artisanat..." class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium" />
                             </div>
                         </div>
                     </div>
 
                     <div class="pt-4">
-                        <button onclick="savePlatformSettings()" class="bg-[#0f172a] hover:bg-slate-800 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg w-full">Enregistrer les Modifications</button>
+                        <button onclick="savePlatformSettings()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg w-full">Enregistrer les Modifications sur le Cloud</button>
                     </div>
                 </div>
             </div>
 
-        </div>
-    </main>
+            <!-- SECTION: SUPER ADMIN -->
+            <div id="section-superadmin" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="font-black text-lg text-slate-800">Équipe de Direction</h3>
+                        <p class="text-xs text-slate-500">Gérez les accès Super Administrateurs de la plateforme.</p>
+                    </div>
+                    <button onclick="openCreateSuperAdminModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-lg flex items-center gap-2">
+                        <i class="fas fa-plus text-yellow-400"></i> Nouveau Super Admin
+                    </button>
+                </div>
 
-    <!-- Modal: Edit Agent -->
-    <div id="modal-edit-agent" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
-            <button onclick="closeEditAgentModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
-            
-            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                <i class="fas fa-user-edit"></i>
+                <div class="glass-card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
+                                <tr>
+                                    <th class="px-6 py-4">Nom de l'Admin</th>
+                                    <th class="px-6 py-4">Mot de Passe</th>
+                                    <th class="px-6 py-4">Email</th>
+                                    <th class="px-6 py-4">Date de Création</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="superadmins-table-body" class="divide-y divide-slate-50 bg-white">
+                                <!-- Rempli dynamiquement par JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Modifier l'Agent</h3>
-            <p class="text-xs text-slate-500 mb-6">Modifier les informations de l'agent : <span id="edit-agent-email-display" class="font-bold"></span></p>
+
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODALS -->
+    <!-- ============================================== -->
+
+    <!-- Modal: Mon Profil Super Admin -->
+    <div id="modal-edit-profile" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 relative shadow-2xl transform transition-all scale-100">
+            <button onclick="closeProfileModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition"><i class="fas fa-times"></i></button>
             
-            <form id="form-edit-agent" onsubmit="handleEditAgent(event)" class="space-y-4">
-                <input type="hidden" id="edit-agent-id">
+            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center text-xl mb-4 shadow-inner">
+                <i class="fas fa-user-cog"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Mon Profil</h3>
+            <p class="text-xs text-slate-500 mb-6">Personnalisez vos informations de connexion.</p>
+            
+            <form id="form-edit-profile" onsubmit="handleEditProfile(event)" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Code Promo</label>
-                    <input type="text" id="edit-agent-promo" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nom d'affichage</label>
+                    <input type="text" id="profile-name" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition" />
                 </div>
-                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
-                    <label class="text-xs font-bold text-slate-700">Commission Active</label>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="edit-agent-commission-active" class="sr-only peer">
-                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                    </label>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nouveau Mot de Passe</label>
+                    <input type="password" id="profile-password" placeholder="Laisser vide pour ne pas changer" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition" />
                 </div>
-                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
-                    Enregistrer
-                </button>
+                
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition shadow-lg hover:shadow-xl">
+                        Sauvegarder le Profil
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal: Edit Shop -->
-    <div id="modal-edit-shop" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-lg p-8 relative shadow-2xl transform transition-all">
-            <button onclick="closeEditShopModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
-            
-            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                <i class="fas fa-store-alt"></i>
-            </div>
-            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Modifier la Boutique</h3>
-            <p class="text-xs text-slate-500 mb-6">Boutique : <span id="edit-shop-name-display" class="font-bold"></span></p>
-            
-            <form id="form-edit-shop" onsubmit="handleEditShop(event)" class="space-y-4">
-                <input type="hidden" id="edit-shop-id">
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nom de la Boutique</label>
-                    <input type="text" id="edit-shop-name" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Slogan</label>
-                    <input type="text" id="edit-shop-slogan" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Catégorie par Défaut</label>
-                    <input type="text" id="edit-shop-category" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Téléphone de Contact</label>
-                    <input type="text" id="edit-shop-phone" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Adresse Physique</label>
-                    <input type="text" id="edit-shop-address" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-                </div>
-                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
-                    Enregistrer les Modifications
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Edit Client -->
-    <div id="modal-edit-client" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
-            <button onclick="closeEditClientModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
-            
-            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                <i class="fas fa-user-edit"></i>
-            </div>
-            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Modifier le Client</h3>
-            <p class="text-xs text-slate-500 mb-6">Client : <span id="edit-client-email-display" class="font-bold"></span></p>
-            
-            <form id="form-edit-client" onsubmit="handleEditClient(event)" class="space-y-4">
-                <input type="hidden" id="edit-client-id">
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nom du Client</label>
-                    <input type="text" id="edit-client-name" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Email du Client</label>
-                    <input type="email" id="edit-client-email" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" disabled />
-                </div>
-                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
-                    Enregistrer
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Edit Concours Registration -->
-    <div id="modal-edit-concours" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
-            <button onclick="closeEditConcoursModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
-            
-            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                <i class="fas fa-trophy"></i>
-            </div>
-            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Modifier l'Inscription</h3>
-            <p class="text-xs text-slate-500 mb-6">Participant : <span id="edit-concours-name-display" class="font-bold"></span></p>
-            
-            <form id="form-edit-concours" onsubmit="handleEditConcours(event)" class="space-y-4">
-                <input type="hidden" id="edit-concours-id">
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nom</label>
-                    <input type="text" id="edit-concours-name" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Email</label>
-                    <input type="email" id="edit-concours-email" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Téléphone</label>
-                    <input type="text" id="edit-concours-phone" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                </div>
-                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
-                    Enregistrer
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Create Agent -->
-    <div id="modal-agent" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
-            <button onclick="closeAgentModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
-            
-            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                <i class="fas fa-user-plus"></i>
-            </div>
-            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Enregistrer un Agent</h3>
-            <p class="text-xs text-slate-500 mb-6">Créer des identifiants d'accès pour un nouvel agent commercial.</p>
-            
+    <!-- Modal: Créer un Agent -->
+    <div id="modal-create-agent" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeAgentModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
+            <div class="w-12 h-12 bg-slate-900 text-blue-400 rounded-xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fas fa-user-tie"></i></div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Nouvel Agent</h3>
+            <p class="text-xs text-slate-500 mb-6">Enregistrez un nouveau représentant commercial.</p>
             <form id="form-create-agent" onsubmit="handleCreateAgent(event)" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Email de l'Agent</label>
-                    <input type="email" id="new-agent-email" required placeholder="agent@legrandart.com" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium" />
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Adresse Email</label>
+                    <input type="email" id="new-agent-email" required placeholder="agent@legrandart.com" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Code Promo Unique (Ex: AGENT01)</label>
+                    <input type="text" id="new-agent-promo" required placeholder="CODEPROMO" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition" />
                 </div>
                 <div>
                     <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Mot de Passe Provisoire</label>
-                    <input type="password" id="new-agent-pass" required placeholder="••••••••" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium" />
+                    <input type="password" id="new-agent-pass" required placeholder="••••••••" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition" />
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition shadow-lg">Enregistrer l'Agent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Créer un Super Admin -->
+    <div id="modal-create-superadmin" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeCreateSuperAdminModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
+            <div class="w-12 h-12 bg-slate-900 text-yellow-400 rounded-xl flex items-center justify-center text-xl mb-4 shadow-lg"><i class="fas fa-shield-alt"></i></div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Nouveau Super Admin</h3>
+            <form id="form-create-superadmin" onsubmit="handleCreateSuperAdmin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nom Complet</label>
+                    <input type="text" id="new-sa-name" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm transition" />
                 </div>
                 <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Code Promo Assigné (Optionnel)</label>
-                    <input type="text" id="new-agent-promo" placeholder="Ex: AGENT01" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Adresse Email</label>
+                    <input type="email" id="new-sa-email" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm transition" />
                 </div>
-                
-                <button type="submit" id="btn-submit-agent" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
-                    Déployer le Compte Agent
-                </button>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Mot de Passe Provisoire</label>
+                    <input type="password" id="new-sa-pass" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm transition" />
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition shadow-lg">Créer l'Administrateur</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal: Shop Limits -->
-    <div id="modal-shop-limits" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-lg p-8 relative shadow-2xl">
-            <button onclick="closeShopLimitsModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
-            
-            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 flex items-center justify-center text-xl rounded-xl mb-4">
-                <i class="fas fa-sliders-h"></i>
+    <!-- Modal: Confirmation -->
+    <div id="modal-confirm" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl text-center">
+            <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Contrôle des Limites Boutique</h3>
-            <p class="text-xs text-slate-500 mb-6">Définissez les restrictions pour la boutique : <span id="limit-shop-name" class="font-bold"></span></p>
-            
-            <form id="form-shop-limits" onsubmit="handleSaveShopLimits(event)" class="space-y-4">
-                <input type="hidden" id="limit-shop-id">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nombre Max Produits</label>
-                        <input type="number" id="limit-products" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold" value="50">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Prix Max Autorisé ($)</label>
-                        <input type="number" id="limit-price-max" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold" value="5000">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Commandes / Jour</label>
-                        <input type="number" id="limit-orders-day" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold" value="20">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Commandes / Mois</label>
-                        <input type="number" id="limit-orders-month" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold" value="500">
-                    </div>
-                </div>
-                
-                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2 shadow-lg shadow-slate-900/20">
-                    Enregistrer les Restrictions
-                </button>
-            </form>
+            <h3 id="confirm-title" class="text-lg font-black text-slate-800 mb-2">Confirmation</h3>
+            <p id="confirm-message" class="text-sm text-slate-500 mb-6">Êtes-vous sûr de vouloir continuer ?</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl font-bold text-xs transition">Annuler</button>
+                <button id="confirm-btn-yes" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-2.5 rounded-xl font-bold text-xs transition shadow-md">Confirmer</button>
+            </div>
         </div>
     </div>
 
-    <!-- Migration depuis Supabase vers Firebase (Backend de la plateforme) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none"></div>
 
-        // Configuration Firebase (Injectée par l'environnement Canvas)
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { projectId: "demo-project" };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'admin-app-id';
+    <!-- ============================================== -->
+    <!-- SCRIPTS -->
+    <!-- ============================================== -->
+    <script>
+        // CONFIGURATION SUPABASE GLOBALE
+        const ADMIN_SUPABASE_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
+        const ADMIN_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkcWl6a3VtcXVkd2JucmRjb21hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODY5NDcsImV4cCI6MjA5NTQ2Mjk0N30.3bjAcBSu64FZ9AaGiuVTZNpM4fsqc6NKOdEdD4WuX6c';
+        
+        const supabaseAdmin = window.supabase ? window.supabase.createClient(ADMIN_SUPABASE_URL, ADMIN_SUPABASE_KEY) : null;
 
-        let currentUser = null;
+        // --- ÉTATS GLOBAUX ---
+        let allAgents = [];
         let allShops = [];
         let allOrders = [];
-        let allAgents = [];
-        let concoursData = [];
         let allClients = [];
-        let supportTickets = [];
-        let platformSettings = {};
-
-        // Utilisation de la structure recommandée pour l'environnement
-        const dbPath = function(col) { return collection(db, 'artifacts', appId, 'public', 'data', col); };
-        const docPath = function(col, docId) { return doc(db, 'artifacts', appId, 'public', 'data', col, docId); };
-
-        // Initialisation de l'authentification
-        const initAuth = async function() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Erreur d'authentification : ", error);
-            }
+        let concoursData = [];
+        let superAdminsData = [];
+        let supabaseEvents = [];
+        
+        let currentAdminProfile = {
+            id: 'sa_default',
+            name: 'Admin Principal',
+            email: 'admin@legrandart.com'
         };
 
-        initAuth();
+        let confirmActionCallback = null;
 
-        onAuthStateChanged(auth, async function(user) {
-            if (user) {
-                currentUser = user;
-                updateCloudStatus(true);
-                await seedInitialData(); 
-                setupRealtimeListeners();
-            } else {
-                updateCloudStatus(false);
-            }
+        // --- OUTILS ---
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-emerald-500' : (type === 'error' ? 'bg-rose-500' : 'bg-slate-800');
+            const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform transition-all duration-300 translate-y-10 opacity-0`;
+            toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-y-10', 'opacity-0'));
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- NAVIGATION ET UI ---
+        function toggleSidebar() {
+            document.getElementById('main-sidebar').classList.toggle('-translate-x-full');
+        }
+
+        function showSection(id) {
+            const sections = ['overview', 'agents', 'shops', 'clients', 'evenements', 'concours', 'landing', 'support', 'settings', 'superadmin'];
+            
+            sections.forEach(s => {
+                const elSec = document.getElementById('section-' + s);
+                const elNav = document.getElementById('nav-' + s);
+                if (elSec) elSec.classList.add('hidden');
+                if (elNav) elNav.classList.remove('active');
+            });
+            
+            const targetSec = document.getElementById('section-' + id);
+            const targetNav = document.getElementById('nav-' + id);
+            if (targetSec) targetSec.classList.remove('hidden');
+            if (targetNav) targetNav.classList.add('active');
+            
+            if (window.innerWidth < 768) document.getElementById('main-sidebar').classList.add('-translate-x-full');
+        }
+
+        function showConfirmModal(title, message, onConfirm) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            confirmActionCallback = onConfirm;
+            document.getElementById('modal-confirm').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('modal-confirm').classList.add('hidden');
+            confirmActionCallback = null;
+        }
+
+        document.getElementById('confirm-btn-yes').addEventListener('click', () => {
+            if (confirmActionCallback) confirmActionCallback();
+            closeConfirmModal();
         });
 
-        function updateCloudStatus(isOnline) {
-            const el = document.getElementById('cloud-status');
-            if(el) {
-                el.innerHTML = isOnline ? `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Système Connecté` : `<span class="w-2 h-2 rounded-full bg-rose-500"></span> Hors ligne`;
-                el.className = `flex items-center gap-2 mb-4 px-2 text-[10px] uppercase tracking-widest font-bold ${isOnline ? 'text-emerald-500' : 'text-rose-500'}`;
-            }
-        }
 
-        async function seedInitialData() {
-            if (!currentUser) return;
+        // =====================================================================
+        // === FETCH CLOUD DATA (SUPABASE) ===
+        // =====================================================================
+        
+        async function loadGlobalData() {
+            if (!supabaseAdmin) { showToast("Supabase non initialisé.", "error"); return; }
+            
             try {
-                const snapshot = await getDocs(dbPath('settings'));
-                if (!snapshot.empty) return; 
+                // 1. Boutiques
+                const { data: shops } = await supabaseAdmin.from('boutique_config').select('*');
+                if (shops) allShops = shops;
+                
+                // 2. Commandes (Transactions Globales)
+                const { data: orders } = await supabaseAdmin.from('boutique_orders').select('*').order('created_at', { ascending: false });
+                if (orders) allOrders = orders;
 
-                await setDoc(docPath('settings', 'platform_settings'), { agentCommission: 5, exchangeRate: 2800, topCategories: 'Mode, Tech, Art, Musique' });
-                await setDoc(docPath('settings', 'content_settings'), { announcement: 'Bienvenue sur la plateforme LeGrandArt. Les nouveautés de la semaine sont disponibles !', videoId: 'kZ1qIW1IoWsp7nF837a' });
-                await setDoc(docPath('shops', 'shop_1'), { name: 'Artisanat Local', slogan: 'Le meilleur de l\'art', default_category: 'Art', owner_id: 'ag_1', promo_code: 'AGENT01', is_featured: true, created_at: Date.now(), contact_info: {phone: '+2439900000', address: 'Kinshasa'} });
-                await setDoc(docPath('shops', 'shop_2'), { name: 'Tech Universe', slogan: 'High Tech', default_category: 'Tech', owner_id: 'ag_2', promo_code: 'AGENT02', is_featured: false, created_at: Date.now() });
-                await setDoc(docPath('agents', 'ag_1'), { email: 'banikimukishijimmy@gmail.com', promo_code: 'AGENT01', commission_active: true, created_at: Date.now() });
-                await setDoc(docPath('agents', 'ag_2'), { email: 'agent2@legrandart.com', promo_code: 'AGENT02', commission_active: true, created_at: Date.now() });
-                await setDoc(docPath('clients', 'cl_1'), { email: 'customer1@example.com', created_at: Date.now() });
-                await setDoc(docPath('clients', 'cl_2'), { email: 'fan_art@gmail.com', created_at: Date.now() });
-                await setDoc(docPath('orders', 'ord_1'), { shop_id: 'shop_1', customer_email: 'customer1@example.com', total: 1500, promo_code: 'AGENT01', status: 'Payé', created_at: Date.now() });
-                await setDoc(docPath('orders', 'ord_2'), { shop_id: 'shop_2', customer_email: 'fan_art@gmail.com', total: 3200, promo_code: 'AGENT02', status: 'En attente', created_at: Date.now() });
-                await setDoc(docPath('concours', 'conc_1'), { type: 'Spectateur', name: 'John Doe', email: 'john@example.com', category: 'General', total: 50, created_at: Date.now() });
-                await setDoc(docPath('tickets', 'tick_1'), { issue_description: 'Problème de connexion à la boutique pour configurer un produit.', agent_email: 'agent2@legrandart.com', shop_name: 'Tech Universe', status: 'in_progress', created_at: Date.now() });
-            } catch (e) {
-                console.error("Erreur d'initialisation des donnees :", e);
+                // 3. Agents
+                const { data: agents } = await supabaseAdmin.from('agents_commerciaux').select('*').order('created_at', { ascending: false });
+                if (agents) allAgents = agents;
+
+                // 4. Clients
+                const { data: clients } = await supabaseAdmin.from('clients_globaux').select('*');
+                if (clients) allClients = clients;
+
+                // 5. Concours
+                const { data: concours } = await supabaseAdmin.from('concours_inscriptions').select('*');
+                if (concours) concoursData = concours;
+
+                // 6. Super Admins
+                const { data: admins } = await supabaseAdmin.from('super_admins').select('*');
+                if (admins) superAdminsData = admins;
+
+                // 7. Settings
+                const { data: settings } = await supabaseAdmin.from('platform_settings').select('*').eq('id', 'global_settings').single();
+                if (settings) {
+                    document.getElementById('config-agent-commission').value = settings.agent_commission;
+                    document.getElementById('config-exchange-rate').value = settings.exchange_rate;
+                    document.getElementById('config-top-categories').value = settings.top_categories;
+                }
+
+                // Render UI
+                renderOverview();
+                renderAgentsTable();
+                renderShopsTable();
+                renderClientsTable();
+                renderConcoursTable();
+                renderSuperAdminsTable();
+                showToast("Données Cloud synchronisées.");
+            } catch (err) {
+                console.error(err);
+                showToast("Erreur de récupération des données.", "error");
             }
         }
 
-        function setupRealtimeListeners() {
-            if (!currentUser) return;
-
-            onSnapshot(docPath('settings', 'platform_settings'), function(docSnap) {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const elComm = document.getElementById('config-agent-commission');
-                    const elRate = document.getElementById('config-exchange-rate');
-                    const elCats = document.getElementById('config-top-categories');
-                    if (elComm) elComm.value = data.agentCommission || 5;
-                    if (elRate) elRate.value = data.exchangeRate || 2800;
-                    if (elCats) elCats.value = data.topCategories || '';
-                    platformSettings = data;
-                }
-            }, function(error) { console.error(error); });
-
-            onSnapshot(docPath('settings', 'content_settings'), function(docSnap) {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const elAnn = document.getElementById('config-global-announcement');
-                    const elVid = document.getElementById('config-featured-video-id');
-                    if (elAnn) elAnn.value = data.announcement || '';
-                    if (elVid) elVid.value = data.videoId || '';
-                }
-            }, function(error) { console.error(error); });
-
-            onSnapshot(dbPath('shops'), function(snap) {
-                allShops = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
-                renderShopsTable();
-                renderOverview();
-            }, function(error) { console.error(error); });
-
-            onSnapshot(dbPath('orders'), function(snap) {
-                allOrders = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
-                renderOverview();
-            }, function(error) { console.error(error); });
-
-            onSnapshot(dbPath('agents'), function(snap) {
-                allAgents = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
-                renderAgentsTable(allAgents);
-                renderOverview();
-            }, function(error) { console.error(error); });
-
-            onSnapshot(dbPath('clients'), function(snap) {
-                allClients = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
-                renderClientsTable();
-                renderOverview();
-            }, function(error) { console.error(error); });
-
-            onSnapshot(dbPath('concours'), function(snap) {
-                concoursData = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
-                renderConcoursTable();
-            }, function(error) { console.error(error); });
-
-            onSnapshot(dbPath('tickets'), function(snap) {
-                supportTickets = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }).sort(function(a,b) { return b.created_at - a.created_at; });
-                renderSupportTickets();
-            }, function(error) { console.error(error); });
+        async function fetchAdminEvents() {
+            if (!supabaseAdmin) return;
+            const tbody = document.getElementById('evenements-admin-body');
+            tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i> Chargement du cloud...</td></tr>`;
+            try {
+                const { data, error } = await supabaseAdmin.from('evenement').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                supabaseEvents = data || [];
+                renderAdminEventsTable();
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-rose-500 font-bold">Erreur : ${err.message}</td></tr>`;
+            }
         }
 
-        function formatMoney(amount) {
-            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
-        }
+        // =====================================================================
+        // === RENDER FUNCTIONS ===
+        // =====================================================================
 
+        // --- OVERVIEW ---
         function renderOverview() {
-            const validOrders = allOrders.filter(function(o) { return o.status !== 'Refusé' && o.status !== 'Cancelled'; });
-            const totalRevenue = validOrders.reduce(function(sum, o) { return sum + Number(o.total || 0); }, 0);
+            const validOrders = allOrders.filter(o => o.status !== 'Refusé' && o.status !== 'Cancelled');
+            const totalRevenue = validOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
             
             document.getElementById('global-revenue').innerText = formatMoney(totalRevenue);
             document.getElementById('global-shops').innerText = allShops.length;
@@ -804,25 +762,24 @@
             document.getElementById('global-clients').innerText = allClients.length;
 
             const activityBody = document.getElementById('global-activity-body');
-            const recentOrders = [...allOrders].sort(function(a,b) { return b.created_at - a.created_at; }).slice(0, 6);
+            const recentOrders = allOrders.slice(0, 10);
 
             if (recentOrders.length === 0) {
-                activityBody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-xs text-slate-400">Aucune transaction enregistrée.</td></tr>`;
+                activityBody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-xs text-slate-400">Aucune transaction enregistrée dans le Cloud.</td></tr>`;
             } else {
-                activityBody.innerHTML = recentOrders.map(function(order) {
-                    const shop = allShops.find(function(s) { return s.id === order.shop_id; }) || {};
-                    const shopName = shop.name || 'Boutique Inconnue';
+                activityBody.innerHTML = recentOrders.map(order => {
+                    const shop = allShops.find(s => s.shop_id === order.shop_id) || {};
                     let statusBadge = `<span class="status-badge status-pending">${order.status || 'En attente'}</span>`;
-                    if (order.status === 'Livré' || order.status === 'Delivered' || order.status === 'Payé') statusBadge = `<span class="status-badge status-active">Complété</span>`;
-                    if (order.status === 'Refusé' || order.status === 'Cancelled') statusBadge = `<span class="status-badge status-suspended">Annulé</span>`;
+                    if (order.status === 'Livré' || order.status === 'Payé') statusBadge = `<span class="status-badge status-active"><span class="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-pulse"></span> Complété</span>`;
+                    if (order.status === 'Refusé') statusBadge = `<span class="status-badge status-suspended">Annulé</span>`;
 
                     return `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="px-6 py-4 text-xs font-mono font-bold text-slate-700">#${(order.id || '').toString().substring(0,8)}</td>
-                        <td class="px-6 py-4 text-xs font-bold text-slate-800">${shopName}</td>
-                        <td class="px-6 py-4 text-xs text-slate-500">${order.customer_email || 'Client'}</td>
+                    <tr class="hover:bg-slate-50/50 transition duration-150">
+                        <td class="px-6 py-4 text-xs font-mono font-bold text-slate-700">${order.id || 'N/A'}</td>
+                        <td class="px-6 py-4 text-xs font-bold text-slate-800">${shop.name || order.shop_id || 'N/A'}</td>
+                        <td class="px-6 py-4 text-xs text-slate-500">${order.customer_name || order.customer_email || 'Anonyme'}</td>
                         <td class="px-6 py-4 text-xs font-black text-emerald-600">${formatMoney(order.total)}</td>
-                        <td class="px-6 py-4 text-[10px] font-mono font-bold text-slate-900">${order.promo_code || 'DIRECT'}</td>
+                        <td class="px-6 py-4 text-[10px] font-mono font-bold text-slate-900 bg-slate-100 inline-block rounded-md px-2 mt-2">${order.promo_code || 'DIRECT'}</td>
                         <td class="px-6 py-4">${statusBadge}</td>
                     </tr>
                     `;
@@ -830,479 +787,398 @@
             }
         }
 
-        function renderShopsTable() {
-            const tbody = document.getElementById('shops-table-body');
-            if (allShops.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">Aucune boutique déployée sur la plateforme.</td></tr>`;
+        // --- AGENTS ---
+        function renderAgentsTable(agentsToRender = null) {
+            const arr = agentsToRender || allAgents;
+            const tbody = document.getElementById('agents-table-body');
+            if (arr.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-xs text-slate-400">Aucun agent dans la base de données.</td></tr>`;
                 return;
             }
-
-            tbody.innerHTML = allShops.map(function(shop) { 
+            tbody.innerHTML = arr.map(agent => {
+                const sClass = agent.commission_active ? 'status-active' : 'status-suspended';
+                const agentShops = allShops.filter(shop => shop.promo_code === agent.promo_code);
+                const agentRevenue = allOrders.filter(o => o.promo_code === agent.promo_code && o.status !== 'Refusé').reduce((s, o) => s + Number(o.total || 0), 0);
                 return `
-                <tr class="hover:bg-slate-50 transition group">
+                <tr class="hover:bg-slate-50/50 transition duration-150">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200">
-                                <i class="fas fa-store text-slate-400"></i>
+                            <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-black text-xs shadow-inner">
+                                <i class="fas fa-user-tie"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-bold text-slate-900">${shop.name}</h4>
-                                <p class="text-[10px] text-slate-400 font-mono">ID : ${shop.id.substring(0,8)}</p>
+                                <span class="text-sm font-bold text-slate-800">${agent.email}</span>
                             </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-xs text-slate-600 font-medium">
-                        <i class="fas fa-user-circle text-slate-400 mr-1"></i> ${shop.owner_id ? shop.owner_id.substring(0,8)+'...' : 'Inconnu'}
-                    </td>
-                    <td class="px-6 py-4 text-[10px] font-bold text-blue-500 uppercase tracking-wider">
-                        ${shop.promo_code || 'ADMIN DEPLOY'}
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="status-badge status-active">Actif</span>
-                        ${shop.is_featured ? `<span class="ml-2 bg-amber-100 text-amber-600 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter"><i class="fas fa-star text-[7px]"></i> TOP</span>` : ''}
-                    </td>
-                    <td class="px-6 py-4 text-right space-x-1">
-                        <button onclick="toggleShopFeatured('${shop.id}', ${shop.is_featured || false})" class="w-8 h-8 rounded-lg ${shop.is_featured ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500'} hover:bg-amber-500 hover:text-white transition" title="Mettre au Top">
-                            <i class="fas fa-star"></i>
-                        </button>
-                        <button onclick="openShopLimits('${shop.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-yellow-500 hover:text-black transition" title="Gérer les Limites"><i class="fas fa-sliders-h"></i></button>
-                        <button onclick="openEditShopModal('${shop.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-blue-500 hover:text-white transition" title="Modifier la Boutique"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteShop('${shop.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Supprimer Boutique"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-                `;
-            }).join('');
-        }
-
-        function renderAgentsTable(agentsToRender) {
-            if (!agentsToRender) agentsToRender = allAgents;
-            const tbody = document.getElementById('agents-table-body');
-            if (agentsToRender.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-xs text-slate-400">Aucun agent trouvé.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = agentsToRender.map(function(agent) {
-                const sClass = agent.commission_active ? 'status-active' : 'status-suspended';
-                const agentShops = allShops.filter(function(shop) { return shop.owner_id === agent.id || shop.promo_code === agent.promo_code; });
-                const agentRevenue = allOrders
-                    .filter(function(order) { return order.promo_code === agent.promo_code && order.status !== 'Refusé'; })
-                    .reduce(function(sum, order) { return sum + Number(order.total || 0); }, 0);
-
-                return `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center font-bold text-xs uppercase">
-                                ${agent.email ? agent.email.charAt(0) : 'N/A'}
-                            </div>
-                            <span class="text-sm font-bold text-slate-800">${agent.email}</span>
                         </div>
                     </td>
                     <td class="px-6 py-4 text-xs font-mono font-bold text-slate-900">${agent.promo_code || 'N/A'}</td>
                     <td class="px-6 py-4 text-xs font-bold text-slate-600">${agentShops.length} Boutiques</td>
                     <td class="px-6 py-4 text-xs font-black text-emerald-600">${formatMoney(agentRevenue)}</td>
                     <td class="px-6 py-4"><span class="status-badge ${sClass}">${agent.commission_active ? 'Active' : 'Inactive'}</span></td>
-                    <td class="px-6 py-4 text-right space-x-1 flex items-center justify-end gap-3">
-                        <div class="flex flex-col items-end">
-                            <span class="text-[8px] font-black uppercase text-slate-400">Commission</span>
-                            <label class="relative inline-flex items-center cursor-pointer" title="Activer/Désactiver la commission">
-                                <input type="checkbox" value="" class="sr-only peer" ${agent.commission_active ? 'checked' : ''} onchange="toggleAgentCommission('${agent.id}', this.checked)">
-                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                            </label>
-                        </div>
-                        <button onclick="openEditAgentModal('${agent.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-blue-500 hover:text-white transition" title="Modifier l'Agent"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteAgent('${agent.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Supprimer l'Agent"><i class="fas fa-trash"></i></button>
+                    <td class="px-6 py-4 text-right space-x-1">
+                        <button onclick="toggleAgentStatus('${agent.id}', ${agent.commission_active})" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-800 hover:text-white transition"><i class="fas fa-power-off text-xs"></i></button>
+                        <button onclick="confirmDeleteAgent('${agent.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition shadow-sm"><i class="fas fa-trash text-xs"></i></button>
                     </td>
-                </tr>
-                `;
+                </tr>`;
             }).join('');
         }
 
-        function renderClientsTable() {
-            const tbody = document.getElementById('clients-table-body');
-            if (allClients.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">Aucun client enregistré.</td></tr>`;
+        function filterAgents() {
+            const q = document.getElementById('agent-search').value.toLowerCase();
+            renderAgentsTable(allAgents.filter(a => a.email.toLowerCase().includes(q) || (a.promo_code||'').toLowerCase().includes(q)));
+        }
+
+        function openAgentModal() { document.getElementById('modal-create-agent').classList.remove('hidden'); }
+        function closeAgentModal() { document.getElementById('modal-create-agent').classList.add('hidden'); }
+
+        async function handleCreateAgent(e) {
+            e.preventDefault();
+            if(!supabaseAdmin) return;
+            const email = document.getElementById('new-agent-email').value;
+            const promo_code = document.getElementById('new-agent-promo').value.toUpperCase();
+            const password = document.getElementById('new-agent-pass').value;
+
+            try {
+                // On retire la ligne "id" pour laisser Supabase générer l'UUID automatiquement.
+                // On rend aussi les autres champs explicites.
+                const { error } = await supabaseAdmin.from('agents_commerciaux').insert({
+                    email: email,
+                    password: password,
+                    promo_code: promo_code,
+                    commission_active: true
+                });
+                if(error) throw error;
+                showToast("Agent créé avec succès.");
+                closeAgentModal();
+                e.target.reset();
+                loadGlobalData();
+            } catch(err) {
+                showToast(err.message, "error");
+            }
+        }
+
+        async function toggleAgentStatus(id, currentStatus) {
+            if(!supabaseAdmin) return;
+            try {
+                await supabaseAdmin.from('agents_commerciaux').update({ commission_active: !currentStatus }).eq('id', id);
+                loadGlobalData();
+                showToast("Statut agent mis à jour.");
+            } catch(e) {}
+        }
+        
+        function confirmDeleteAgent(id) {
+            showConfirmModal("Supprimer Agent", "Cette action est irréversible.", async () => {
+                if(!supabaseAdmin) return;
+                await supabaseAdmin.from('agents_commerciaux').delete().eq('id', id);
+                loadGlobalData();
+                showToast("Agent supprimé.");
+            });
+        }
+
+        // --- SHOPS ---
+        function renderShopsTable(shopsToRender = null) {
+            const arr = shopsToRender || allShops;
+            const tbody = document.getElementById('shops-table-body');
+            if (arr.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-xs text-slate-400">Aucune boutique sur le Cloud.</td></tr>`;
                 return;
             }
-
-            tbody.innerHTML = allClients.map(function(client) {
-                const clientOrders = allOrders.filter(function(order) { return order.customer_email === client.email; });
-                const totalSpent = clientOrders.reduce(function(sum, order) { return sum + Number(order.total || 0); }, 0);
-                const registrationDate = new Date(client.created_at).toLocaleDateString();
-
-                return `
-                <tr class="hover:bg-slate-50 transition">
+            tbody.innerHTML = arr.map(shop => `
+                <tr class="hover:bg-slate-50/50 transition duration-150">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <i class="fas fa-user text-slate-300 text-lg"></i>
-                            <span class="text-sm font-semibold text-slate-800">${client.email}</span>
+                            <img src="${shop.logo_url || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-xl object-cover bg-slate-100 border" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 items-center justify-center text-slate-500 hidden"><i class="fas fa-store"></i></div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-900">${shop.name || 'Boutique sans nom'}</h4>
+                                <span class="text-[9px] text-slate-400">${shop.shop_id}</span>
+                            </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-xs text-slate-500">${registrationDate}</td>
-                    <td class="px-6 py-4 text-xs font-bold text-slate-600">${clientOrders.length} Commandes (${formatMoney(totalSpent)})</td>
-                    <td class="px-6 py-4"><span class="status-badge status-active">Actif</span></td>
-                    <td class="px-6 py-4 text-right space-x-1">
-                        <button onclick="openEditClientModal('${client.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-purple-500 hover:text-white transition" title="Modifier le Client"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteClient('${client.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Supprimer le Client"><i class="fas fa-trash"></i></button>
+                    <td class="px-6 py-4 text-xs text-slate-600 font-medium">${shop.owner_id || 'Inconnu'}</td>
+                    <td class="px-6 py-4 text-xs text-slate-600">${shop.default_category || 'N/A'}</td>
+                    <td class="px-6 py-4 text-[10px] font-bold text-blue-500 bg-blue-50 inline-block px-2 rounded-md mt-4">${shop.promo_code || 'DIRECT'}</td>
+                    <td class="px-6 py-4">
+                        <span class="status-badge status-active">Actif</span>
+                        ${shop.is_featured ? `<span class="ml-2 bg-amber-100 text-amber-600 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase">TOP</span>` : ''}
                     </td>
-                </tr>
-            `;
-            }).join('');
+                    <td class="px-6 py-4 text-right space-x-1">
+                        <button onclick="toggleShopFeatured('${shop.shop_id}', ${shop.is_featured || false})" class="w-8 h-8 rounded-lg ${shop.is_featured ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500'} hover:bg-amber-500 hover:text-white transition"><i class="fas fa-star text-xs"></i></button>
+                        <button onclick="confirmDeleteShop('${shop.shop_id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition"><i class="fas fa-trash text-xs"></i></button>
+                    </td>
+                </tr>`).join('');
         }
 
+        function filterShops() {
+            const q = document.getElementById('shop-search').value.toLowerCase();
+            renderShopsTable(allShops.filter(s => (s.name||'').toLowerCase().includes(q) || (s.shop_id||'').toLowerCase().includes(q)));
+        }
+
+        async function toggleShopFeatured(id, currentStatus) {
+            if(!supabaseAdmin) return;
+            await supabaseAdmin.from('boutique_config').update({ is_featured: !currentStatus }).eq('shop_id', id);
+            loadGlobalData();
+            showToast("Boutique mise à jour.");
+        }
+
+        function confirmDeleteShop(id) { 
+            showConfirmModal("Supprimer Boutique", "Voulez-vous supprimer définitivement la configuration de cette boutique ?", async () => { 
+                if(!supabaseAdmin) return;
+                await supabaseAdmin.from('boutique_config').delete().eq('shop_id', id);
+                loadGlobalData();
+                showToast("Boutique supprimée."); 
+            }); 
+        }
+
+        // --- CLIENTS ---
+        function renderClientsTable() {
+            const tbody = document.getElementById('clients-table-body');
+            if (allClients.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center text-slate-400 py-8">Aucun client.</td></tr>`;
+            tbody.innerHTML = allClients.map(client => {
+                return `
+                <tr class="hover:bg-slate-50/50">
+                    <td class="px-6 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs"><i class="fas fa-user"></i></div><span class="font-semibold text-sm">${client.email}</span></td>
+                    <td class="px-6 py-4 text-xs text-slate-500">${new Date(client.created_at).toLocaleDateString()}</td>
+                    <td class="px-6 py-4"><span class="status-badge status-active">Actif</span></td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="confirmDeleteClient('${client.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition"><i class="fas fa-trash text-xs"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+        function confirmDeleteClient(id) { 
+            showConfirmModal("Supprimer", "Supprimer le client de la base globale ?", async () => { 
+                await supabaseAdmin.from('clients_globaux').delete().eq('id', id);
+                loadGlobalData(); showToast("Client supprimé."); 
+            }); 
+        }
+
+        // --- CONCOURS ---
         function renderConcoursTable() {
             const tbody = document.getElementById('concours-table-body');
-            if (concoursData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">Aucune inscription au concours.</td></tr>`;
+            if (concoursData.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center text-slate-400 py-8">Aucune inscription Cloud.</td></tr>`;
+            tbody.innerHTML = concoursData.map(c => `
+                <tr class="hover:bg-slate-50/50">
+                    <td class="px-6 py-3"><span class="px-2 py-1 rounded bg-slate-100 text-slate-700 font-bold uppercase text-[9px]">${c.type || 'N/A'}</span></td>
+                    <td class="px-6 py-3"><p class="text-xs font-semibold">${c.name}</p><p class="text-[10px] text-slate-500">${c.email}</p></td>
+                    <td class="px-6 py-3 text-xs text-slate-600">${c.category}</td>
+                    <td class="px-6 py-3 text-xs font-black text-emerald-600">${c.total || 'Gratuit'}</td>
+                    <td class="px-6 py-3 text-right">
+                        <button onclick="confirmDeleteConcours('${c.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition"><i class="fas fa-trash text-xs"></i></button>
+                    </td>
+                </tr>`).join('');
+        }
+        function exportConcoursCSV() { showToast("Exportation du CSV (Simulation)"); }
+        function confirmDeleteConcours(id) { 
+            showConfirmModal("Supprimer", "Supprimer cette inscription ?", async () => { 
+                await supabaseAdmin.from('concours_inscriptions').delete().eq('id', id);
+                loadGlobalData(); showToast("Inscription supprimée."); 
+            }); 
+        }
+
+        // --- EVENEMENTS ---
+        function renderAdminEventsTable() {
+            const tbody = document.getElementById('evenements-admin-body');
+            if (supabaseEvents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">Aucun événement dans la base (Table 'evenement').</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = concoursData.map(function(entry) {
+            tbody.innerHTML = supabaseEvents.map(ev => {
+                let statusBadge = '';
+                if (ev.status === 'pending') statusBadge = `<span class="status-badge status-pending animate-pulse">En attente</span>`;
+                else if (ev.status === 'approved') statusBadge = `<span class="status-badge status-active">Approuvé</span>`;
+                else statusBadge = `<span class="status-badge status-suspended">Rejeté</span>`;
+
+                const dateObj = ev.date_debut ? new Date(ev.date_debut) : null;
+                const dateStr = dateObj ? dateObj.toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'}) : 'Date non définie';
+
                 return `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="px-6 py-3 text-xs font-bold text-slate-800">${entry.type}</td>
+                <tr class="hover:bg-slate-50/50 transition duration-150">
                     <td class="px-6 py-3">
-                        <p class="text-xs font-semibold text-slate-800">${entry.name}</p>
-                        <p class="text-[10px] text-slate-500">${entry.email}</p>
+                        <div class="flex items-center gap-3">
+                            <img src="${ev.image_url || 'https://via.placeholder.com/50'}" class="w-10 h-10 rounded-lg object-cover border border-slate-200">
+                            <div>
+                                <p class="text-xs font-bold text-slate-800 line-clamp-1">${ev.titre || 'Sans titre'}</p>
+                                <p class="text-[9px] font-black uppercase text-slate-400">${ev.categorie || ''}</p>
+                            </div>
+                        </div>
                     </td>
-                    <td class="px-6 py-3 text-xs text-slate-600">${entry.category || entry.ticket_type || 'N/A'}</td>
-                    <td class="px-6 py-3 text-xs font-black text-emerald-600">${entry.total}</td>
+                    <td class="px-6 py-3 text-xs text-slate-600 font-medium">${ev.organizer || 'Inconnu'}</td>
+                    <td class="px-6 py-3 text-xs text-slate-600">
+                        <p class="font-semibold text-slate-800">${dateStr}</p>
+                        <p class="text-[10px] text-slate-500">${ev.lieu || 'Non spécifié'}</p>
+                    </td>
+                    <td class="px-6 py-3">${statusBadge}</td>
                     <td class="px-6 py-3 text-right space-x-1">
-                        <button onclick="openEditConcoursModal('${entry.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-emerald-500 hover:text-white transition" title="Modifier l'Inscription"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteConcoursRegistration('${entry.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Supprimer l'Inscription"><i class="fas fa-trash"></i></button>
+                        ${ev.status === 'pending' ? `
+                        <button onclick="updateEventStatus('${ev.id}', 'approved')" class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition tooltip-trigger shadow-sm" title="Approuver"><i class="fas fa-check text-xs"></i></button>
+                        <button onclick="updateEventStatus('${ev.id}', 'rejected')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition tooltip-trigger shadow-sm" title="Rejeter"><i class="fas fa-times text-xs"></i></button>
+                        ` : ''}
+                        <button onclick="confirmDeleteAdminEvent('${ev.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-800 hover:text-white transition tooltip-trigger shadow-sm" title="Supprimer de la BD"><i class="fas fa-trash text-xs"></i></button>
                     </td>
-                </tr>
-                `;
+                </tr>`;
             }).join('');
         }
 
-        function renderSupportTickets() {
-            const container = document.getElementById('tickets-container');
-            if (supportTickets.length === 0) {
-                container.innerHTML = `<div class="glass-card p-6 text-center text-xs text-slate-400">Aucun ticket de support en cours.</div>`;
+        async function updateEventStatus(id, newStatus) {
+            if(!supabaseAdmin) return;
+            try {
+                await supabaseAdmin.from('evenement').update({ status: newStatus }).eq('id', id);
+                showToast(newStatus === 'approved' ? "Événement approuvé." : "Événement rejeté.", newStatus === 'approved' ? "success" : "error");
+                fetchAdminEvents();
+            } catch(err) {}
+        }
+
+        function confirmDeleteAdminEvent(id) {
+            showConfirmModal("Suppression", "Supprimer cet événement ?", async () => {
+                if(!supabaseAdmin) return;
+                await supabaseAdmin.from('evenement').delete().eq('id', id);
+                fetchAdminEvents();
+                showToast("Événement supprimé.");
+            });
+        }
+
+        // --- SUPER ADMIN PROFIL & TEAM ---
+        function renderSuperAdminsTable() {
+            const tbody = document.getElementById('superadmins-table-body');
+            if (superAdminsData.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8">Aucun Administrateur.</td></tr>`;
+            tbody.innerHTML = superAdminsData.map(admin => `
+                <tr class="hover:bg-slate-50 transition group">
+                    <td class="px-6 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-900 text-yellow-500 flex items-center justify-center font-bold text-xs">${(admin.name||'A').charAt(0)}</div><span class="text-sm font-bold">${admin.name}</span></td>
+                    <td class="px-6 py-4 text-xs font-mono font-medium text-slate-500">*******</td>
+                    <td class="px-6 py-4 text-xs font-medium text-slate-500">${admin.email}</td>
+                    <td class="px-6 py-4 text-xs font-bold text-slate-400">${new Date(admin.created_at).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 text-right space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="openEditSuperAdminModal('${admin.id}')" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-blue-500 hover:text-white transition"><i class="fas fa-edit text-xs"></i></button>
+                        <button onclick="confirmDeleteSuperAdmin('${admin.id}')" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:bg-rose-500 hover:text-white transition"><i class="fas fa-trash text-xs"></i></button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        function openCreateSuperAdminModal() { document.getElementById('modal-create-superadmin').classList.remove('hidden'); }
+        function closeCreateSuperAdminModal() { document.getElementById('modal-create-superadmin').classList.add('hidden'); }
+        
+        async function handleCreateSuperAdmin(e) {
+            e.preventDefault();
+            if(!supabaseAdmin) return;
+            const name = document.getElementById('new-sa-name').value;
+            const email = document.getElementById('new-sa-email').value;
+            const password = document.getElementById('new-sa-pass').value;
+
+            try {
+                // On rend l'association explicite pour éviter les erreurs.
+                // Assurez-vous que les noms de colonnes à gauche (ex: 'name')
+                // correspondent EXACTEMENT à votre table Supabase.
+                // On retire la ligne "id" pour laisser Supabase générer l'UUID automatiquement.
+                const { error } = await supabaseAdmin.from('super_admins').insert({
+                    name: name,
+                    email: email,
+                    password: password
+                });
+                if (error) throw error; // Lancer l'erreur si Supabase en retourne une
+                showToast("Super Admin créé.");
+                closeCreateSuperAdminModal();
+                e.target.reset();
+                loadGlobalData();
+            } catch(e) { 
+                showToast("Erreur: " + e.message, "error"); // Afficher le message d'erreur spécifique
+            }
+        }
+
+        function openEditSuperAdminModal(id) {
+            const admin = superAdminsData.find(a => a.id === id);
+            if (!admin) {
+                showToast("Administrateur non trouvé.", "error");
                 return;
             }
-
-            container.innerHTML = supportTickets.map(function(ticket) {
-                let statusClass = 'border-l-rose-500';
-                if (ticket.status === 'resolved') statusClass = 'border-l-emerald-500';
-                else if (ticket.status === 'in_progress') statusClass = 'border-l-yellow-500';
-                
-                const createdAt = new Date(ticket.created_at).toLocaleString();
-
-                return `
-                <div class="glass-card p-6 flex gap-5 items-start border-l-4 ${statusClass}">
-                    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 text-xl"><i class="fas fa-exclamation-triangle"></i></div>
-                    <div class="flex-1">
-                        <div class="flex justify-between items-start mb-1">
-                            <h4 class="font-bold text-slate-800 text-base">${ticket.issue_description.substring(0, 50)}...</h4>
-                            <span class="text-[10px] font-bold text-slate-400">${createdAt}</span>
-                        </div>
-                        <p class="text-xs text-slate-600 mb-3">Signalé par l'agent : <span class="font-bold">${ticket.agent_email}</span> pour la boutique : <span class="font-bold">${ticket.shop_name}</span>.</p>
-                        <div class="flex gap-2">
-                            ${ticket.status !== 'resolved' ? `<button onclick="markTicketResolved('${ticket.id}')" class="px-4 py-1.5 bg-green-500 text-white text-[10px] font-black uppercase rounded hover:bg-green-600 transition">Marquer résolu</button>` : ''}
-                            <button onclick="deleteTicket('${ticket.id}')" class="px-4 py-1.5 bg-rose-500 text-white text-[10px] font-black uppercase rounded hover:bg-rose-600 transition">Supprimer</button>
-                        </div>
-                    </div>
-                </div>
-                `;
-            }).join('');
+            document.getElementById('edit-sa-id').value = admin.id;
+            document.getElementById('edit-sa-name').value = admin.name;
+            document.getElementById('edit-sa-email').value = admin.email;
+            document.getElementById('edit-sa-pass').value = ''; // Toujours vider le champ mot de passe
+            document.getElementById('modal-edit-superadmin').classList.remove('hidden');
         }
 
-        // --- EXPORT DES FONCTIONS GLOBALES POUR LE HTML ---
-        
-        window.showSection = function(id) {
-            const sections = ['overview', 'agents', 'shops', 'clients', 'concours', 'landing', 'support', 'settings'];
-            sections.forEach(function(s) {
-                document.getElementById('section-' + s).classList.add('hidden');
-                if(document.getElementById('nav-' + s)) document.getElementById('nav-' + s).classList.remove('active');
-            });
-            document.getElementById('section-' + id).classList.remove('hidden');
-            if(document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
-            
-            const titles = {
-                'overview': 'Tableau de bord',
-                'agents': 'Gestion des Agents Commerciaux',
-                'concours': 'Inscriptions Concours',
-                'shops': 'Répertoire des Boutiques',
-                'clients': 'Clients Enregistrés',
-                'landing': "Gestion du Contenu de l'Accueil",
-                'support': 'Tickets de Support Technique',
-                'settings': 'Paramètres de la Plateforme'
-            };
+        function closeEditSuperAdminModal() {
+            document.getElementById('modal-edit-superadmin').classList.add('hidden');
+        }
 
-            document.getElementById('section-title').innerText = titles[id];
-        };
-
-        window.handleLogout = function() {
-            window.location.reload();
-        };
-
-        window.filterAgents = function() {
-            const query = document.getElementById('agent-search').value.toLowerCase();
-            const filteredAgents = allAgents.filter(function(agent) { 
-                return agent.email.toLowerCase().includes(query) || (agent.promo_code || '').toLowerCase().includes(query);
-            });
-            renderAgentsTable(filteredAgents);
-        };
-
-        window.toggleShopFeatured = async function(shopId, currentStatus) {
-            if (!currentUser) return;
-            try {
-                await updateDoc(docPath('shops', shopId), { is_featured: !currentStatus });
-            } catch (err) { alert("Erreur : " + err.message); }
-        };
-
-        window.deleteShop = async function(shopId) {
-            if (!confirm(`Voulez-vous vraiment supprimer cette boutique ?`)) return;
-            try { await deleteDoc(docPath('shops', shopId)); } 
-            catch (e) { alert("Erreur : " + e.message); }
-        };
-
-        window.savePlatformContent = async function() {
-            if (!currentUser) return;
-            try {
-                await setDoc(docPath('settings', 'content_settings'), {
-                    announcement: document.getElementById('config-global-announcement').value,
-                    videoId: document.getElementById('config-featured-video-id').value,
-                    updated_at: Date.now()
-                }, { merge: true });
-                alert("Contenu de la page d'accueil mis à jour !");
-            } catch (e) { alert("Erreur : " + e.message); }
-        };
-
-        window.savePlatformSettings = async function() {
-            if (!currentUser) return;
-            try {
-                await setDoc(docPath('settings', 'platform_settings'), {
-                    agentCommission: parseInt(document.getElementById('config-agent-commission').value),
-                    exchangeRate: parseFloat(document.getElementById('config-exchange-rate').value),
-                    topCategories: document.getElementById('config-top-categories').value,
-                    updated_at: Date.now()
-                }, { merge: true });
-                alert("Paramètres globaux enregistrés avec succès !");
-            } catch (e) { alert("Erreur : " + e.message); }
-        };
-
-        window.markTicketResolved = async function(ticketId) {
-            if (!confirm("Marquer ce ticket comme résolu ?")) return;
-            try { await updateDoc(docPath('tickets', ticketId), { status: 'resolved', resolved_at: Date.now() }); } 
-            catch (e) { alert("Erreur : " + e.message); }
-        };
-
-        window.deleteTicket = async function(ticketId) {
-            if (!confirm("Supprimer ce ticket de support ?")) return;
-            try { await deleteDoc(docPath('tickets', ticketId)); } 
-            catch (e) { alert("Erreur : " + e.message); }
-        };
-
-        window.deleteConcoursRegistration = async function(entryId) {
-            if (!confirm("Supprimer cette inscription au concours ?")) return;
-            try { await deleteDoc(docPath('concours', entryId)); } 
-            catch (e) { alert("Erreur : " + e.message); }
-        };
-
-        window.deleteClient = async function(clientId) {
-            if (!confirm("Voulez-vous supprimer ce profil client ?")) return;
-            try { await deleteDoc(docPath('clients', clientId)); } 
-            catch (e) { alert("Erreur : " + e.message); }
-        };
-
-        window.openShopLimits = function(shopId) {
-            const shop = allShops.find(function(s) { return s.id === shopId; });
-            if (!shop) return;
-            document.getElementById('limit-shop-id').value = shopId;
-            document.getElementById('limit-shop-name').innerText = shop.name;
-            document.getElementById('limit-products').value = shop.limit_products || 50;
-            document.getElementById('limit-price-max').value = shop.limit_price_max || 5000;
-            document.getElementById('limit-orders-day').value = shop.limit_orders_day || 20;
-            document.getElementById('limit-orders-month').value = shop.limit_orders_month || 500;
-            document.getElementById('modal-shop-limits').classList.remove('hidden');
-        };
-
-        window.closeShopLimitsModal = function() {
-            document.getElementById('modal-shop-limits').classList.add('hidden');
-        };
-
-        window.handleSaveShopLimits = async function(e) {
+        async function handleEditSuperAdmin(e) {
             e.preventDefault();
-            const shopId = document.getElementById('limit-shop-id').value;
-            try {
-                await updateDoc(docPath('shops', shopId), {
-                    limit_products: parseInt(document.getElementById('limit-products').value),
-                    limit_price_max: parseFloat(document.getElementById('limit-price-max').value),
-                    limit_orders_day: parseInt(document.getElementById('limit-orders-day').value),
-                    limit_orders_month: parseInt(document.getElementById('limit-orders-month').value)
-                });
-                alert("Restrictions mises à jour pour cette boutique.");
-                window.closeShopLimitsModal();
-            } catch (err) { alert("Erreur : " + err.message); }
-        };
+            if(!supabaseAdmin) return;
+            const id = document.getElementById('edit-sa-id').value;
+            const name = document.getElementById('edit-sa-name').value;
+            const email = document.getElementById('edit-sa-email').value;
+            const password = document.getElementById('edit-sa-pass').value;
 
-        window.toggleAgentCommission = async function(agentId, isActive) {
-            try { await updateDoc(docPath('agents', agentId), { commission_active: isActive }); } 
-            catch (e) { alert("Erreur : " + e.message); }
-        };
-
-        window.openAgentModal = function() { document.getElementById('modal-agent').classList.remove('hidden'); };
-        window.closeAgentModal = function() { document.getElementById('modal-agent').classList.add('hidden'); };
-
-        window.handleCreateAgent = async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('new-agent-email').value;
-            const promo = document.getElementById('new-agent-promo').value || 'AUTO-' + Math.floor(Math.random() * 1000);
-            const btn = document.getElementById('btn-submit-agent');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Déploiement...`;
-
-            try {
-                const newAgentId = 'ag_' + Math.random().toString(36).substr(2, 9);
-                await setDoc(docPath('agents', newAgentId), {
-                    email: email,
-                    promo_code: promo.toUpperCase(),
-                    commission_active: true,
-                    created_at: Date.now()
-                });
-                alert(`Agent ${email} créé avec succès !`);
-                e.target.reset();
-                window.closeAgentModal();
-            } catch (err) { 
-                alert("Erreur : " + err.message); 
-            } finally { 
-                btn.disabled = false; 
-                btn.innerText = "Déployer le Compte Agent"; 
+            let updates = { name, email };
+            if (password) { // On met à jour le mot de passe seulement s'il est renseigné
+                updates.password = password;
             }
-        };
 
-        window.openEditAgentModal = function(agentId) {
-            const agent = allAgents.find(function(a) { return a.id === agentId; });
-            if (!agent) return;
-            document.getElementById('edit-agent-id').value = agent.id;
-            document.getElementById('edit-agent-email-display').innerText = agent.email;
-            document.getElementById('edit-agent-promo').value = agent.promo_code || '';
-            document.getElementById('edit-agent-commission-active').checked = agent.commission_active || false;
-            document.getElementById('modal-edit-agent').classList.remove('hidden');
-        };
+            const { error } = await supabaseAdmin.from('super_admins').update(updates).eq('id', id);
+            if (error) return showToast("Erreur: " + error.message, "error");
+            showToast("Profil Super Admin mis à jour.");
+            closeEditSuperAdminModal();
+            loadGlobalData();
+        }
 
-        window.closeEditAgentModal = function() { document.getElementById('modal-edit-agent').classList.add('hidden'); };
-
-        window.handleEditAgent = async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('edit-agent-id').value;
-            try {
-                await updateDoc(docPath('agents', id), {
-                    promo_code: document.getElementById('edit-agent-promo').value.trim().toUpperCase(),
-                    commission_active: document.getElementById('edit-agent-commission-active').checked,
-                    updated_at: Date.now()
-                });
-                alert("Profil mis à jour.");
-                window.closeEditAgentModal();
-            } catch (err) { alert("Erreur : " + err.message); }
-        };
-
-        window.deleteAgent = async function(agentId) {
-            if (!confirm("Voulez-vous vraiment supprimer cet agent ?")) return;
-            try { await deleteDoc(docPath('agents', agentId)); } 
-            catch (err) { alert("Erreur : " + err.message); }
-        };
-
-        window.openEditShopModal = function(shopId) {
-            const shop = allShops.find(function(s) { return s.id === shopId; });
-            if (!shop) return;
-            document.getElementById('edit-shop-id').value = shop.id;
-            document.getElementById('edit-shop-name-display').innerText = shop.name;
-            document.getElementById('edit-shop-name').value = shop.name || '';
-            document.getElementById('edit-shop-slogan').value = shop.slogan || '';
-            document.getElementById('edit-shop-category').value = shop.default_category || '';
-            document.getElementById('edit-shop-phone').value = shop.contact_info?.phone || '';
-            document.getElementById('edit-shop-address').value = shop.contact_info?.address || '';
-            document.getElementById('modal-edit-shop').classList.remove('hidden');
-        };
-
-        window.closeEditShopModal = function() { document.getElementById('modal-edit-shop').classList.add('hidden'); };
-
-        window.handleEditShop = async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('edit-shop-id').value;
-            try {
-                await updateDoc(docPath('shops', id), {
-                    name: document.getElementById('edit-shop-name').value.trim(),
-                    slogan: document.getElementById('edit-shop-slogan').value.trim(),
-                    default_category: document.getElementById('edit-shop-category').value.trim(),
-                    contact_info: { 
-                        phone: document.getElementById('edit-shop-phone').value.trim(), 
-                        address: document.getElementById('edit-shop-address').value.trim() 
-                    },
-                    updated_at: Date.now()
-                });
-                alert("Configuration de la boutique enregistrée.");
-                window.closeEditShopModal();
-            } catch (err) { alert("Erreur : " + err.message); }
-        };
-
-        window.openEditClientModal = function(clientId) {
-            const client = allClients.find(function(c) { return c.id === clientId; });
-            if (!client) return;
-            document.getElementById('edit-client-id').value = client.id;
-            document.getElementById('edit-client-email-display').innerText = client.email;
-            document.getElementById('edit-client-name').value = client.email.split('@')[0];
-            document.getElementById('edit-client-email').value = client.email;
-            document.getElementById('modal-edit-client').classList.remove('hidden');
-        };
-
-        window.closeEditClientModal = function() { document.getElementById('modal-edit-client').classList.add('hidden'); };
-
-        window.handleEditClient = async function(e) {
-            e.preventDefault();
-            alert("Sauvegarde effectuée pour ce client.");
-            window.closeEditClientModal();
-        };
-
-        window.openEditConcoursModal = function(entryId) {
-            const entry = concoursData.find(function(c) { return c.id === entryId; });
-            if (!entry) return;
-            document.getElementById('edit-concours-id').value = entry.id;
-            document.getElementById('edit-concours-name-display').innerText = entry.name;
-            document.getElementById('edit-concours-name').value = entry.name || '';
-            document.getElementById('edit-concours-email').value = entry.email || '';
-            document.getElementById('edit-concours-phone').value = entry.phone || '';
-            document.getElementById('modal-edit-concours').classList.remove('hidden');
-        };
-
-        window.closeEditConcoursModal = function() { document.getElementById('modal-edit-concours').classList.add('hidden'); };
-
-        window.handleEditConcours = async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('edit-concours-id').value;
-            try {
-                await updateDoc(docPath('concours', id), {
-                    name: document.getElementById('edit-concours-name').value.trim(),
-                    email: document.getElementById('edit-concours-email').value.trim(),
-                    phone: document.getElementById('edit-concours-phone').value.trim()
-                });
-                alert("Inscription mise à jour.");
-                window.closeEditConcoursModal();
-            } catch (err) { alert("Erreur : " + err.message); }
-        };
-
-        window.exportConcoursCSV = function() {
-            if (concoursData.length === 0) return alert("Aucune donnée à exporter.");
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Type,Nom,Email,Telephone,Categorie,Total,Date\n";
-            concoursData.forEach(function(entry) {
-                const date = new Date(entry.created_at).toLocaleDateString();
-                let row = `${entry.type},${entry.name},${entry.email},${entry.phone || ''},${entry.category || entry.ticket_type || ''},${entry.total || ''},${date}`;
-                csvContent += row + "\n";
+        function confirmDeleteSuperAdmin(id) {
+            showConfirmModal("Révoquer Accès", "Supprimer ce compte Super Admin ?", async () => {
+                if(!supabaseAdmin) return;
+                await supabaseAdmin.from('super_admins').delete().eq('id', id);
+                loadGlobalData(); showToast("Accès révoqué.");
             });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "inscriptions_concours.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        }
+
+        function openProfileModal() {
+            document.getElementById('profile-name').value = currentAdminProfile.name;
+            document.getElementById('profile-password').value = '';
+            document.getElementById('modal-edit-profile').classList.remove('hidden');
+        }
+        function closeProfileModal() { document.getElementById('modal-edit-profile').classList.add('hidden'); }
+        
+        async function handleEditProfile(e) {
+            e.preventDefault();
+            const name = document.getElementById('profile-name').value;
+            const pass = document.getElementById('profile-password').value;
+            
+            try {
+                let updates = { name: name };
+                if (pass) updates.password = pass;
+                await supabaseAdmin.from('super_admins').update(updates).eq('id', currentAdminProfile.id);
+                currentAdminProfile.name = name;
+                document.getElementById('admin-name').innerText = name;
+                showToast("Profil mis à jour"); 
+                closeProfileModal();
+                loadGlobalData();
+            } catch(e) {}
+        }
+
+        async function savePlatformSettings() {
+            const agentComm = document.getElementById('config-agent-commission').value;
+            const exchangeRate = document.getElementById('config-exchange-rate').value;
+            const topCategories = document.getElementById('config-top-categories').value;
+
+            try {
+                await supabaseAdmin.from('platform_settings').upsert({
+                    id: 'global_settings',
+                    agent_commission: agentComm,
+                    exchange_rate: exchangeRate,
+                    top_categories: topCategories,
+                    updated_at: new Date().toISOString()
+                });
+                showToast("Paramètres globaux sauvegardés sur le Cloud.");
+            } catch(e) { showToast("Erreur de sauvegarde", "error"); }
+        }
+
+        // --- INITIALISATION ---
+        window.onload = () => {
+            document.getElementById('admin-name').innerText = currentAdminProfile.name;
+            loadGlobalData();
+            fetchAdminEvents();
         };
+
     </script>
 </body>
 </html>
