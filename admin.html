@@ -222,6 +222,7 @@
                         <table class="w-full text-left">
                             <thead class="bg-white text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
                                 <tr>
+                                    <th class="px-6 py-4">Mot de Passe</th>
                                     <th class="px-6 py-4">Détails Agent</th>
                                     <th class="px-6 py-4">Code Promo</th>
                                     <th class="px-6 py-4">Boutiques Créées</th>
@@ -801,6 +802,9 @@
                 const agentRevenue = allOrders.filter(o => o.promo_code === agent.promo_code && o.status !== 'Refusé').reduce((s, o) => s + Number(o.total || 0), 0);
                 return `
                 <tr class="hover:bg-slate-50/50 transition duration-150">
+                    <td class="px-6 py-4 text-xs font-mono font-medium text-slate-500">
+                        ${agent.password ? '*******' : 'Non défini'}
+                    </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-black text-xs shadow-inner">
@@ -817,6 +821,8 @@
                     <td class="px-6 py-4"><span class="status-badge ${sClass}">${agent.commission_active ? 'Active' : 'Inactive'}</span></td>
                     <td class="px-6 py-4 text-right space-x-1">
                         <button onclick="toggleAgentStatus('${agent.id}', ${agent.commission_active})" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-800 hover:text-white transition"><i class="fas fa-power-off text-xs"></i></button>
+                        <button onclick="resetAgentPassword('${agent.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-yellow-500 hover:text-black transition" title="Réinitialiser le mot de passe"><i class="fas fa-key text-xs"></i></button>
+                        <button onclick="openEditAgentModal('${agent.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-blue-500 hover:text-white transition" title="Modifier l'agent"><i class="fas fa-edit text-xs"></i></button>
                         <button onclick="confirmDeleteAgent('${agent.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition shadow-sm"><i class="fas fa-trash text-xs"></i></button>
                     </td>
                 </tr>`;
@@ -839,9 +845,10 @@
             const password = document.getElementById('new-agent-pass').value;
 
             try {
-                // On retire la ligne "id" pour laisser Supabase générer l'UUID automatiquement.
-                // On rend aussi les autres champs explicites.
+                // ALTERNATIVE : On génère un UUID côté client car la DB n'est pas configurée pour le faire.
+                // La meilleure solution reste de configurer la valeur par défaut de la colonne 'id' sur Supabase.
                 const { error } = await supabaseAdmin.from('agents_commerciaux').insert({
+                    id: crypto.randomUUID(), // Ajout de la génération d'UUID côté client
                     email: email,
                     password: password,
                     promo_code: promo_code,
@@ -873,6 +880,50 @@
                 loadGlobalData();
                 showToast("Agent supprimé.");
             });
+        }
+
+        function openEditAgentModal(id) {
+            const agent = allAgents.find(a => a.id === id);
+            if (!agent) return showToast("Agent non trouvé.", "error");
+
+            document.getElementById('edit-agent-id').value = agent.id;
+            document.getElementById('edit-agent-email-display').innerText = agent.email;
+            document.getElementById('edit-agent-promo').value = agent.promo_code || '';
+            document.getElementById('edit-agent-commission-active').checked = agent.commission_active;
+            document.getElementById('modal-edit-agent').classList.remove('hidden');
+        }
+
+        function closeEditAgentModal() {
+            document.getElementById('modal-edit-agent').classList.add('hidden');
+        }
+
+        async function handleEditAgent(e) {
+            e.preventDefault();
+            if(!supabaseAdmin) return;
+            const id = document.getElementById('edit-agent-id').value;
+            const promo_code = document.getElementById('edit-agent-promo').value.toUpperCase();
+            const commission_active = document.getElementById('edit-agent-commission-active').checked;
+
+            try {
+                const { error } = await supabaseAdmin.from('agents_commerciaux').update({ promo_code, commission_active }).eq('id', id);
+                if (error) throw error;
+                showToast("Agent mis à jour avec succès.");
+                closeEditAgentModal();
+                loadGlobalData();
+            } catch(err) {
+                showToast("Erreur: " + err.message, "error");
+            }
+        }
+
+        async function resetAgentPassword(id) {
+            const agent = allAgents.find(a => a.id === id);
+            if (!agent) return showToast("Agent non trouvé.", "error");
+            
+            const newPass = 'LGA' + Math.floor(1000 + Math.random() * 9000);
+            const { error } = await supabaseAdmin.from('agents_commerciaux').update({ password: newPass }).eq('id', id);
+            if (error) return showToast("Erreur: " + error.message, "error");
+            showToast(`Nouveau mot de passe pour ${agent.email} : ${newPass}`, 'success');
+            loadGlobalData();
         }
 
         // --- SHOPS ---
