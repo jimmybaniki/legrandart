@@ -1050,6 +1050,21 @@
         }
 
         window.onload = () => {
+            // Vérifie si un utilisateur est connecté et met à jour le bouton de connexion
+            const userDataString = localStorage.getItem('lg_user_data');
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                const loginButton = document.querySelector('button[onclick="showLoginPortal()"]');
+                if (loginButton) {
+                    loginButton.onclick = () => {
+                        if (userData.role === 'gerant') window.location.href = 'dashboard.html';
+                        else if (userData.role === 'artiste') window.location.href = 'espace-pro.html';
+                        else showLoginPortal();
+                    };
+                }
+            }
+
+
             const urlParams = new URLSearchParams(window.location.search);
             const skipRedirect = urlParams.get('skipRedirect') === 'true';
 
