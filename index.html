@@ -366,7 +366,7 @@
                         </button>
                         <div class="accordion-content px-5 pb-5">
                             <p class="text-xs text-gray-400 leading-relaxed mb-4">Aider les artistes et les gérants à développer leur présence et leurs ventes.</p>
-                            <a href="agent-commercial.html" class="inline-block bg-purple-500 text-black text-[10px] font-black uppercase tracking-widest px-5 py-2.5 rounded-lg">Devenir Agent</a>
+                            <a href="agent-commercial.html" class="inline-block bg-purple-500 text-black text-[10px] font-black uppercase tracking-widest px-5 py-2.5 rounded-lg">Espace Agent</a>
                         </div>
                     </div>
 
@@ -504,23 +504,21 @@
             </div>
         </div>
 
-        <!-- Bouton Admin Flottant -->
-        <button onclick="accessPlatformAdmin()" title="Accès Administration" class="fixed bottom-5 left-5 z-50 w-12 h-12 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20 hover:border-yellow-500 transition-all shadow-[0_0_25px_rgba(234,179,8,0.3)] animate-pulse-glow">
-            <i data-feather="shield" class="w-6 h-6"></i>
-        </button>
-        
         <!-- FOOTER COMPLET -->
         <footer class="bg-[#050505] border-t border-white/5 pt-24 pb-12 px-6 mt-24">
             <div class="max-w-[1600px] mx-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
                     <!-- Colonne 1: À Propos -->
                     <div class="space-y-8 text-left">
-                        <a href="#" onclick="showPage('home')" class="flex flex-col leading-none">
-                            <span class="text-3xl font-black text-white logo-text">
-                                LeGrand<span class="text-yellow-500">Art</span>
-                            </span>
-                            <span class="text-[8px] md:text-[9px] uppercase tracking-[0.4em] text-emerald-500 font-black mt-1">Espace Business</span>
-                        </a>
+                        <div class="flex items-end gap-4">
+                            <a href="#" onclick="showPage('home')" class="flex flex-col leading-none">
+                                <span class="text-3xl font-black text-white logo-text">LeGrand<span class="text-yellow-500">Art</span></span>
+                                <span class="text-[8px] md:text-[9px] uppercase tracking-[0.4em] text-emerald-500 font-black mt-1">Espace Business</span>
+                            </a>
+                            <button onclick="accessPlatformAdmin()" title="Accès Administration" class="w-6 h-6 mb-1 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center border border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20 hover:border-yellow-500 transition-all shadow-[0_0_15px_rgba(234,179,8,0.2)] animate-pulse-glow">
+                                <i data-feather="shield" class="w-3 h-3"></i>
+                            </button>
+                        </div>
                         <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
                             La première plateforme éthique dédiée à l'excellence artistique panafricaine. Nous protégeons et promouvons l'art qui élève l'esprit et honore nos racines.
                         </p>
@@ -599,6 +597,13 @@
                     <p class="text-[9px] text-emerald-500/50 font-black uppercase tracking-[0.3em]">
                         GOMBE, KINSHASA, RDC
                     </p>
+                </div>
+
+                <!-- Powered by Banikilabs -->
+                <div class="text-center mt-12">
+                    <a href="https://www.banikilabs.store/site_web.html" target="_blank" rel="noopener noreferrer" class="text-xs text-gray-600 hover:text-yellow-500 transition-colors">
+                        Powered by <span class="font-bold">Banikilabs</span>
+                    </a>
                 </div>
             </div>
         </footer>
