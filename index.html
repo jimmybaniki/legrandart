@@ -183,6 +183,14 @@
         .accordion-item.active .accordion-icon {
             transform: rotate(180deg);
         }
+
+        @keyframes pulse-glow {
+            50% {
+                box-shadow: 0 0 35px rgba(234, 179, 8, 0.4);
+                border-color: rgba(234, 179, 8, 1);
+            }
+        }
+        .animate-pulse-glow { animation: pulse-glow 4s infinite ease-in-out; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -496,14 +504,11 @@
             </div>
         </div>
 
-        <!-- Bouton d'Administration -->
-        <section class="max-w-[1400px] mx-auto px-4 md:px-6 py-12 text-center">
-            <button onclick="accessPlatformAdmin()" class="premium-icon-btn flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest text-yellow-500 border-2 border-yellow-500/40 hover:border-yellow-500 hover:bg-yellow-500/10 transition-all shadow-[0_0_20px_rgba(234,179,8,0.15)] mx-auto">
-                <i data-feather="shield" class="w-5 h-5"></i>
-                <span>Accès Administration</span>
-            </button>
-        </section>
-
+        <!-- Bouton Admin Flottant -->
+        <button onclick="accessPlatformAdmin()" title="Accès Administration" class="fixed bottom-5 left-5 z-50 w-12 h-12 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20 hover:border-yellow-500 transition-all shadow-[0_0_25px_rgba(234,179,8,0.3)] animate-pulse-glow">
+            <i data-feather="shield" class="w-6 h-6"></i>
+        </button>
+        
         <!-- FOOTER COMPLET -->
         <footer class="bg-[#050505] border-t border-white/5 pt-24 pb-12 px-6 mt-24">
             <div class="max-w-[1600px] mx-auto">
