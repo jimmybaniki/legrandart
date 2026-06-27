@@ -15,555 +15,500 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
-        .sidebar { background: #000000; width: 260px; transition: all 0.3s; }
-        .nav-link { 
-            display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; 
-            color: #94a3b8; border-radius: 0.75rem; transition: 0.2s; 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
         }
-        .nav-link:hover, .nav-link.active { background: #facc15; color: black; font-weight: bold; }
-        .glass-card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        .btn-action { background: #10b981; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: 0.2s; }
-        .btn-action:hover { background: #059669; }
-        .hidden { display: none !important; }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+        .sidebar { background: #0f172a; width: 260px; transition: all 0.3s; }
+        .nav-link { 
+            display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1rem; 
+            color: #94a3b8; border-radius: 0.75rem; transition: 0.2s; font-size: 0.875rem; font-weight: 500;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #facc15; }
+        .nav-link.active { background: #facc15; color: #0f172a; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(250, 204, 21, 0.3); }
+        .glass-card { background: white; border-radius: 1.25rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
         
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
-    <!-- Sidebar -->
-    <aside class="sidebar flex flex-col p-6 text-white shrink-0">
+    
+    <!-- PASSERELLE DE CONNEXION AGENT (OVERLAY) -->
+    <div id="access-overlay" class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4 transition-all">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-transform">
+            <div class="bg-slate-900 p-8 text-center relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-yellow-400/20 rounded-full blur-xl"></div>
+                <i class="fas fa-user-tie text-4xl text-yellow-400 mb-3 relative z-10"></i>
+                <h3 class="text-2xl font-black uppercase text-white tracking-wide relative z-10">Portail Agent</h3>
+                <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold mt-1 relative z-10">Réseau Commercial LeGrandArt</p>
+            </div>
+            
+            <div class="p-8 space-y-6">
+                <form id="auth-form" onsubmit="handleAgentLogin(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Email Agent</label>
+                        <div class="relative">
+                            <i class="fas fa-envelope absolute left-4 top-3.5 text-slate-400"></i>
+                            <input id="agent-email" type="email" required placeholder="agent@legrandart.com" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Mot de passe fourni</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-4 top-3.5 text-slate-400"></i>
+                            <input id="agent-password" type="password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition" />
+                        </div>
+                    </div>
+                    <button type="submit" id="btn-login" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition shadow-lg mt-2">
+                        Connexion Sécurisée
+                    </button>
+                    <div id="login-error" class="hidden text-[10px] font-bold text-rose-500 text-center uppercase tracking-widest">Identifiants incorrects ou compte inactif.</div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar flex flex-col p-6 shrink-0 z-40 hidden md:flex">
         <div class="mb-10 px-2">
-            <a href="index.html" class="text-2xl font-black italic">LeGrand<span class="text-yellow-400">Art</span></a>
-            <p class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Agent Commercial</p>
+            <h1 class="text-2xl font-black italic text-white tracking-tight">LeGrand<span class="text-yellow-400">Art</span></h1>
+            <p class="text-[9px] uppercase tracking-widest text-slate-400 font-bold">Réseau Agent</p>
         </div>
         <nav class="flex-1 space-y-2">
-            <a href="#" onclick="showSection('overview')" class="nav-link active" id="nav-overview"><i class="fas fa-chart-line w-5"></i> Vue d'ensemble</a>
-            <a href="#" onclick="showSection('clients')" class="nav-link" id="nav-clients"><i class="fas fa-users w-5"></i> Mes Clients (Gérants)</a>
+            <a href="#" onclick="showSection('overview')" class="nav-link active" id="nav-overview"><i class="fas fa-chart-pie w-5"></i> Vue d'ensemble</a>
             <a href="#" onclick="showSection('shops')" class="nav-link" id="nav-shops"><i class="fas fa-store w-5"></i> Boutiques Gérées</a>
-            <a href="#" onclick="showSection('tools')" class="nav-link" id="nav-tools"><i class="fas fa-plus-circle w-5"></i> Outils & Création</a>
-            <a href="#" onclick="showSection('tech')" class="nav-link" id="nav-tech"><i class="fas fa-tools w-5"></i> Support Technique</a>
+            <a href="#" onclick="showSection('tools')" class="nav-link" id="nav-tools"><i class="fas fa-plus-circle w-5"></i> Déployer un Client</a>
+            <a href="#" onclick="showSection('tech')" class="nav-link" id="nav-tech"><i class="fas fa-headset w-5"></i> Assistance Gérants</a>
         </nav>
-        <div class="mt-auto border-t border-white/10 pt-6">
-            <div id="cloud-status" class="flex items-center gap-2 mb-4 px-2 text-[10px] uppercase tracking-widest font-bold text-yellow-500">
-                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Connexion base...
+        <div class="mt-auto border-t border-slate-700/50 pt-6">
+            <div id="cloud-status" class="flex items-center gap-2 mb-4 px-2 text-[10px] uppercase tracking-widest font-bold text-emerald-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Actif
             </div>
-            <button onclick="handleLogout()" class="nav-link w-full text-red-400 hover:bg-red-500/10 hover:text-red-500">
+            <button onclick="handleLogout()" class="nav-link w-full text-rose-400 hover:bg-rose-500/10 hover:text-rose-500">
                 <i class="fas fa-sign-out-alt w-5"></i> Déconnexion
             </button>
         </div>
     </aside>
 
-    <!-- Main Area -->
+    <!-- MAIN AREA -->
     <main class="flex-1 flex flex-col overflow-y-auto relative">
-        <!-- Top Toolbar -->
-        <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-20">
+        <!-- TOP TOOLBAR -->
+        <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-30">
             <div class="flex items-center gap-4">
-                <a href="index.html" class="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors" title="Retour à l'accueil">
+                <button onclick="window.location.href='index.html'" class="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 transition-colors" title="Retour à l'accueil">
                     <i class="fa-solid fa-house text-sm"></i>
-                </a>
-                <h2 class="font-bold text-lg" id="section-title">Tableau de bord Agent</h2>
+                </button>
+                <h2 class="font-black text-lg text-slate-800" id="section-title">Tableau de bord Agent</h2>
             </div>
             <div class="flex items-center gap-4">
-                <button onclick="toggleNotifications()" class="relative text-gray-500 hover:text-black transition">
-                    <i class="fas fa-bell text-xl"></i>
-                    <span id="notification-count" class="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-[9px] text-white font-black">0</span>
-                </button>
-                <div class="h-6 w-px bg-gray-200 mx-2"></div>
                 <div class="flex flex-col text-right">
-                    <span id="agent-name" class="font-bold text-sm">Agent</span>
-                    <span class="text-[10px] text-gray-400 font-bold uppercase">Commercial</span>
+                    <span id="display-agent-email" class="font-bold text-sm text-slate-800">Chargement...</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Agent Agréé</span>
                 </div>
-                <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center font-black text-black shadow-sm">A</div>
+                <div class="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center font-black text-slate-900 shadow-md">
+                    <i class="fas fa-user-tie"></i>
+                </div>
             </div>
         </header>
 
-        <!-- Notifications Dropdown -->
-        <div id="notification-panel" class="absolute top-20 right-8 w-80 glass-card p-0 shadow-xl hidden z-30 overflow-hidden border border-gray-200">
-            <div class="bg-gray-50 p-4 border-b border-gray-100 flex items-center justify-between">
-                <div>
-                    <h3 class="font-black uppercase text-xs tracking-widest text-gray-800">Alertes Réseau</h3>
-                </div>
-                <button onclick="clearNotifications()" class="text-[10px] font-bold text-gray-400 hover:text-red-500 uppercase">Effacer</button>
-            </div>
-            <div id="notification-list" class="max-h-80 overflow-y-auto p-2 space-y-1">
-                <p class="text-center text-xs text-gray-400 py-4">Aucune notification.</p>
-            </div>
-        </div>
-
-        <div class="p-8 space-y-8">
-            <!-- VUE D'ENSEMBLE -->
+        <div class="p-4 md:p-8 space-y-8">
+            
+            <!-- SECTION: VUE D'ENSEMBLE -->
             <div id="section-overview" class="space-y-8">
+                <!-- KPI Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="glass-card p-6 border-l-4 border-l-black">
-                        <p class="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Gérants (Clients)</p>
-                        <h3 id="stat-clients" class="text-4xl font-black text-black">0</h3>
-                        <p class="text-xs text-gray-400 mt-2"><i class="fas fa-arrow-up text-green-500"></i> Partenaires inscrits</p>
+                    <div class="glass-card p-6 border-l-4 border-slate-900 relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 text-5xl text-slate-100"><i class="fas fa-store"></i></div>
+                        <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Boutiques Déployées</p>
+                        <h3 id="stat-shops" class="text-3xl font-black text-slate-900 relative z-10">0</h3>
+                        <p class="text-xs text-slate-400 mt-2 font-semibold relative z-10">Gérées par votre code</p>
                     </div>
-                    <div class="glass-card p-6 border-l-4 border-l-yellow-400">
-                        <p class="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Boutiques Déployées</p>
-                        <h3 id="stat-shops" class="text-4xl font-black text-black">0</h3>
-                        <p class="text-xs text-gray-400 mt-2"><i class="fas fa-store text-yellow-500"></i> Boutiques actives</p>
+                    
+                    <div class="glass-card p-6 border-l-4 border-yellow-400 relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 text-5xl text-yellow-50"><i class="fas fa-shopping-cart"></i></div>
+                        <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Ventes Réseau (Total)</p>
+                        <h3 id="stat-sales" class="text-3xl font-black text-slate-900 relative z-10">0 $</h3>
+                        <p class="text-xs text-slate-400 mt-2 font-semibold relative z-10">Total volume généré</p>
                     </div>
-                    <div class="glass-card p-6 border-l-4 border-l-green-500 bg-green-50/30">
-                        <p class="text-green-700 text-[10px] font-black uppercase tracking-widest mb-1">Commissions Estimées (5%)</p>
-                        <h3 id="stat-commissions" class="text-4xl font-black text-green-600">0.00 $</h3>
-                        <p class="text-xs text-green-600/70 mt-2 font-semibold">Basé sur le total des ventes réseau</p>
+
+                    <div class="glass-card p-6 border-l-4 border-emerald-500 bg-emerald-50/30 relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 text-5xl text-emerald-100/50"><i class="fas fa-money-bill-wave"></i></div>
+                        <p class="text-emerald-700 text-[10px] font-black uppercase tracking-widest mb-1">Commissions Estimées</p>
+                        <h3 id="stat-commissions" class="text-3xl font-black text-emerald-600 relative z-10">0 $</h3>
+                        <p class="text-[10px] text-emerald-600/70 mt-2 font-bold uppercase tracking-widest relative z-10">Taux standard : 5%</p>
                     </div>
-                    <div class="glass-card p-6 border-l-4 border-l-amber-500 bg-amber-50/30">
-                        <p class="text-amber-700 text-[10px] font-black uppercase tracking-widest mb-1">Mon Code Promo Agent</p>
-                        <div class="flex gap-2 mt-2">
-                            <input type="text" id="agent-promo-code" placeholder="Ex: AGENT01" class="flex-1 p-2 bg-white border border-amber-200 rounded-lg text-sm font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-amber-400" />
-                            <button onclick="saveAgentPromoCode()" class="bg-amber-500 text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-amber-600 transition shadow-sm">OK</button>
+
+                    <div class="glass-card p-6 border-l-4 border-indigo-500 bg-indigo-50/30">
+                        <p class="text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-1">Mon Code Promo Agent</p>
+                        <div class="mt-2 bg-white border border-indigo-200 rounded-lg p-3 text-center shadow-sm">
+                            <span id="stat-promocode" class="text-lg font-mono font-black text-indigo-700 tracking-wider">CHARGEMENT...</span>
                         </div>
-                        <p class="text-[9px] text-amber-600/70 mt-2 font-semibold italic">Utilisé pour identifier vos ventes.</p>
+                        <p class="text-[9px] text-indigo-600/70 mt-3 font-semibold text-center uppercase">Utilisé pour traquer vos ventes.</p>
                     </div>
                 </div>
 
-                <div class="glass-card p-6">
-                    <h3 class="font-black uppercase text-sm mb-4">Activité Récente du Réseau</h3>
-                    <div class="overflow-x-auto">
+                <!-- Activité Récente (Commandes avec le code de l'agent) -->
+                <div class="glass-card overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 bg-white">
+                        <h3 class="font-black text-sm text-slate-800 uppercase tracking-wide">Activité Récente du Réseau</h3>
+                        <p class="text-xs text-slate-500 mt-1">Les dernières commandes effectuées dans les boutiques de vos gérants.</p>
+                    </div>
+                    <div class="overflow-x-auto p-4">
                         <table class="w-full text-left">
-                            <thead class="bg-gray-50 text-gray-400 text-[10px] uppercase font-black tracking-widest">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
                                 <tr>
-                                    <th class="px-4 py-3 rounded-tl-lg">ID Commande</th>
+                                    <th class="px-4 py-3">Commande</th>
                                     <th class="px-4 py-3">Boutique</th>
                                     <th class="px-4 py-3">Montant</th>
-                                    <th class="px-4 py-3">Code Agent</th>
-                                    <th class="px-4 py-3 rounded-tr-lg">Statut</th>
+                                    <th class="px-4 py-3">Statut</th>
                                 </tr>
                             </thead>
-                            <tbody id="recent-activity-body" class="divide-y divide-gray-100">
-                                <tr><td colspan="4" class="px-4 py-8 text-center text-xs text-gray-400">Chargement de l'activité...</td></tr>
+                            <tbody id="recent-activity-body" class="divide-y divide-slate-50">
+                                <tr><td colspan="4" class="px-4 py-8 text-center text-xs text-slate-400">Chargement de l'activité...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- LISTE CLIENTS (Gérants) -->
-            <div id="section-clients" class="hidden glass-card overflow-hidden">
-                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                    <h3 class="font-black uppercase text-sm">Apporteurs d'Affaires : Gérants</h3>
-                    <p class="text-xs text-gray-500 mt-1">Liste des propriétaires uniques de boutiques.</p>
-                </div>
-                <div class="overflow-x-auto p-4">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-100 text-gray-500 text-[10px] uppercase font-black tracking-widest">
-                            <tr>
-                                <th class="px-6 py-3 rounded-l-lg">ID Propriétaire</th>
-                                <th class="px-6 py-3">Nombre de boutiques</th>
-                                <th class="px-6 py-3 rounded-r-lg">Statut Réseau</th>
-                            </tr>
-                        </thead>
-                        <tbody id="clients-list-body" class="divide-y divide-gray-50">
-                            <!-- Rempli en JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- LISTE BOUTIQUES -->
+            <!-- SECTION: BOUTIQUES GEREES -->
             <div id="section-shops" class="hidden glass-card overflow-hidden">
-                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                    <h3 class="font-black uppercase text-sm">Gestion de Réseau : Boutiques</h3>
-                    <p class="text-xs text-gray-500 mt-1">Toutes les boutiques créées sur la plateforme.</p>
+                <div class="p-6 border-b border-slate-100 bg-white">
+                    <h3 class="font-black text-sm text-slate-800 uppercase tracking-wide">Mon Réseau de Boutiques</h3>
+                    <p class="text-xs text-slate-500 mt-1">Toutes les boutiques créées et liées à votre code d'agent.</p>
                 </div>
                 <div class="overflow-x-auto p-4">
                     <table class="w-full text-left">
-                        <thead class="bg-gray-100 text-gray-500 text-[10px] uppercase font-black tracking-widest">
+                        <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
                             <tr>
-                                <th class="px-6 py-3 rounded-l-lg">Boutique</th>
+                                <th class="px-6 py-3">Boutique & Gérant</th>
                                 <th class="px-6 py-3">Catégorie</th>
-                                <th class="px-6 py-3">Devise</th>
-                                <th class="px-6 py-3 rounded-r-lg text-right">Actions</th>
+                                <th class="px-6 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="shops-list-body" class="divide-y divide-gray-50">
+                        <tbody id="shops-list-body" class="divide-y divide-slate-50">
                             <!-- Rempli en JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- OUTILS & CRÉATION -->
+            <!-- SECTION: DEPLOYER UN CLIENT (TOOLS) -->
             <div id="section-tools" class="hidden space-y-8">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- CREATE MANAGER & SHOP -->
-                    <div class="glass-card p-8 border-t-4 border-t-yellow-400">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center"><i class="fas fa-store"></i></div>
-                            <h3 class="text-xl font-black uppercase">Créer Gérant & Boutique</h3>
+                <div class="glass-card p-8 border-t-4 border-t-yellow-400 max-w-2xl mx-auto">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center text-xl shadow-inner"><i class="fas fa-store"></i></div>
+                        <div>
+                            <h3 class="text-xl font-black uppercase text-slate-800">Déployer une Boutique</h3>
+                            <p class="text-xs text-slate-500">Créez un espace pour un gérant. Votre code sera automatiquement lié.</p>
                         </div>
-                        <form onsubmit="handleCreateManagerAndShop(event)" class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-1">
-                                    <label class="text-[9px] font-black uppercase text-gray-400 ml-1">Email du Gérant</label>
-                                    <input type="email" id="new-manager-email" required placeholder="manager@exemple.com" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-black outline-none" />
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[9px] font-black uppercase text-gray-400 ml-1">Mot de passe provisoire</label>
-                                    <input type="password" id="new-manager-pass" required placeholder="••••••••" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-black outline-none" />
-                                </div>
+                    </div>
+                    
+                    <form onsubmit="handleDeployShop(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Email du Gérant</label>
+                                <input type="email" id="new-manager-email" required placeholder="manager@exemple.com" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[9px] font-black uppercase text-gray-400 ml-1">Numéro WhatsApp du Gérant</label>
-                                <input type="tel" id="new-manager-phone" required placeholder="+243..." class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-black outline-none" />
+                                <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Mot de passe provisoire</label>
+                                <input type="password" id="new-manager-pass" required placeholder="••••••••" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black uppercase text-gray-400 ml-1">Nom de la Boutique</label>
-                                <input type="text" id="new-manager-shop-name" required placeholder="Nom de l'enseigne" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-black outline-none" />
-                            </div>
-                            <button type="submit" id="btn-create-mgr" class="w-full bg-black text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-800 transition shadow-lg">
-                                Déployer la Boutique
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- CREATE CLIENT -->
-                    <div class="glass-card p-8 border-t-4 border-t-blue-500">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fas fa-user-plus"></i></div>
-                            <h3 class="text-xl font-black uppercase">Créer un Compte Client</h3>
                         </div>
-                        <form onsubmit="handleCreateClient(event)" class="space-y-4">
-                            <input type="email" id="new-client-email" required placeholder="Email du client" class="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm outline-none" />
-                            <input type="password" id="new-client-pass" required placeholder="Mot de passe provisoire" class="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm outline-none" />
-                            <input type="tel" id="new-client-phone" required placeholder="Numéro WhatsApp du client" class="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm outline-none" />
-                            <button type="submit" id="btn-create-cli" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition shadow-lg">
-                                Enregistrer le Client
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Numéro WhatsApp du Gérant</label>
+                            <input type="tel" id="new-manager-phone" required placeholder="+243..." class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Nom de la Boutique</label>
+                            <input type="text" id="new-manager-shop-name" required placeholder="Ex: Boutique Élégance" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
+                        </div>
+                        <div class="pt-2">
+                            <button type="submit" id="btn-deploy-shop" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition shadow-xl flex items-center justify-center gap-2">
+                                <i class="fas fa-rocket"></i> Créer et Déployer
                             </button>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <!-- SUPPORT TECH -->
-            <div id="section-tech" class="hidden glass-card p-8 max-w-2xl">
+            <!-- SECTION: SUPPORT TECH -->
+            <div id="section-tech" class="hidden glass-card p-8 max-w-2xl mx-auto">
                 <div class="flex items-center gap-4 mb-6">
-                    <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
-                        <i class="fab fa-whatsapp"></i>
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl shadow-inner">
+                        <i class="fas fa-headset"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-black uppercase">Assistance Technique</h3>
-                        <p class="text-xs text-gray-500">Signalez un problème pour une boutique via WhatsApp.</p>
+                        <h3 class="text-xl font-black uppercase text-slate-800">Assistance Gérants</h3>
+                        <p class="text-xs text-slate-500">Signalez un problème technique au Super Admin.</p>
                     </div>
                 </div>
                 <form class="space-y-4" onsubmit="sendTechSupport(event)">
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Boutique concernée</label>
-                        <select id="tech-target" class="w-full p-3.5 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black font-semibold text-sm">
-                            <option value="">Sélectionner une boutique...</option>
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Boutique concernée</label>
+                        <select id="tech-target" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400 font-semibold text-sm">
+                            <option value="">Sélectionner une boutique de mon réseau...</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Description du problème</label>
-                        <textarea id="tech-msg" required placeholder="Décrivez le problème technique rencontré par le gérant..." class="w-full p-4 bg-gray-50 rounded-xl h-32 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black text-sm"></textarea>
+                        <label class="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Description du problème</label>
+                        <textarea id="tech-msg" required placeholder="Décrivez le problème rencontré..." class="w-full p-4 bg-slate-50 rounded-xl h-32 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-black hover:bg-gray-800 transition text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2">
-                        <i class="fas fa-paper-plane"></i> Envoyer au Support Central
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fas fa-paper-plane"></i> Envoyer au Support
                     </button>
                 </form>
             </div>
         </div>
     </main>
 
-    <!-- Modal Discount -->
-    <div id="discount-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
-            <button onclick="closeDiscountModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
-            
-            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                <i class="fas fa-tags"></i>
-            </div>
-            <h3 class="text-xl font-black uppercase mb-2">Appliquer une Remise</h3>
-            <p class="text-xs text-gray-500 mb-6">Demandez une remise commerciale pour : <span id="discount-shop-name" class="font-bold text-black"></span></p>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Pourcentage de remise (%)</label>
-                    <input type="number" id="discount-val" placeholder="Ex: 10" min="1" max="100" class="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-bold text-lg">
-                </div>
-                <button onclick="saveDiscount()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-4 rounded-xl font-black uppercase tracking-widest text-xs transition">
-                    Envoyer la demande
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Accès Agent Commercial (Auth Overlay) -->
-    <div id="access-overlay" class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 transition-all">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div class="bg-black p-8 text-center relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-yellow-400/20 rounded-full blur-xl"></div>
-                <i class="fas fa-user-tie text-4xl text-yellow-400 mb-3"></i>
-                <h3 class="text-2xl font-black uppercase text-white tracking-wide">Espace Agent</h3>
-                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mt-1">Accès Sécurisé LeGrandArt</p>
-            </div>
-            
-            <div class="p-8 space-y-6">
-                <div id="authTabs" class="flex gap-4 mb-6 border-b border-gray-100">
-                    <button onclick="toggleAuthMode('login')" id="loginTabBtn" class="flex-1 pb-3 border-b-2 border-black text-black font-black text-[10px] uppercase tracking-widest transition-all">Connexion</button>
-                    <button onclick="toggleAuthMode('signup')" id="signupTabBtn" class="flex-1 pb-3 border-b-2 border-transparent text-gray-400 font-black text-[10px] uppercase tracking-widest transition-all">Inscription</button>
-                </div>
-
-                <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-1.5 tracking-widest">Email Agent</label>
-                        <div class="relative">
-                            <i class="fas fa-envelope absolute left-4 top-3.5 text-gray-400"></i>
-                            <input id="agent-email" type="email" required placeholder="agent@legrandart.com" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-1.5 tracking-widest">Mot de passe</label>
-                        <div class="relative">
-                            <i class="fas fa-lock absolute left-4 top-3.5 text-gray-400"></i>
-                            <input id="agent-password" type="password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-black transition" />
-                        </div>
-                    </div>
-                    <button type="submit" id="btn-login" class="w-full bg-black hover:bg-gray-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition mt-2">
-                        Accéder au Tableau de Bord
-                    </button>
-                </form>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Shop Details -->
-    <div id="shop-details-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl transform transition-all">
-            <button onclick="closeShopDetailsModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
-            
-            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                <i class="fas fa-store"></i>
-            </div>
-            <h3 class="text-xl font-black uppercase mb-2" id="details-shop-name">Nom de la Boutique</h3>
-            <p class="text-xs text-gray-500 mb-6" id="details-shop-slogan">Slogan de la boutique</p>
-            
-            <div class="space-y-4">
-                <div>
-                    <p class="text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Contact</p>
-                    <div class="flex items-center gap-3 mb-2" id="details-contact-phone-row">
-                        <i class="fa-brands fa-whatsapp text-green-500"></i>
-                        <a id="details-contact-phone" href="#" target="_blank" class="text-sm text-gray-700 hover:underline">+243...</a>
-                    </div>
-                    <div class="flex items-center gap-3" id="details-contact-address-row">
-                        <i class="fa-solid fa-location-dot text-indigo-500"></i>
-                        <span id="details-contact-address" class="text-sm text-gray-700">Adresse</span>
-                    </div>
-                </div>
-                <div>
-                    <p class="text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">Réseaux Sociaux</p>
-                    <div class="flex gap-4" id="details-social-links">
-                        <a id="details-social-fb" href="#" target="_blank" class="text-blue-600 hover:text-blue-800 text-xl hidden"><i class="fa-brands fa-facebook"></i></a>
-                        <a id="details-social-ig" href="#" target="_blank" class="text-pink-600 hover:text-pink-800 text-xl hidden"><i class="fa-brands fa-instagram"></i></a>
-                        <a id="details-social-tk" href="#" target="_blank" class="text-gray-800 hover:text-black text-xl hidden"><i class="fa-brands fa-tiktok"></i></a>
-                    </div>
-                </div>
-                <div class="pt-4 border-t border-gray-100">
-                    <p class="text-[10px] font-black uppercase text-gray-500 mb-2 tracking-widest">ID Propriétaire</p>
-                    <span id="details-owner-id" class="text-xs font-mono text-gray-600"></span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-[300] flex flex-col gap-2 pointer-events-none"></div>
 
     <script>
-        // --- SUPABASE CONFIGURATION ---
-        const CLOUD_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co'; // URL Supabase centralisée
-        const CLOUD_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkcWl6a3VtcXVkd2JucmRjb21hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODY5NDcsImV4cCI6MjA5NTQ2Mjk0N30.3bjAcBSu64FZ9AaGiuVTZNpM4fsqc6NKOdEdD4WuX6c'; // Clé Supabase centralisée
+        // CONFIGURATION SUPABASE GLOBALE
+        const SUPABASE_URL = 'https://sdqizkumqudwbnrdcoma.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkcWl6a3VtcXVkd2JucmRjb21hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODY5NDcsImV4cCI6MjA5NTQ2Mjk0N30.3bjAcBSu64FZ9AaGiuVTZNpM4fsqc6NKOdEdD4WuX6c';
         
-        let sb = null;
-        let currentUser = null;
-        let allShops = [];
-        let allOrders = [];
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        window.onload = async function() {
-            initCloud();
-            await verifierAccesAgent();
+        // ETAT SESSION AGENT (Lié à la table agents_commerciaux créée par Super Admin)
+        let currentAgent = null;
+        let myShops = [];
+        let myOrders = [];
+
+        window.onload = function() {
+            checkSession();
         };
 
-        // Ajoutez cette vérification dans agent-commercial.html
-        async function verifierAccesAgent() {
-            const { data: { user } } = await sb.auth.getUser();
-            
-            if (user) {
-                const role = user.user_metadata?.role;
-                if (role !== 'agent' && user.email !== 'banikimukishijimmy@gmail.com') {
-                    await sb.auth.signOut();
-                    window.location.href = 'index.html';
-                }
-            }
+        // UI Toast Helper
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-rose-500';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform transition-all duration-300 translate-y-10 opacity-0`;
+            toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-y-10', 'opacity-0'));
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
-        function initCloud() {
-            try {
-                sb = supabase.createClient(CLOUD_URL, CLOUD_KEY);
-                document.getElementById('cloud-status').innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Cloud Connecté`;
-                document.getElementById('cloud-status').className = "flex items-center gap-2 mb-4 px-2 text-[10px] uppercase tracking-widest font-bold text-green-500";
-                
-                // Auth Listener
-                sb.auth.onAuthStateChange((event, session) => {
-                    if (session) {
-                        // Vérification stricte de l'email lors de la connexion
-                        if (session.user.email === 'banikimukishijimmy@gmail.com') {
-                            currentUser = session.user;
-                            finalizeLogin(currentUser.email);
-                        } else {
-                            alert("Accès refusé : Ce compte n'est pas autorisé.");
-                            sb.auth.signOut();
-                            window.location.href = 'boutiques.html';
-                        }
-                    } else {
-                        currentUser = null;
-                        document.getElementById('access-overlay').classList.remove('hidden');
-                    }
-                });
-            } catch (e) {
-                console.error("Supabase Init Error:", e);
-                document.getElementById('cloud-status').innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Erreur Cloud`;
-                document.getElementById('cloud-status').className = "flex items-center gap-2 mb-4 px-2 text-[10px] uppercase tracking-widest font-bold text-red-500";
-            }
-        }
-
-        let authMode = 'login';
-        function toggleAuthMode(mode) {
-            authMode = mode;
-            const isLogin = mode === 'login';
-            document.getElementById('loginTabBtn').className = isLogin ? "flex-1 pb-3 border-b-2 border-black text-black font-black text-[10px] uppercase tracking-widest transition-all" : "flex-1 pb-3 border-b-2 border-transparent text-gray-400 font-black text-[10px] uppercase tracking-widest transition-all";
-            document.getElementById('signupTabBtn').className = !isLogin ? "flex-1 pb-3 border-b-2 border-black text-black font-black text-[10px] uppercase tracking-widest transition-all" : "flex-1 pb-3 border-b-2 border-transparent text-gray-400 font-black text-[10px] uppercase tracking-widest transition-all";
-            document.getElementById('btn-login').innerText = isLogin ? "Accéder au Tableau de Bord" : "Créer mon compte Agent";
-        }
-
-        // --- AUTHENTICATION ---
-        async function handleAuth(e) {
-            e.preventDefault();
-            if (!sb) return alert("Système Cloud indisponible.");
-            
-            const email = document.getElementById('agent-email').value;
-            const password = document.getElementById('agent-password').value;
-            const btn = document.getElementById('btn-login');
-            
-            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Traitement...`;
-            btn.disabled = true;
-
-            try {
-                if (authMode === 'login') {
-                    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                } else {
-                    const { data, error } = await sb.auth.signUp({ 
-                        email, 
-                        password,
-                        options: { data: { role: 'agent' } }
-                    });
-                    if (error) throw error;
-                    alert("Demande d'inscription envoyée ! Vérifiez vos e-mails pour confirmer votre compte.");
-                    toggleAuthMode('login');
-                }
-            } catch (err) {
-                alert("Erreur de connexion : " + err.message);
-            } finally {
-                btn.innerHTML = authMode === 'login' ? "Accéder au Tableau de Bord" : "Créer mon compte Agent";
-                btn.disabled = false;
-            }
-        }
-
-        function finalizeLogin(email) {
-            document.getElementById('agent-name').innerText = email.split('@')[0];
-            document.getElementById('access-overlay').classList.add('hidden');
-            loadData();
-        }
-
-        async function handleLogout() {
-            if (sb && currentUser && !currentUser.email.includes('demo')) {
-                await sb.auth.signOut();
+        // --- AUTHENTIFICATION (Passerelle Personnalisée Agent) ---
+        function checkSession() {
+            const savedSession = localStorage.getItem('lga_agent_session');
+            if (savedSession) {
+                currentAgent = JSON.parse(savedSession);
+                finalizeLogin();
             } else {
-                currentUser = null;
                 document.getElementById('access-overlay').classList.remove('hidden');
-                document.getElementById('agent-email').value = '';
-                document.getElementById('agent-password').value = '';
-                document.getElementById('btn-login').innerHTML = `Connexion`;
-                document.getElementById('btn-login').disabled = false;
             }
         }
 
-        // --- AGENT ACTIONS ---
+        async function handleAgentLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('agent-email').value.trim();
+            const password = document.getElementById('agent-password').value.trim();
+            const btn = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('login-error');
 
-        async function saveAgentPromoCode() {
-            if (!currentUser) return;
-            const code = document.getElementById('agent-promo-code').value.trim().toUpperCase();
-            if (!code) return alert("Veuillez entrer un code valide.");
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Vérification...`;
+            errorMsg.classList.add('hidden');
 
             try {
-                const { error } = await sb.from('agent_profiles').upsert({
-                    id: currentUser.id,
-                    email: currentUser.email,
-                    promo_code: code,
-                    updated_at: new Date().toISOString()
-                });
-                if (error) throw error;
-                alert("Votre code promo est maintenant actif sur le réseau !");
+                // Vérification stricte dans la table créée par le Super Admin
+                const { data, error } = await sb.from('agents_commerciaux')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', password)
+                    .single();
+
+                if (error || !data) throw new Error("Identifiants incorrects.");
+                if (!data.commission_active) throw new Error("Ce compte agent est suspendu.");
+
+                // Succès : Sauvegarde de la session locale
+                currentAgent = data;
+                localStorage.setItem('lga_agent_session', JSON.stringify(data));
+                
+                showToast("Connexion réussie !");
+                finalizeLogin();
+
             } catch (err) {
-                console.error("Erreur Cloud Agent Profile (Table manquante ?):", err.message);
-                alert("Erreur de sauvegarde du code promo. Vérifiez la configuration Supabase et la table 'agent_profiles'.");
+                errorMsg.classList.remove('hidden');
+                errorMsg.innerText = err.message || "Erreur de connexion.";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "Connexion Sécurisée";
             }
         }
 
-        async function loadAgentProfile() {
-            if (!currentUser) return;
+        function finalizeLogin() {
+            document.getElementById('access-overlay').classList.add('hidden');
+            document.getElementById('display-agent-email').innerText = currentAgent.email;
+            document.getElementById('stat-promocode').innerText = currentAgent.promo_code || "NON DÉFINI";
+            loadAgentData();
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('lga_agent_session');
+            currentAgent = null;
+            document.getElementById('access-overlay').classList.remove('hidden');
+            document.getElementById('agent-email').value = '';
+            document.getElementById('agent-password').value = '';
+        }
+
+        // --- CHARGEMENT DES DONNÉES LIÉES AU CODE PROMO ---
+        async function loadAgentData() {
+            if (!currentAgent || !currentAgent.promo_code) return;
+            const code = currentAgent.promo_code;
 
             try {
-                const { data } = await sb.from('agent_profiles').select('promo_code').eq('id', currentUser.id).single();
-                if (data && data.promo_code) {
-                    document.getElementById('agent-promo-code').value = data.promo_code;
-                }
-            } catch (e) {
-                console.error('Erreur lecture profil agent Supabase :', e.message || e);
+                // 1. Boutiques créées avec ce code
+                const { data: shops } = await sb.from('boutique_config').select('*').eq('promo_code', code);
+                myShops = shops || [];
+
+                // 2. Commandes liées à ce code
+                const { data: orders } = await sb.from('boutique_orders').select('*').eq('promo_code', code).order('created_at', { ascending: false });
+                myOrders = orders || [];
+
+                renderOverview();
+                renderShops();
+                populateTechSelect();
+
+            } catch (err) {
+                console.error("Erreur chargement données:", err);
+                showToast("Erreur lors du chargement des données.", "error");
             }
         }
 
-        // Helper to sign up a user without logging out the agent
-        async function createAccountSilent(email, password, metadata) {
-            const tempSb = supabase.createClient(CLOUD_URL, CLOUD_KEY, { auth: { persistSession: false } });
-            return await tempSb.auth.signUp({ email, password, options: { data: metadata } });
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
         }
 
-        async function handleCreateManagerAndShop(e) {
+        // --- RENDU UI ---
+        function renderOverview() {
+            // Stats
+            document.getElementById('stat-shops').innerText = myShops.length;
+
+            const validOrders = myOrders.filter(o => o.status !== 'Refusé' && o.status !== 'Cancelled');
+            const totalSales = validOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+            const commission = totalSales * 0.05; // 5% Standard
+
+            document.getElementById('stat-sales').innerText = formatMoney(totalSales);
+            document.getElementById('stat-commissions').innerText = formatMoney(commission);
+
+            // Activité
+            const tbody = document.getElementById('recent-activity-body');
+            const recent = myOrders.slice(0, 5);
+            if (recent.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-xs text-slate-400">Aucune commande enregistrée avec votre code.</td></tr>`;
+            } else {
+                tbody.innerHTML = recent.map(o => {
+                    const shopName = myShops.find(s => s.shop_id === o.shop_id)?.name || o.shop_id;
+                    let statusClass = "text-amber-600 bg-amber-50";
+                    if (o.status === 'Livré') statusClass = "text-emerald-600 bg-emerald-50";
+                    if (o.status === 'Refusé') statusClass = "text-rose-600 bg-rose-50";
+
+                    return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-4 py-3 text-xs font-bold text-slate-800">${o.id}</td>
+                        <td class="px-4 py-3 text-xs text-slate-600">${shopName}</td>
+                        <td class="px-4 py-3 text-xs font-black text-emerald-600">${formatMoney(o.total)}</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-[9px] font-black uppercase ${statusClass}">${o.status}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
+        function renderShops() {
+            const tbody = document.getElementById('shops-list-body');
+            if (myShops.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-xs text-slate-400">Vous n'avez encore déployé aucune boutique.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = myShops.map(shop => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200 overflow-hidden">
+                                ${shop.logo_url ? `<img src="${shop.logo_url}" class="w-full h-full object-cover">` : `<i class="fas fa-store text-slate-400"></i>`}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-900">${shop.name}</h4>
+                                <p class="text-[10px] text-slate-500 font-mono">Gérant: ${shop.owner_id.substring(0,8)}...</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-xs font-semibold text-slate-600">${shop.default_category || 'N/A'}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="requestDiscount('${shop.name}')" class="px-3 py-1.5 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-lg text-[10px] font-black uppercase transition border border-yellow-200">
+                            Demander Remise
+                        </button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        function populateTechSelect() {
+            const select = document.getElementById('tech-target');
+            select.innerHTML = `<option value="">Sélectionner une boutique de mon réseau...</option>`;
+            myShops.forEach(shop => {
+                select.innerHTML += `<option value="${shop.name}">${shop.name}</option>`;
+            });
+        }
+
+        // --- ACTIONS AGENT ---
+        
+        // Helper: Create Auth User using generic Supabase method without persistent session
+        async function createAuthUser(email, password) {
+            const tempSb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+            return await tempSb.auth.signUp({ email, password });
+        }
+
+        async function handleDeployShop(e) {
             e.preventDefault();
             const email = document.getElementById('new-manager-email').value;
             const password = document.getElementById('new-manager-pass').value;
-            const shopName = document.getElementById('new-manager-shop-name').value;
             const phone = document.getElementById('new-manager-phone').value;
-            const btn = document.getElementById('btn-create-mgr');
+            const shopName = document.getElementById('new-manager-shop-name').value;
+            const btn = document.getElementById('btn-deploy-shop');
 
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Déploiement...`;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Déploiement en cours...`;
 
             try {
-                // 1. Créer le compte Auth
-                const { data: authData, error: authErr } = await createAccountSilent(email, password, { role: 'gerant' });
+                // 1. Créer le compte Auth (Le gérant se connectera à espace-pro.html)
+                const { data: authData, error: authErr } = await createAuthUser(email, password);
                 if (authErr) throw authErr;
 
-                // 2. Créer la configuration de la boutique
                 const managerId = authData.user.id;
                 const shopId = 'shop_' + managerId.slice(0, 12);
                 
+                // 2. Créer la configuration de la boutique EN INJECTANT LE CODE PROMO
                 const { error: configErr } = await sb.from('boutique_config').insert({
                     shop_id: shopId,
                     owner_id: managerId,
                     name: shopName,
                     slogan: "Bienvenue dans ma boutique LeGrandArt",
+                    promo_code: currentAgent.promo_code, // LIAISON CRITIQUE
                     default_category: "Général",
                     currency: "USD",
                     exchange_rate: 2800,
@@ -574,343 +519,61 @@
                 });
                 if (configErr) throw configErr;
 
-                alert(`Félicitations ! Le gérant ${email} a été créé et sa boutique "${shopName}" est en ligne.`);
+                showToast(`Boutique "${shopName}" déployée avec succès !`);
                 
-                // Envoi des identifiants par WhatsApp
-                const msg = encodeURIComponent(`Bonjour ! Votre boutique "${shopName}" a été créée sur LeGrandArt.\n\nVoici vos identifiants :\n📧 Email : ${email}\n🔑 Mot de passe : ${password}\n\nAccédez à votre espace ici : https://legrandart.org/dashboard.html`);
-                const waLink = `https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`;
-                
-                if (confirm("Voulez-vous envoyer les identifiants par WhatsApp au gérant ?")) {
-                    window.open(waLink, '_blank');
+                // Envoi WhatsApp Optionnel
+                const msg = encodeURIComponent(`Bonjour ! Votre boutique "${shopName}" a été déployée sur LeGrandArt par votre agent commercial.\n\nVoici vos identifiants pour l'Espace Pro :\n📧 Email : ${email}\n🔑 Mot de passe : ${password}\n\nLien : https://legrandart.org/espace-pro.html`);
+                if (confirm("Déploiement terminé. Voulez-vous envoyer les accès au gérant par WhatsApp ?")) {
+                    window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
                 }
 
                 e.target.reset();
-                loadData();
-            } catch (err) { alert("Erreur de création: " + err.message); }
-            finally { btn.disabled = false; btn.innerText = "Déployer la Boutique"; }
-        }
+                loadAgentData(); // Rafraichir les stats
 
-        async function handleCreateClient(e) {
-            e.preventDefault();
-            const email = document.getElementById('new-client-email').value;
-            const password = document.getElementById('new-client-pass').value;
-            const phone = document.getElementById('new-client-phone').value;
-            const btn = document.getElementById('btn-create-cli');
-
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Création...`;
-
-            try {
-                const { error: authErr } = await createAccountSilent(email, password, { role: 'client' });
-                if (authErr) throw authErr;
-
-                alert(`Compte client créé avec succès pour ${email}.`);
-
-                // Envoi des identifiants par WhatsApp
-                const msg = encodeURIComponent(`Bonjour ! Votre compte client a été créé sur LeGrandArt.\n\nVoici vos identifiants :\n📧 Email : ${email}\n🔑 Mot de passe : ${password}\n\nExplorez les boutiques ici : https://legrandart.org/boutiques.html`);
-                const waLink = `https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`;
-                
-                if (confirm("Voulez-vous envoyer les identifiants par WhatsApp au client ?")) {
-                    window.open(waLink, '_blank');
-                }
-
-                e.target.reset();
-            } catch (err) { alert("Erreur: " + err.message); }
-            finally { btn.disabled = false; btn.innerText = "Enregistrer le Client"; }
-        }
-
-        // --- DATA FETCHING & RENDERING ---
-        async function loadData() {
-            if (!sb) return;
-
-            try {
-                // 1. Fetch Shops (Boutiques)
-                const { data: shopsData, error: shopsErr } = await sb.from('boutique_config').select('*').order('created_at', { ascending: false });
-                if (!shopsErr && shopsData) allShops = shopsData;
-
-                // 2. Fetch Orders (Commandes) for stats and notifications
-                const { data: ordersData, error: ordersErr } = await sb.from('boutique_orders').select('*').order('created_at', { ascending: false });
-                if (!ordersErr && ordersData) allOrders = ordersData;
-
-                renderOverview();
-                renderClients();
-                renderShops();
-                populateTechSelect();
-                generateNotifications();
-                loadAgentProfile();
-
-            } catch (e) {
-                console.error("Erreur chargement données:", e);
+            } catch (err) {
+                showToast("Erreur de déploiement: " + err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-rocket"></i> Créer et Déployer`;
             }
         }
 
-        function formatMoney(amount) {
-            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-        }
-
-        function renderOverview() {
-            // Stats Calculations
-            const activeShopsCount = allShops.length;
-            
-            // Unique owners = Clients
-            const uniqueOwners = new Set(allShops.filter(s => s.owner_id).map(s => s.owner_id));
-            const clientsCount = uniqueOwners.size > 0 ? uniqueOwners.size : (activeShopsCount > 0 ? activeShopsCount : 0); // Fallback if owner_id is missing
-
-            // Commission = 5% of total sales (excluding refused)
-            const validOrders = allOrders.filter(o => o.status !== 'Refusé');
-            const totalRevenue = validOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
-            const commission = totalRevenue * 0.05;
-
-            document.getElementById('stat-shops').innerText = activeShopsCount;
-            document.getElementById('stat-clients').innerText = clientsCount;
-            document.getElementById('stat-commissions').innerText = formatMoney(commission);
-
-            // Recent Activity Table
-            const activityBody = document.getElementById('recent-activity-body');
-            const recentOrders = allOrders.slice(0, 5); // 5 most recent
-
-            if (recentOrders.length === 0) {
-                activityBody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-xs text-gray-400">Aucune commande récente.</td></tr>`;
-            } else {
-                activityBody.innerHTML = recentOrders.map(order => {
-                    const shopName = getShopNameById(order.shop_id);
-                    let statusBadge = `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-[9px] font-black uppercase">${order.status}</span>`;
-                    if (order.status === 'Livré') statusBadge = `<span class="px-2 py-1 bg-green-100 text-green-700 rounded-md text-[9px] font-black uppercase">Livré</span>`;
-                    if (order.status === 'Refusé') statusBadge = `<span class="px-2 py-1 bg-red-100 text-red-700 rounded-md text-[9px] font-black uppercase">Refusé</span>`;
-
-                    return `
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-4 py-3 text-xs font-bold">${order.id}</td>
-                        <td class="px-4 py-3 text-xs text-gray-600">${shopName}</td>
-                        <td class="px-4 py-3 text-xs font-black">${formatMoney(order.total)}</td>
-                        <td class="px-4 py-3 text-[10px] font-mono text-amber-600 uppercase">${order.promo_code || '-'}</td>
-                        <td class="px-4 py-3">${statusBadge}</td>
-                    </tr>
-                    `;
-                }).join('');
-            }
-        }
-
-        function renderClients() {
-            const tbody = document.getElementById('clients-list-body');
-            
-            // Group shops by owner_id to simulate clients list
-            const clientsMap = {};
-            allShops.forEach(shop => {
-                const oid = shop.owner_id || 'Gérant Inconnu';
-                if(!clientsMap[oid]) clientsMap[oid] = { id: oid, shopCount: 0 };
-                clientsMap[oid].shopCount++;
-            });
-
-            const clientsArray = Object.values(clientsMap);
-
-            if (clientsArray.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-xs text-gray-400">Aucun gérant inscrit.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = clientsArray.map(client => `
-                <tr class="hover:bg-gray-50 transition group">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-bold">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <span class="text-sm font-bold text-gray-900">${client.id.substring(0,8)}...</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-xs font-bold text-gray-500">${client.shopCount} Boutique(s)</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-[9px] font-black uppercase flex items-center w-max gap-1">
-                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Actif
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderShops() {
-            const tbody = document.getElementById('shops-list-body');
-            
-            if (allShops.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-xs text-gray-400">Aucune boutique déployée.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = allShops.map(shop => `
-                <tr class="hover:bg-gray-50 transition">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
-                                ${shop.logo_url ? `<img src="${shop.logo_url}" class="w-full h-full object-cover">` : `<i class="fas fa-store text-gray-400"></i>`}
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-bold text-gray-900">${shop.name}</h4>
-                                <p class="text-[10px] text-gray-400">${shop.slogan || 'Sans slogan'}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-xs font-semibold text-gray-500">${shop.default_category || 'Général'}</td>
-                    <td class="px-6 py-4 text-xs font-bold text-gray-900">${shop.currency || 'USD'}</td>
-                    <td class="px-6 py-4 text-right space-x-2">
-                        <button onclick="openDiscount('${shop.name}')" class="px-3 py-1.5 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-lg text-[10px] font-black uppercase transition tooltip-trigger">
-                            <i class="fas fa-tag"></i> Remise
-                        </button>
-                        <button onclick="jumpToTechSupport('${shop.name}')" class="px-3 py-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-[10px] font-black uppercase transition">
-                            <i class="fas fa-headset"></i> Support
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function populateTechSelect() {
-            const select = document.getElementById('tech-target');
-            select.innerHTML = `<option value="">Sélectionner une boutique...</option>`;
-            allShops.forEach(shop => {
-                select.innerHTML += `<option value="${shop.name}">${shop.name}</option>`;
-            });
-        }
-
-        function generateNotifications() {
-            const list = document.getElementById('notification-list');
-            const count = document.getElementById('notification-count');
-            
-            // Generate alerts for the last 5 orders
-            const recentOrders = allOrders.slice(0, 5);
-            
-            if (recentOrders.length > 0) {
-                count.innerText = recentOrders.length;
-                count.classList.remove('hidden');
-                
-                list.innerHTML = recentOrders.map(order => {
-                    const shopName = getShopNameById(order.shop_id);
-                    return `
-                    <div class="p-3 bg-white rounded-xl border border-gray-100 hover:bg-gray-50 transition cursor-default">
-                        <div class="flex justify-between items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
-                                <i class="fas fa-shopping-cart text-xs"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-xs font-bold text-gray-900 truncate">Vente: ${shopName}</p>
-                                <p class="text-[10px] text-gray-500 mt-0.5">Commande ${order.id} d'un montant de ${formatMoney(order.total)}.</p>
-                            </div>
-                        </div>
-                        <p class="text-[8px] text-right uppercase tracking-widest text-gray-400 mt-2">${order.date || 'Récemment'}</p>
-                    </div>
-                    `;
-                }).join('');
-            } else {
-                count.innerText = '0';
-                count.classList.add('hidden');
-            }
-        }
-
-        // --- HELPERS ---
-        function getShopNameById(id) {
-            const shop = allShops.find(s => s.shop_id === id);
-            return shop ? shop.name : 'Boutique Inconnue';
-        }
-
-        // --- NAVIGATION & UI LOGIC ---
+        // --- NAVIGATION INTERNE ---
         function showSection(id) {
-            ['overview', 'clients', 'shops', 'tech', 'tools'].forEach(s => {
-                document.getElementById('section-' + s).classList.add('hidden');
-                if(document.getElementById('nav-' + s)) document.getElementById('nav-' + s).classList.remove('active');
+            ['overview', 'shops', 'tech', 'tools'].forEach(s => {
+                const el = document.getElementById('section-' + s);
+                const nav = document.getElementById('nav-' + s);
+                if (el) el.classList.add('hidden');
+                if (nav) nav.classList.remove('active');
             });
             document.getElementById('section-' + id).classList.remove('hidden');
             document.getElementById('nav-' + id).classList.add('active');
-            document.getElementById('section-title').innerText = id === 'tools' ? "Outils & Création" : document.getElementById('nav-' + id).innerText.trim();
+            const titleMap = {
+                'overview': 'Vue d\'ensemble',
+                'shops': 'Boutiques Gérées',
+                'tools': 'Déployer un Client',
+                'tech': 'Assistance Gérants'
+            };
+            document.getElementById('section-title').innerText = titleMap[id];
         }
 
-        function jumpToTechSupport(shopName) {
-            showSection('tech');
-            const select = document.getElementById('tech-target');
-            if (select) select.value = shopName;
-        }
-
-        function toggleNotifications() {
-            const panel = document.getElementById('notification-panel');
-            panel.classList.toggle('hidden');
-        }
-
-        function clearNotifications() {
-            document.getElementById('notification-list').innerHTML = '<p class="text-center text-xs text-gray-400 py-4">Aucune notification.</p>';
-            const count = document.getElementById('notification-count');
-            count.innerText = '0';
-            count.classList.add('hidden');
-            document.getElementById('notification-panel').classList.add('hidden');
-        }
-
-        // --- MODAL DISCOUNT ---
-        let currentDiscountTarget = '';
-        function openDiscount(name) {
-            currentDiscountTarget = name;
-            document.getElementById('discount-shop-name').innerText = name;
-            document.getElementById('discount-val').value = '';
-            document.getElementById('discount-modal').classList.remove('hidden');
-        }
-
-        function closeDiscountModal() { 
-            document.getElementById('discount-modal').classList.add('hidden'); 
-        }
-
-        function saveDiscount() {
-            const val = document.getElementById('discount-val').value;
-            if (!val || val <= 0) return alert("Veuillez entrer un pourcentage valide.");
-            
-            // Logique de demande de discount via WhatsApp à l'administration ou au gérant
-            const msg = `*DEMANDE DE REMISE*\n\nBoutique: ${currentDiscountTarget}\nRemise demandée: ${val}%\nAgent: ${document.getElementById('agent-name').innerText}`;
+        // Demande de Remise (WhatsApp)
+        function requestDiscount(shopName) {
+            const val = prompt(`Quel pourcentage de remise souhaitez-vous demander pour la boutique "${shopName}" ? (Ex: 10)`);
+            if (!val || isNaN(val)) return;
+            const msg = `*DEMANDE DE REMISE*\n\nBoutique: ${shopName}\nCode Agent: ${currentAgent.promo_code}\nRemise demandée: ${val}%`;
             window.open(`https://wa.me/243815022325?text=${encodeURIComponent(msg)}`, '_blank');
-            closeDiscountModal();
         }
 
-        // --- SUPPORT TECHNIQUE ---
+        // Envoi Ticket Support (WhatsApp)
         function sendTechSupport(e) {
             e.preventDefault();
             const target = document.getElementById('tech-target').value;
             const msg = document.getElementById('tech-msg').value;
-            if (!target) return alert("Veuillez sélectionner une boutique.");
-
-            const wa = `*SUPPORT AGENT LEGRANDART*\n\nAgent: ${document.getElementById('agent-name').innerText}\nBoutique Concernée: ${target}\nProblème: ${msg}`;
+            const wa = `*SUPPORT TECHNIQUE - AGENT LGA*\n\nAgent: ${currentAgent.email}\nCode: ${currentAgent.promo_code}\nBoutique Concernée: ${target}\nProblème: ${msg}`;
             window.open(`https://wa.me/243815022325?text=${encodeURIComponent(wa)}`, '_blank');
-            
             document.getElementById('tech-msg').value = '';
-        }
-
-        // --- SHOP DETAILS MODAL ---
-        function openShopDetailsModal(shopId) {
-            const shop = allShops.find(s => s.shop_id === shopId);
-            if (!shop) return;
-
-            document.getElementById('details-shop-name').innerText = shop.name;
-            document.getElementById('details-shop-slogan').innerText = shop.slogan || 'Pas de slogan';
-            document.getElementById('details-owner-id').innerText = shop.owner_id;
-
-            // Contact Info
-            const phone = shop.contact_info?.phone;
-            const address = shop.contact_info?.address;
-            document.getElementById('details-contact-phone').innerText = phone || 'Non renseigné';
-            document.getElementById('details-contact-phone').href = phone ? `https://wa.me/${phone.replace(/\D/g,'')}` : '#';
-            document.getElementById('details-contact-phone-row').classList.toggle('hidden', !phone);
-            document.getElementById('details-contact-address').innerText = address || 'Non renseigné';
-            document.getElementById('details-contact-address-row').classList.toggle('hidden', !address);
-
-            // Social Links
-            const social = shop.social_links || {};
-            const fb = document.getElementById('details-social-fb');
-            const ig = document.getElementById('details-social-ig');
-            const tk = document.getElementById('details-social-tk');
-            if (fb) { fb.href = social.facebook || '#'; fb.classList.toggle('hidden', !social.facebook); }
-            if (ig) { ig.href = social.instagram || '#'; ig.classList.toggle('hidden', !social.instagram); }
-            if (tk) { tk.href = social.tiktok || '#'; tk.classList.toggle('hidden', !social.tiktok); }
-            document.getElementById('details-social-links').classList.toggle('hidden', !(social.facebook || social.instagram || social.tiktok));
-
-            document.getElementById('shop-details-modal').classList.remove('hidden');
-        }
-
-        function closeShopDetailsModal() {
-            document.getElementById('shop-details-modal').classList.add('hidden');
+            showToast("Demande de support préparée dans WhatsApp.");
         }
     </script>
 </body>
