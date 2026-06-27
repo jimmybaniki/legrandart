@@ -571,6 +571,10 @@
             <p class="text-xs text-slate-500 mb-6">Enregistrez un nouveau représentant commercial.</p>
             <form id="form-create-agent" onsubmit="handleCreateAgent(event)" class="space-y-4">
                 <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nom de l'Agent</label>
+                    <input type="text" id="new-agent-name" required placeholder="Jean Dupont" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition" />
+                </div>
+                <div>
                     <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Adresse Email</label>
                     <input type="email" id="new-agent-email" required placeholder="agent@legrandart.com" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition" />
                 </div>
@@ -961,12 +965,14 @@
         async function handleCreateAgent(e) {
             e.preventDefault();
             if(!supabaseAdmin) return;
+            const name = document.getElementById('new-agent-name').value;
             const email = document.getElementById('new-agent-email').value;
             const promo_code = document.getElementById('new-agent-promo').value.toUpperCase();
             const password = document.getElementById('new-agent-pass').value;
 
             try {
                 const { error } = await supabaseAdmin.from('agents_commerciaux').insert({
+                    name: name,
                     id: crypto.randomUUID(),
                     email: email,
                     password: password,
@@ -1041,6 +1047,7 @@
                     </td>
                     <td class="px-6 py-4 text-right space-x-1">
                         <button onclick="toggleShopFeatured('${shop.shop_id}', ${shop.is_featured || false})" class="w-8 h-8 rounded-lg ${shop.is_featured ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500'} hover:bg-amber-500 hover:text-white transition"><i class="fas fa-star text-xs"></i></button>
+                        <button onclick="confirmDeleteShopOrders('${shop.shop_id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition" title="Supprimer l'historique des commandes"><i class="fas fa-receipt text-xs"></i></button>
                         <button onclick="confirmDeleteShop('${shop.shop_id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-rose-500 hover:text-white transition"><i class="fas fa-trash text-xs"></i></button>
                     </td>
                 </tr>`).join('');
@@ -1065,6 +1072,16 @@
                 loadGlobalData();
                 showToast("Boutique supprimée."); 
             }); 
+        }
+
+        function confirmDeleteShopOrders(shopId) {
+            const shopName = allShops.find(s => s.shop_id === shopId)?.name || shopId;
+            showConfirmModal("Purger les commandes", `Voulez-vous supprimer TOUTES les commandes de la boutique "${shopName}" ? Cette action est irréversible.`, async () => {
+                if(!supabaseAdmin) return;
+                await supabaseAdmin.from('boutique_orders').delete().eq('shop_id', shopId);
+                loadGlobalData();
+                showToast(`Commandes de ${shopName} purgées.`);
+            });
         }
 
         // --- CLIENTS ---

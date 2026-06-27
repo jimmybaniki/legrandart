@@ -74,6 +74,36 @@
 </head>
 <body class="font-sans antialiased text-slate-800 h-full flex flex-col">
 
+    <!-- MODAL: MON PROFIL GERANT -->
+    <div id="modal-edit-profile" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeProfileModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl mb-4 shadow-inner">
+                <i class="fas fa-user-cog"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Mon Profil Gérant</h3>
+            <p class="text-xs text-slate-500 mb-6">Mettez à jour vos informations de connexion.</p>
+            
+            <form id="form-edit-profile" onsubmit="handleUpdateManagerProfile(event)" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nom d'affichage</label>
+                    <input type="text" id="profile-name" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nouveau Mot de Passe</label>
+                    <input type="password" id="profile-password" placeholder="Laisser vide pour ne pas changer" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                </div>
+                
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition shadow-lg hover:shadow-xl">
+                        Sauvegarder le Profil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- PORTAL AUTHENTICATION OVERLAY -->
     <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden flex flex-col transform transition-all relative">
@@ -156,7 +186,7 @@
             
             <div class="flex items-center gap-3">
                 <!-- User account identity -->
-                <div id="user-profile-badge" class="hidden sm:flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+                <div id="user-profile-badge" onclick="openProfileModal()" class="hidden sm:flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs cursor-pointer hover:bg-slate-100 transition-colors">
                     <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
                     <span id="user-email-display" class="font-semibold text-slate-700">invite@legrandart.com</span>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-rose-600 transition pl-1" title="Déconnexion">
@@ -636,9 +666,6 @@
                                 <h3 class="text-lg md:text-xl font-extrabold text-slate-900">Commandes Reçues</h3>
                                 <p class="text-xs md:text-sm text-slate-500 font-medium">Flux d'achats en temps réel</p>
                             </div>
-                            <button onclick="clearAllOrders()" class="text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1">
-                                <i class="fa-solid fa-trash-can"></i> Tout effacer
-                            </button>
                         </div>
 
                         <div id="admin-orders-container" class="space-y-3 min-h-[150px] flex flex-col justify-center">
@@ -983,7 +1010,7 @@
                         currentUser = session.user;
                         // Ensure that loadAllData is called after currentUser is set and authenticated
                         document.getElementById('auth-screen').classList.add('hidden');
-                        document.getElementById('user-profile-badge').classList.remove('hidden');
+                        document.getElementById('user-profile-badge').classList.remove('hidden'); // Reste sm:flex
                         document.getElementById('user-email-display').innerText = currentUser.email;
                         loadAllData();
                     } else {
@@ -1076,6 +1103,40 @@
             document.getElementById('auth-screen').classList.remove('hidden');
             document.getElementById('user-profile-badge').classList.add('hidden');
             showNotification("Déconnecté avec succès.");
+        }
+
+        // --- PROFIL GERANT ---
+        function openProfileModal() {
+            if (!currentUser) return;
+            document.getElementById('profile-name').value = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+            document.getElementById('profile-password').value = '';
+            document.getElementById('modal-edit-profile').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('modal-edit-profile').classList.add('hidden');
+        }
+
+        async function handleUpdateManagerProfile(e) {
+            e.preventDefault();
+            if (!currentUser || !useSupabase) return;
+
+            const name = document.getElementById('profile-name').value;
+            const password = document.getElementById('profile-password').value;
+            
+            let updates = { data: { name: name } };
+            if (password) {
+                updates.password = password;
+            }
+
+            const { data, error } = await sb.auth.updateUser(updates);
+
+            if (error) return showNotification("Erreur de mise à jour: " + error.message, true);
+
+            currentUser = data.user; // Rafraîchir l'objet utilisateur local
+            document.getElementById('user-email-display').innerText = currentUser.email; // Le nom est dans user_metadata, l'email est plus stable ici
+            closeProfileModal();
+            showNotification("Profil mis à jour avec succès !");
         }
 
         // Window Onload triggers
@@ -2607,17 +2668,6 @@
                 renderOrders();
                 updateDashboard();
                 showNotification(`Commande ${id} : ${newStatus}`);
-            }
-        }
-
-        // Delete all orders
-        async function clearAllOrders() {
-            if (confirm("Effacer toutes les commandes de la base ?")) {
-                orders = [];
-                await saveOrder(null, true);
-                renderOrders();
-                updateDashboard();
-                showNotification("Toutes les commandes ont été effacées.");
             }
         }
 

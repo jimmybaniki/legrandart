@@ -83,6 +83,36 @@
         </div>
     </div>
 
+    <!-- MODAL: MON PROFIL AGENT -->
+    <div id="modal-edit-profile" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 relative shadow-2xl transform transition-all">
+            <button onclick="closeProfileModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition"><i class="fas fa-times"></i></button>
+            
+            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center text-xl mb-4 shadow-inner">
+                <i class="fas fa-user-cog"></i>
+            </div>
+            <h3 class="text-xl font-black uppercase mb-1 text-slate-800">Mon Profil Agent</h3>
+            <p class="text-xs text-slate-500 mb-6">Mettez à jour vos informations de connexion.</p>
+            
+            <form id="form-edit-profile" onsubmit="handleUpdateAgentProfile(event)" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nom d'Agent</label>
+                    <input type="text" id="profile-name" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 tracking-widest">Nouveau Mot de Passe</label>
+                    <input type="password" id="profile-password" placeholder="Laisser vide pour ne pas changer" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition" />
+                </div>
+                
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition shadow-lg hover:shadow-xl">
+                        Sauvegarder le Profil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- SIDEBAR -->
     <aside class="sidebar flex flex-col p-6 shrink-0 z-40 hidden md:flex">
         <div class="mb-10 px-2">
@@ -113,14 +143,14 @@
                 <button onclick="window.location.href='index.html'" class="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 transition-colors" title="Retour à l'accueil">
                     <i class="fa-solid fa-house text-sm"></i>
                 </button>
-                <h2 class="font-black text-lg text-slate-800" id="section-title">Tableau de bord Agent</h2>
+                <h2 class="font-black text-lg text-slate-800" id="section-title">Tableau de bord</h2>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 group cursor-pointer" onclick="openProfileModal()">
                 <div class="flex flex-col text-right">
-                    <span id="display-agent-email" class="font-bold text-sm text-slate-800">Chargement...</span>
+                    <span id="display-agent-name" class="font-bold text-sm text-slate-800 group-hover:text-yellow-600 transition-colors">Chargement...</span>
                     <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Agent Agréé</span>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center font-black text-slate-900 shadow-md">
+                <div class="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center font-black text-slate-900 shadow-md group-hover:scale-105 transition-transform">
                     <i class="fas fa-user-tie"></i>
                 </div>
             </div>
@@ -219,8 +249,12 @@
                         </div>
                     </div>
                     
-                    <form onsubmit="handleDeployShop(event)" class="space-y-4">
+                    <form onsubmit="handleDeployShop(event)" class="space-y-4" id="form-deploy-shop">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Nom du Gérant</label>
+                                <input type="text" id="new-manager-name" required placeholder="Ex: Jean Dupont" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
+                            </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Email du Gérant</label>
                                 <input type="email" id="new-manager-email" required placeholder="manager@exemple.com" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
@@ -229,10 +263,6 @@
                                 <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Mot de passe provisoire</label>
                                 <input type="password" id="new-manager-pass" required placeholder="••••••••" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
                             </div>
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Numéro WhatsApp du Gérant</label>
-                            <input type="tel" id="new-manager-phone" required placeholder="+243..." class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Nom de la Boutique</label>
@@ -363,7 +393,7 @@
 
         function finalizeLogin() {
             document.getElementById('access-overlay').classList.add('hidden');
-            document.getElementById('display-agent-email').innerText = currentAgent.email;
+            document.getElementById('display-agent-name').innerText = currentAgent.name || currentAgent.email;
             document.getElementById('stat-promocode').innerText = currentAgent.promo_code || "NON DÉFINI";
             loadAgentData();
         }
@@ -485,10 +515,11 @@
 
         async function handleDeployShop(e) {
             e.preventDefault();
+            const name = document.getElementById('new-manager-name').value;
             const email = document.getElementById('new-manager-email').value;
             const password = document.getElementById('new-manager-pass').value;
-            const phone = document.getElementById('new-manager-phone').value;
             const shopName = document.getElementById('new-manager-shop-name').value;
+            const form = document.getElementById('form-deploy-shop');
             const btn = document.getElementById('btn-deploy-shop');
 
             btn.disabled = true;
@@ -496,7 +527,7 @@
 
             try {
                 // 1. Créer le compte Auth (Le gérant se connectera à espace-pro.html)
-                const { data: authData, error: authErr } = await createAuthUser(email, password);
+                const { data: authData, error: authErr } = await sb.auth.signUp({ email, password, options: { data: { name: name, role: 'gerant' } } });
                 if (authErr) throw authErr;
 
                 const managerId = authData.user.id;
@@ -514,20 +545,20 @@
                     exchange_rate: 2800,
                     theme_color: "#4f46e5",
                     theme_rgb: "79, 70, 229",
-                    layout: "grid",
-                    contact_info: { phone: phone, address: "" }
+                    layout: "grid"
                 });
                 if (configErr) throw configErr;
 
                 showToast(`Boutique "${shopName}" déployée avec succès !`);
                 
                 // Envoi WhatsApp Optionnel
-                const msg = encodeURIComponent(`Bonjour ! Votre boutique "${shopName}" a été déployée sur LeGrandArt par votre agent commercial.\n\nVoici vos identifiants pour l'Espace Pro :\n📧 Email : ${email}\n🔑 Mot de passe : ${password}\n\nLien : https://legrandart.org/espace-pro.html`);
-                if (confirm("Déploiement terminé. Voulez-vous envoyer les accès au gérant par WhatsApp ?")) {
+                const phone = prompt("Déploiement réussi. Entrez le numéro WhatsApp du gérant pour lui envoyer ses accès (ex: +243...):");
+                if (phone) {
+                    const msg = encodeURIComponent(`Bonjour ${name} ! Votre boutique "${shopName}" a été déployée sur LeGrandArt par votre agent commercial.\n\nVoici vos identifiants pour l'Espace Pro :\n📧 Email : ${email}\n🔑 Mot de passe : ${password}\n\nLien : https://legrandart.org/espace-pro.html`);
                     window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
                 }
 
-                e.target.reset();
+                form.reset();
                 loadAgentData(); // Rafraichir les stats
 
             } catch (err) {
@@ -536,6 +567,38 @@
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fas fa-rocket"></i> Créer et Déployer`;
             }
+        }
+
+        // --- PROFIL AGENT ---
+        function openProfileModal() {
+            if (!currentAgent) return;
+            document.getElementById('profile-name').value = currentAgent.name || '';
+            document.getElementById('profile-password').value = '';
+            document.getElementById('modal-edit-profile').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('modal-edit-profile').classList.add('hidden');
+        }
+
+        async function handleUpdateAgentProfile(e) {
+            e.preventDefault();
+            if (!currentAgent) return;
+
+            const name = document.getElementById('profile-name').value;
+            const password = document.getElementById('profile-password').value;
+            
+            let updates = { name: name };
+            if (password) updates.password = password;
+
+            const { data, error } = await sb.from('agents_commerciaux').update(updates).eq('id', currentAgent.id).select().single();
+            if (error) return showToast("Erreur de mise à jour: " + error.message, "error");
+
+            currentAgent = data;
+            localStorage.setItem('lga_agent_session', JSON.stringify(data));
+            finalizeLogin();
+            closeProfileModal();
+            showToast("Profil mis à jour avec succès !");
         }
 
         // --- NAVIGATION INTERNE ---
