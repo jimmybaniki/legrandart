@@ -204,6 +204,11 @@
                         <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span> Connexion Supabase...
                     </span>
                 </div>
+                <div id="premium-btn-container" class="hidden">
+                    <button onclick="requestPremiumAccess()" class="bg-rose-600 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 shadow-md hover:scale-105">
+                        <i class="fa-solid fa-gem"></i> Premium
+                    </button>
+                </div>
                 <button onclick="resetToDefaults()" class="text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 md:px-3 md:py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5">
                     <i class="fa-solid fa-rotate-left"></i> Réinitialiser
                 </button>
@@ -1108,6 +1113,12 @@
             showNotification("Déconnecté avec succès.");
         }
 
+        // --- PREMIUM ACCESS ---
+        function requestPremiumAccess() {
+            const message = encodeURIComponent(`Bonjour LeGrandArt, je suis le gérant de la boutique "${storeConfig.name}" et je souhaiterais obtenir l'accès Premium pour ma boutique.`);
+            window.open(`https://wa.me/243978415814?text=${message}`, '_blank');
+        }
+
         // --- PROFIL GERANT ---
         function openProfileModal() {
             if (!currentUser) return;
@@ -1201,6 +1212,7 @@
                             social: configData.social_links || storeConfig.social,
                             limitProducts: configData.limit_products,
                             limitPriceMax: configData.limit_price_max,
+                            is_premium: configData.is_premium || false,
                             limitOrdersDay: configData.limit_orders_day,
                             limitOrdersMonth: configData.limit_orders_month
                         };
@@ -1367,7 +1379,8 @@
                         payment_methods: storeConfig.paymentMethods,
                         contact_info: storeConfig.contact,
                         social_links: storeConfig.social,
-                        updated_at: new Date().toISOString()
+                        updated_at: new Date().toISOString(),
+                        is_premium: storeConfig.is_premium || false
                     };
 
                     const { error } = await sb.from('boutique_config').upsert(payload, { onConflict: 'shop_id' });
@@ -1656,6 +1669,14 @@
                 btnList.style.color = !isGrid ? storeConfig.themeColor : '';
                 btnList.style.borderWidth = !isGrid ? '2px' : '1px';
             }
+
+            // Premium badge and button visibility
+            const premiumBadge = document.getElementById('premium-badge');
+            const premiumBtnContainer = document.getElementById('premium-btn-container');
+            if (premiumBadge) premiumBadge.classList.toggle('hidden', !storeConfig.is_premium);
+            if (premiumBtnContainer) premiumBtnContainer.classList.toggle('hidden', storeConfig.is_premium);
+
+
             
             // Contact & Social UI Sync
             const contact = storeConfig.contact || { phone: "", address: "" };
@@ -1944,14 +1965,9 @@
             const editId = document.getElementById('edit-prod-id').value;
             const price = parseFloat(document.getElementById('prod-price').value);
 
-            // 🔒 VALIDATION DES LIMITES ADMIN (côté agent commercial)
-            if (!editId && storeConfig.limitProducts != null && products.length >= storeConfig.limitProducts) {
-                showNotification(`Quota de produits atteint (${storeConfig.limitProducts}). Contactez votre agent commercial.`, true);
-                return;
-            }
-
             // 🔒 VALIDATION DES LIMITES ADMIN
-            if (!editId && storeConfig.limitProducts != null && products.length >= storeConfig.limitProducts) {
+            // La vérification est ignorée si la boutique est premium (is_premium = true)
+            if (!editId && !storeConfig.is_premium && storeConfig.limitProducts != null && products.length >= storeConfig.limitProducts) {
                 showNotification(`Quota de produits atteint (${storeConfig.limitProducts}). Contactez l'administration.`, true);
                 return;
             }
@@ -2785,14 +2801,8 @@
             
             document.getElementById('dashboard-sales').innerText = formatVal(totalRevenue);
             document.getElementById('dashboard-orders-count').innerText = orders.length;
-            const productLimitText = (storeConfig.limitProducts != null) ? ` / ${storeConfig.limitProducts}` : '';
-            document.getElementById('dashboard-products-count').innerHTML = products.length + productLimitText + 
-                (lowStockCount > 0 ? ` <span class="text-[10px] text-amber-500 font-black animate-pulse" title="${lowStockCount} produits en stock critique">(⚠️ ${lowStockCount})</span>` : '');
-
-            const premiumBadge = document.getElementById('premium-badge');
-            if (premiumBadge) {
-                premiumBadge.classList.toggle('hidden', !(storeConfig.limitProducts != null && storeConfig.limitProducts > 100));
-            }
+            const productLimitText = (storeConfig.is_premium || storeConfig.limitProducts == null) ? ' / Illimité' : ` / ${storeConfig.limitProducts}`;
+            document.getElementById('dashboard-products-count').innerHTML = products.length + productLimitText + (lowStockCount > 0 ? ` <span class="text-[10px] text-amber-500 font-black animate-pulse" title="${lowStockCount} produits en stock critique">(⚠️ ${lowStockCount})</span>` : '');
 
             const avg = orders.length > 0 ? (totalRevenue / orders.length) : 0;
             document.getElementById('dashboard-avg-cart').innerText = formatVal(avg);
