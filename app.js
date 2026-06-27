@@ -83,7 +83,7 @@ function loginAsManager(shopName) {
     // Simule une connexion en tant que gérant d'une boutique spécifique
     localStorage.setItem('lg_active_managed_shop', shopName);
     // Redirection vers le tableau de bord générique pour toutes les boutiques gérées
-    window.location.href = 'dashboard.html';
+    window.location.href = 'espace-pro.html';
 }
 
 function registerProfile(profile) {
@@ -347,7 +347,7 @@ async function loadShops() {
                     tags: s.default_category || 'Boutique Cloud',
                     image: s.logo_url || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=800',
                     // On redirige vers le dashboard ou une vue boutique (à créer)
-                    href: `dashboard.html?preview=${s.shop_id}` 
+                    href: `espace-pro.html?preview=${s.shop_id}` 
                 }));
                 shops = formattedShops;
             }

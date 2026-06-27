@@ -84,7 +84,7 @@
                 <a href="#" class="hover:text-amber-500 transition-colors">Accueil</a>
                 <a href="#collections" class="hover:text-amber-500 transition-colors">Collections</a>
                 <a href="#propos" class="hover:text-amber-500 transition-colors">À Propos</a>
-                <a href="dashboard.html" class="hover:text-amber-500 transition-colors text-slate-400">Admin</a>
+                <a href="espace-pro.html" class="hover:text-amber-500 transition-colors text-slate-400">Admin</a>
             </div>
 
             <div class="flex items-center gap-6">
