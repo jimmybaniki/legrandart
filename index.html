@@ -1057,8 +1057,8 @@
                 const loginButton = document.querySelector('button[onclick="showLoginPortal()"]');
                 if (loginButton) {
                     loginButton.onclick = () => {
-                        if (userData.role === 'gerant') window.location.href = 'espace-pro.html';
-                        else if (userData.role === 'artiste') window.location.href = 'espace-pro.html';
+                        if (userData.role === 'gerant') window.location.href = 'dashboard.html';
+                        else if (userData.role === 'artiste') window.location.href = 'dashboard.html';
                         else showLoginPortal();
                     };
                 }
@@ -1074,11 +1074,11 @@
             //     const userData = JSON.parse(userDataString);
                 
             //     if (!skipRedirect) {
-            //         if (userData.role === 'artiste') {
-            //             window.location.href = 'espace-pro.html';
+            //         if (userData.role === 'artiste') { 
+            //             window.location.href = 'dashboard.html';
             //             return;
-            //         } else if (userData.role === 'gerant') {
-            //             window.location.href = 'espace-pro.html';
+            //         } else if (userData.role === 'gerant') { 
+            //             window.location.href = 'dashboard.html';
             //             return;
             //         }
             //     } else if (userData.role === 'artiste' || userData.role === 'gerant') {
@@ -1089,9 +1089,9 @@
                         const dashBtn = document.getElementById('pro-dash-btn');
                         const editNameInput = document.getElementById('edit-name-input');
                         if (nameSpan) nameSpan.innerText = userData.name;
-                        bar.classList.remove('hidden');
+                        bar.classList.remove('hidden'); 
                         if (editNameInput) editNameInput.value = userData.name;
-                        if (dashBtn) dashBtn.onclick = () => window.location.href = userData.role === 'artiste' ? 'espace-pro.html' : 'espace-pro.html';
+                        if (dashBtn) dashBtn.onclick = () => window.location.href = userData.role === 'artiste' ? 'dashboard.html' : 'dashboard.html';
                     }
             //     }
             // }
@@ -1154,9 +1154,9 @@
                 // Update navigation on desktop
                 const loginArea = document.getElementById('login-area');
                 if (loginArea) {
-                    let dashboardLink = '';
-                    if (userData.role === 'gerant') dashboardLink = 'espace-pro.html';
-                    else if (userData.role === 'artiste') dashboardLink = 'espace-pro.html';
+                    let dashboardLink = ''; 
+                    if (userData.role === 'gerant') dashboardLink = 'dashboard.html';
+                    else if (userData.role === 'artiste') dashboardLink = 'dashboard.html';
                     else dashboardLink = 'boutiques.html';
 
                     loginArea.innerHTML = `
@@ -1171,17 +1171,17 @@
                 // Update navigation on mobile
                 const mobileLoginContainer = document.getElementById('mobile-login-container');
                 if (mobileLoginContainer) {
-                    let dashboardLink = '';
+                    let dashboardLink = ''; 
                     if (userData.role === 'gerant') {
-                        dashboardLink = 'espace-pro.html';
+                        dashboardLink = 'dashboard.html';
                     } else if (userData.role === 'artiste') {
-                        dashboardLink = 'espace-pro.html';
+                        dashboardLink = 'dashboard.html';
                     } else {
                         dashboardLink = 'boutiques.html';
                     }
-                    mobileLoginContainer.innerHTML = `
+                    mobileLoginContainer.innerHTML = ` 
                         <div class="flex flex-col gap-3">
-                            <a href="espace-pro.html" class="w-full bg-emerald-500 text-black text-center font-black py-4 rounded-xl uppercase text-xs tracking-[0.15em]">Tableau de bord</a>
+                            <a href="dashboard.html" class="w-full bg-emerald-500 text-black text-center font-black py-4 rounded-xl uppercase text-xs tracking-[0.15em]">Tableau de bord</a>
                             <button onclick="logout()" class="w-full bg-zinc-900 border border-red-500/30 text-red-400 font-black py-4 rounded-xl uppercase text-xs tracking-[0.15em] flex items-center justify-center gap-2">
                                 <i data-feather="log-out" class="w-4 h-4"></i>
                                 <span>Sortir</span>

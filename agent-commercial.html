@@ -268,6 +268,10 @@
                             <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Nom de la Boutique</label>
                             <input type="text" id="new-manager-shop-name" required placeholder="Ex: Boutique Élégance" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
                         </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Limite de Produits (Optionnel)</label>
+                            <input type="number" id="new-manager-product-limit" placeholder="Ex: 50 (laisser vide pour illimité)" class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-yellow-400 outline-none" />
+                        </div>
                         <div class="pt-2">
                             <button type="submit" id="btn-deploy-shop" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition shadow-xl flex items-center justify-center gap-2">
                                 <i class="fas fa-rocket"></i> Créer et Déployer
@@ -489,7 +493,11 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-xs font-semibold text-slate-600">${shop.default_category || 'N/A'}</td>
-                    <td class="px-6 py-4 text-right">
+                    <td class="px-6 py-4 text-xs font-semibold text-slate-600">${shop.limit_products || 'Illimité'}</td>
+                    <td class="px-6 py-4 text-right space-x-1">
+                        <button onclick="updateShopProductLimit('${shop.shop_id}')" class="px-3 py-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-[10px] font-black uppercase transition border border-slate-200">
+                            <i class="fas fa-edit"></i> Limite
+                        </button>
                         <button onclick="requestDiscount('${shop.name}')" class="px-3 py-1.5 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-lg text-[10px] font-black uppercase transition border border-yellow-200">
                             Demander Remise
                         </button>
@@ -519,6 +527,7 @@
             const email = document.getElementById('new-manager-email').value;
             const password = document.getElementById('new-manager-pass').value;
             const shopName = document.getElementById('new-manager-shop-name').value;
+            const productLimit = document.getElementById('new-manager-product-limit').value;
             const form = document.getElementById('form-deploy-shop');
             const btn = document.getElementById('btn-deploy-shop');
 
@@ -545,7 +554,8 @@
                     exchange_rate: 2800,
                     theme_color: "#4f46e5",
                     theme_rgb: "79, 70, 229",
-                    layout: "grid"
+                    layout: "grid",
+                    limit_products: productLimit ? parseInt(productLimit) : null
                 });
                 if (configErr) throw configErr;
 
@@ -554,7 +564,7 @@
                 // Envoi WhatsApp Optionnel
                 const phone = prompt("Déploiement réussi. Entrez le numéro WhatsApp du gérant pour lui envoyer ses accès (ex: +243...):");
                 if (phone) {
-                    const msg = encodeURIComponent(`Bonjour ${name} ! Votre boutique "${shopName}" a été déployée sur LeGrandArt par votre agent commercial.\n\nVoici vos identifiants pour l'Espace Pro :\n📧 Email : ${email}\n🔑 Mot de passe : ${password}\n\nLien : https://legrandart.org/espace-pro.html`);
+                    const msg = encodeURIComponent(`Bonjour ${name} ! Votre boutique "${shopName}" a été déployée sur LeGrandArt par votre agent commercial.\n\nVoici vos identifiants pour l'Espace Pro :\n📧 Email : ${email}\n🔑 Mot de passe : ${password}\n\nLien : https://legrandart.org/dashboard.html`);
                     window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
                 }
 
@@ -567,6 +577,21 @@
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fas fa-rocket"></i> Créer et Déployer`;
             }
+        }
+
+        async function updateShopProductLimit(shopId) {
+            const shop = myShops.find(s => s.shop_id === shopId);
+            if (!shop) return;
+
+            const newLimit = prompt(`Entrez la nouvelle limite de produits pour "${shop.name}".\nLaissez vide pour une limite illimitée.`, shop.limit_products || '');
+
+            if (newLimit === null) return; // User cancelled
+
+            const limitValue = newLimit.trim() === '' ? null : parseInt(newLimit);
+            const { error } = await sb.from('boutique_config').update({ limit_products: limitValue }).eq('shop_id', shopId);
+            if (error) return showToast("Erreur de mise à jour: " + error.message, "error");
+            loadAgentData();
+            showToast("Limite de produits mise à jour !");
         }
 
         // --- PROFIL AGENT ---
